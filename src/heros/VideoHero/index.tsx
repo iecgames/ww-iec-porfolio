@@ -291,12 +291,12 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
             </motion.p>
           )}
 
-          {/* ── Mobile: video dạng card nghiêng nhẹ (thay cho background video) ── */}
+          {/* ── Mobile: video dạng card (thay cho background video) ── */}
           {isMobile && (videoSource === 'upload' ? uploadedVideoUrl : youtubeId) && (
             <motion.div
               className="mt-12 w-full"
-              initial={{ opacity: 0, y: 50, rotate: -8, scale: 0.92 }}
-              animate={{ opacity: 1, y: 0, rotate: -3, scale: 1 }}
+              initial={{ opacity: 0, y: 50, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ duration: 0.85, delay: buttonsDelay + 0.25, ease: [0.22, 1, 0.36, 1] }}
             >
               <motion.div
