@@ -9,7 +9,7 @@ import type { Category, Post, Tag } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
-import { RippleLink } from './RippleLink'
+import { RippleLink } from '@/components/RippleLink'
 
 /* ──────────── helpers ──────────── */
 

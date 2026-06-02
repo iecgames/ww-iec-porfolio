@@ -1,46 +1,17 @@
 'use client'
 
 import type { Page } from '@/payload-types'
+import { RippleLink } from '@/components/RippleLink'
 import { useTransparentHeader } from '@/providers/TransparentHeader'
 import { resolveLinkHref } from '@/utilities/resolveLinkHref'
 import { motion, type Variants } from 'framer-motion'
-import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
 import { RenderVideoHeroBlocks } from './RenderVideoHeroBlocks'
 
 type VideoHeroProps = NonNullable<Page['hero'] & { type: 'videoHero' }>
 
-/** Renders an internal/section link via next/link, external links via a plain anchor. */
-function HeroLink({
-  resolved,
-  newTab,
-  className,
-  style,
-  children,
-}: {
-  resolved: { href: string; external: boolean } | null
-  newTab?: boolean | null
-  className?: string
-  style?: React.CSSProperties
-  children: React.ReactNode
-}) {
-  const href = resolved?.href ?? '#'
-  const target = newTab ? '_blank' : undefined
-  const rel = newTab ? 'noopener noreferrer' : undefined
-
-  if (!resolved || resolved.external) {
-    return (
-      <a href={href} target={target} rel={rel} className={className} style={style}>
-        {children}
-      </a>
-    )
-  }
-  return (
-    <Link href={href} target={target} rel={rel} className={className} style={style}>
-      {children}
-    </Link>
-  )
-}
+/** Brand-blue gradient used for the hero CTA ripple. */
+const HERO_GRADIENT = 'linear-gradient(135deg, #2563EB 0%, #38BDF8 100%)'
 
 function extractYouTubeId(url: string): string | null {
   const patterns = [
@@ -320,24 +291,25 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
                 transition={{ duration: 0.7, delay: buttonsDelay, ease: 'easeOut' }}
               >
                 {primaryButtonLabel && (
-                  <HeroLink
-                    resolved={primaryHref}
+                  <RippleLink
+                    href={primaryHref?.href ?? '#'}
+                    label={primaryButtonLabel}
+                    variant="solid"
+                    gradient={HERO_GRADIENT}
+                    external={primaryHref?.external}
                     newTab={primaryButton?.newTab}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-sm font-semibold text-white transition-opacity hover:opacity-90"
-                    style={{ background: 'linear-gradient(135deg, #2563EB 0%, #38BDF8 100%)' }}
-                  >
-                    {primaryButtonLabel}
-                  </HeroLink>
+                  />
                 )}
 
                 {secondaryButtonLabel && (
-                  <HeroLink
-                    resolved={secondaryHref}
+                  <RippleLink
+                    href={secondaryHref?.href ?? '#'}
+                    label={secondaryButtonLabel}
+                    variant="outline"
+                    gradient={HERO_GRADIENT}
+                    external={secondaryHref?.external}
                     newTab={secondaryButton?.newTab}
-                    className="inline-flex items-center gap-2 px-6 py-2.5 rounded-md text-sm font-semibold border-2 border-blue-600 text-blue-700 bg-transparent transition-colors hover:bg-blue-50"
-                  >
-                    {secondaryButtonLabel}
-                  </HeroLink>
+                  />
                 )}
 
                 {hasPopupBtn && (
