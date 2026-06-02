@@ -1,12 +1,5 @@
 import type { Field } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-
 import { Banner } from '@/blocks/Banner/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Code } from '@/blocks/Code/config'
@@ -22,24 +15,12 @@ export const hero: Field = {
     {
       name: 'type',
       type: 'select',
-      defaultValue: 'lowImpact',
+      defaultValue: 'none',
       label: 'Type',
       options: [
         {
           label: 'None',
           value: 'none',
-        },
-        {
-          label: 'High Impact',
-          value: 'highImpact',
-        },
-        {
-          label: 'Medium Impact',
-          value: 'mediumImpact',
-        },
-        {
-          label: 'Low Impact',
-          value: 'lowImpact',
         },
         {
           label: 'Video Hero',
@@ -50,40 +31,6 @@ export const hero: Field = {
           value: 'brandHero',
         },
       ],
-      required: true,
-    },
-    {
-      name: 'richText',
-      type: 'richText',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => {
-          return [
-            ...rootFeatures,
-            HeadingFeature({ enabledHeadingSizes: ['h1', 'h2', 'h3', 'h4'] }),
-            FixedToolbarFeature(),
-            InlineToolbarFeature(),
-          ]
-        },
-      }),
-      label: false,
-      localized: true,
-    },
-    linkGroup({
-      overrides: {
-        maxRows: 2,
-        admin: {
-          initCollapsed: true,
-          condition: (_, { type } = {}) => type !== 'brandHero',
-        },
-      },
-    }),
-    {
-      name: 'media',
-      type: 'upload',
-      admin: {
-        condition: (_, { type } = {}) => ['highImpact', 'mediumImpact'].includes(type),
-      },
-      relationTo: 'media',
       required: true,
     },
     // --- Video Hero fields ---
@@ -126,7 +73,8 @@ export const hero: Field = {
       label: 'Heading',
       localized: true,
       admin: {
-        description: 'Main heading displayed in the overlay area',
+        description:
+          'Tiêu đề chính hiển thị trong vùng overlay. Phần nằm giữa cặp dấu \\\\ ... \\\\ sẽ được highlight (gradient, cỡ chữ lớn, xuống dòng riêng). Ví dụ: "Join us \\\\IEC Game - Winter Wolf\\\\" → "IEC Game - Winter Wolf" được highlight. Nếu không có dấu \\\\, mặc định highlight từ cuối cùng.',
         condition: (_, { type } = {}) => type === 'videoHero',
       },
     },

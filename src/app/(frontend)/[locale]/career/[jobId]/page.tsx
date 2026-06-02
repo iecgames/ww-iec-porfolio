@@ -92,7 +92,7 @@ export default async function JobDetailPage({ params: paramsPromise }: Args) {
   const rawRelated = job.relatedJobs
   const pinnedRelatedJobs: RelatedJobItem[] | null =
     Array.isArray(rawRelated) && rawRelated.length > 0
-      ? (rawRelated as (string | Job[])[])
+      ? (rawRelated as (string | Job)[])
           .filter((r): r is Job => typeof r === 'object' && r !== null)
           .slice(0, 3)
           .map((r) => ({

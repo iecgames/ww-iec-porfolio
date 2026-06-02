@@ -22,7 +22,14 @@ export default async function HomePage({ params: paramsPromise }: Args) {
   const { locale } = await paramsPromise
   const url = '/'
 
-  const home = await queryHomeGlobal(locale, draft)
+  let home
+  try {
+    home = await queryHomeGlobal(locale, draft)
+  } catch (e) {
+    const fs = await import('fs')
+    fs.appendFileSync('debug-error.log', `\n===== queryHomeGlobal =====\n${(e as Error).stack}\n`)
+    throw e
+  }
 
   if (!home) {
     return <PayloadRedirects url={url} />

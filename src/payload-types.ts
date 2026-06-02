@@ -179,51 +179,7 @@ export interface Page {
   id: string;
   title: string;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'videoHero' | 'brandHero';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'route' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null);
-            /**
-             * Pick a built-in section page (route is hardcoded in the app).
-             */
-            route?: ('/' | '/posts' | '/career' | '/search') | null;
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
+    type: 'none' | 'videoHero' | 'brandHero';
     videoSource?: ('upload' | 'youtube') | null;
     videoFile?: (string | null) | Media;
     /**
@@ -231,7 +187,7 @@ export interface Page {
      */
     youtubeUrl?: string | null;
     /**
-     * Main heading displayed in the overlay area
+     * Tiêu đề chính hiển thị trong vùng overlay. Phần nằm giữa cặp dấu \\ ... \\ sẽ được highlight (gradient, cỡ chữ lớn, xuống dòng riêng). Ví dụ: "Join us \\IEC Game - Winter Wolf\\" → "IEC Game - Winter Wolf" được highlight. Nếu không có dấu \\, mặc định highlight từ cuối cùng.
      */
     heading?: string | null;
     /**
@@ -375,61 +331,6 @@ export interface Page {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts".
- */
-export interface Post {
-  id: string;
-  title: string;
-  heroImage?: (string | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
-  tags?: (string | Tag)[] | null;
-  meta?: {
-    title?: string | null;
-    /**
-     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
-     */
-    image?: (string | null) | Media;
-    description?: string | null;
-  };
-  publishedAt?: string | null;
-  authors?: (string | User)[] | null;
-  /**
-   * Automatically send a promotional email to all subscribers when this post is first published.
-   */
-  notifySubscribers?: boolean | null;
-  populatedAuthors?:
-    | {
-        id?: string | null;
-        name?: string | null;
-      }[]
-    | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
-  slug: string;
-  updatedAt: string;
-  createdAt: string;
-  _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media".
  */
 export interface Media {
@@ -549,6 +450,113 @@ export interface FolderInterface {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock".
+ */
+export interface CallToActionBlock {
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  links?:
+    | {
+        link: {
+          type?: ('reference' | 'route' | 'custom') | null;
+          newTab?: boolean | null;
+          reference?:
+            | ({
+                relationTo: 'pages';
+                value: string | Page;
+              } | null)
+            | ({
+                relationTo: 'posts';
+                value: string | Post;
+              } | null);
+          /**
+           * Pick a built-in section page (route is hardcoded in the app).
+           */
+          route?: ('/' | '/posts' | '/career' | '/search') | null;
+          url?: string | null;
+          label: string;
+          /**
+           * Choose how the link should be rendered.
+           */
+          appearance?: ('default' | 'outline') | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: string;
+  title: string;
+  heroImage?: (string | null) | Media;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  relatedPosts?: (string | Post)[] | null;
+  categories?: (string | Category)[] | null;
+  tags?: (string | Tag)[] | null;
+  meta?: {
+    title?: string | null;
+    /**
+     * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
+     */
+    image?: (string | null) | Media;
+    description?: string | null;
+  };
+  publishedAt?: string | null;
+  authors?: (string | User)[] | null;
+  /**
+   * Automatically send a promotional email to all subscribers when this post is first published.
+   */
+  notifySubscribers?: boolean | null;
+  populatedAuthors?:
+    | {
+        id?: string | null;
+        name?: string | null;
+      }[]
+    | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
@@ -611,58 +619,6 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CallToActionBlock".
- */
-export interface CallToActionBlock {
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  links?:
-    | {
-        link: {
-          type?: ('reference' | 'route' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'pages';
-                value: string | Page;
-              } | null)
-            | ({
-                relationTo: 'posts';
-                value: string | Post;
-              } | null);
-          /**
-           * Pick a built-in section page (route is hardcoded in the app).
-           */
-          route?: ('/' | '/posts' | '/career' | '/search') | null;
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'outline') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -772,6 +728,10 @@ export interface PolicyTabsBlock {
   tabs?:
     | {
         tabName: string;
+        /**
+         * Tìm và chọn icon (Tabler) hiển thị trước tên tab.
+         */
+        icon?: string | null;
         items?:
           | {
               text: string;
@@ -2060,24 +2020,6 @@ export interface PagesSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    route?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
         videoSource?: T;
         videoFile?: T;
         youtubeUrl?: T;
@@ -2264,6 +2206,7 @@ export interface PolicyTabsBlockSelect<T extends boolean = true> {
     | T
     | {
         tabName?: T;
+        icon?: T;
         items?:
           | T
           | {
@@ -3180,51 +3123,7 @@ export interface Footer {
 export interface Home {
   id: string;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'videoHero' | 'brandHero';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'route' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null);
-            /**
-             * Pick a built-in section page (route is hardcoded in the app).
-             */
-            route?: ('/' | '/posts' | '/career' | '/search') | null;
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
+    type: 'none' | 'videoHero' | 'brandHero';
     videoSource?: ('upload' | 'youtube') | null;
     videoFile?: (string | null) | Media;
     /**
@@ -3232,7 +3131,7 @@ export interface Home {
      */
     youtubeUrl?: string | null;
     /**
-     * Main heading displayed in the overlay area
+     * Tiêu đề chính hiển thị trong vùng overlay. Phần nằm giữa cặp dấu \\ ... \\ sẽ được highlight (gradient, cỡ chữ lớn, xuống dòng riêng). Ví dụ: "Join us \\IEC Game - Winter Wolf\\" → "IEC Game - Winter Wolf" được highlight. Nếu không có dấu \\, mặc định highlight từ cuối cùng.
      */
     heading?: string | null;
     /**
@@ -3369,51 +3268,7 @@ export interface Home {
 export interface Career {
   id: string;
   hero: {
-    type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact' | 'videoHero' | 'brandHero';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
-    links?:
-      | {
-          link: {
-            type?: ('reference' | 'route' | 'custom') | null;
-            newTab?: boolean | null;
-            reference?:
-              | ({
-                  relationTo: 'pages';
-                  value: string | Page;
-                } | null)
-              | ({
-                  relationTo: 'posts';
-                  value: string | Post;
-                } | null);
-            /**
-             * Pick a built-in section page (route is hardcoded in the app).
-             */
-            route?: ('/' | '/posts' | '/career' | '/search') | null;
-            url?: string | null;
-            label: string;
-            /**
-             * Choose how the link should be rendered.
-             */
-            appearance?: ('default' | 'outline') | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    media?: (string | null) | Media;
+    type: 'none' | 'videoHero' | 'brandHero';
     videoSource?: ('upload' | 'youtube') | null;
     videoFile?: (string | null) | Media;
     /**
@@ -3421,7 +3276,7 @@ export interface Career {
      */
     youtubeUrl?: string | null;
     /**
-     * Main heading displayed in the overlay area
+     * Tiêu đề chính hiển thị trong vùng overlay. Phần nằm giữa cặp dấu \\ ... \\ sẽ được highlight (gradient, cỡ chữ lớn, xuống dòng riêng). Ví dụ: "Join us \\IEC Game - Winter Wolf\\" → "IEC Game - Winter Wolf" được highlight. Nếu không có dấu \\, mặc định highlight từ cuối cùng.
      */
     heading?: string | null;
     /**
@@ -3645,24 +3500,6 @@ export interface HomeSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    route?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
         videoSource?: T;
         videoFile?: T;
         youtubeUrl?: T;
@@ -3759,24 +3596,6 @@ export interface CareerSelect<T extends boolean = true> {
     | T
     | {
         type?: T;
-        richText?: T;
-        links?:
-          | T
-          | {
-              link?:
-                | T
-                | {
-                    type?: T;
-                    newTab?: T;
-                    reference?: T;
-                    route?: T;
-                    url?: T;
-                    label?: T;
-                    appearance?: T;
-                  };
-              id?: T;
-            };
-        media?: T;
         videoSource?: T;
         videoFile?: T;
         youtubeUrl?: T;

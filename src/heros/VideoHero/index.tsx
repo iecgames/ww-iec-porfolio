@@ -25,6 +25,31 @@ const charVariants: Variants = {
   visible: { opacity: 1, transition: { duration: 0.01 } },
 }
 
+/**
+ * Tách heading thành phần thường (`rest`) và phần được highlight (`highlight`).
+ *
+ * Phần nằm giữa cặp dấu `\\ ... \\` sẽ là phần highlight (gradient, cỡ chữ lớn).
+ * Ví dụ: "Join us \\IEC Game - Winter Wolf\\"
+ *   → rest = "Join us", highlight = "IEC Game - Winter Wolf"
+ *
+ * Nếu không có dấu `\\`, fallback về hành vi cũ: highlight từ cuối cùng.
+ */
+function parseHeading(text: string): { rest: string; highlight: string } {
+  const match = text.match(/\\+\s*([^\\]+?)\s*\\+/)
+  if (match) {
+    return {
+      rest: text.slice(0, match.index).trim(),
+      highlight: match[1].trim(),
+    }
+  }
+  // Fallback: highlight từ cuối cùng
+  const words = text.trim().split(/\s+/)
+  return {
+    rest: words.slice(0, -1).join(' '),
+    highlight: words[words.length - 1] ?? '',
+  }
+}
+
 /** Typewriter effect: characters appear one by one */
 function TypewriterText({
   text,
@@ -60,16 +85,14 @@ function TypewriterText({
   )
 }
 
-/** Split heading — rest words typewrite first, then gradient last word */
+/** Split heading — phần `rest` typewrite trước, rồi tới phần highlight (gradient) đặt giữa `\\ ... \\` */
 function HeadingWithGradient({ text }: { text: string }) {
-  const words = text.trim().split(/\s+/)
-  const last = words[words.length - 1]
-  const rest = words.slice(0, -1).join(' ')
+  const { rest, highlight } = parseHeading(text)
 
   // stagger per character: 0.055s → feels deliberate but not too slow
   const charStagger = 0.055
   const restCharCount = rest.length + 1 // +1 for the space/br pause
-  const lastStartDelay = restCharCount * charStagger + 0.15
+  const highlightStartDelay = restCharCount * charStagger + 0.15
 
   return (
     <h1 className="text-3xl md:text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight uppercase mb-4">
@@ -80,9 +103,9 @@ function HeadingWithGradient({ text }: { text: string }) {
         </>
       )}
       <TypewriterText
-        text={last + '.'}
+        text={highlight + '.'}
         stagger={charStagger}
-        startDelay={rest ? lastStartDelay + 0.25 : 0.25}
+        startDelay={rest ? highlightStartDelay + 0.25 : 0.25}
         className="bg-clip-text text-transparent text-6xl md:text-7xl lg:text-8xl"
         style={{ backgroundImage: 'linear-gradient(90deg, #2563EB 0%, #38BDF8 100%)' }}
       />
@@ -146,11 +169,12 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
 
   // Calculate delays so each element animates after the previous finishes
   const charStagger = 0.055
-  const headingWords = heading?.trim().split(/\s+/) ?? []
-  const headingRest = headingWords.slice(0, -1).join(' ')
-  const headingLast = headingWords[headingWords.length - 1] ?? ''
+  const { rest: headingRest, highlight: headingHighlight } = heading
+    ? parseHeading(heading)
+    : { rest: '', highlight: '' }
   const restEndTime = 0.25 + headingRest.length * charStagger
-  const lastEndTime = (headingRest ? restEndTime + 0.4 : 0.25) + headingLast.length * charStagger
+  const lastEndTime =
+    (headingRest ? restEndTime + 0.4 : 0.25) + headingHighlight.length * charStagger
   const subtitleDelay = lastEndTime + 0.35
   const blocksDelay = subtitleDelay + 0.65
   const buttonsDelay = blocksDelay + 0.5

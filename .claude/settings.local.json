@@ -3,7 +3,16 @@
     "allow": [
       "Bash(pnpm exec *)",
       "Bash(echo \"EXIT=$?\")",
-      "Bash(pnpm run *)"
+      "Bash(pnpm run *)",
+      "Bash(node -e \"try{JSON.parse\\(require\\('fs'\\).readFileSync\\('messages/en.json','utf8'\\)\\);console.log\\('en OK'\\)}catch\\(e\\){console.log\\('en ERR',e.message\\)}\")",
+      "Bash(node -e \"try{JSON.parse\\(require\\('fs'\\).readFileSync\\('messages/vi.json','utf8'\\)\\);console.log\\('vi OK'\\)}catch\\(e\\){console.log\\('vi ERR',e.message\\)}\")",
+      "Bash(findstr /I \".env\")",
+      "Bash(node -e \"const e=require\\('fs'\\).existsSync;for\\(const f of ['.env','.env.local','.env.development']\\){if\\(e\\(f\\)\\){const c=require\\('fs'\\).readFileSync\\(f,'utf8'\\);const lines=c.split\\(/\\\\r?\\\\n/\\).filter\\(l=>/GCS|GOOGLE|CREDENTIAL|STORAGE|JSON/i.test\\(l\\)&&!/^#/.test\\(l\\)\\);console.log\\(f,'->'\\);for\\(const l of lines\\){const k=l.split\\('='\\)[0];const v=l.slice\\(k.length+1\\);console.log\\('  ',k,'len='+v.length\\);}}}\")",
+      "Bash(node -e \"const fs=require\\('fs'\\);const c=fs.readFileSync\\('.env','utf8'\\);const m=c.match\\(/^STORAGE_PROVIDER=\\(.*\\)$/m\\);console.log\\('STORAGE_PROVIDER=',JSON.stringify\\(m&&m[1]\\)\\);const k=c.match\\(/^GCS_KEY_FILE=\\(.*\\)$/m\\);const kf=k&&k[1].trim\\(\\).replace\\(/^[\\\\\"']|[\\\\\"']$/g,''\\);console.log\\('GCS_KEY_FILE=',JSON.stringify\\(kf\\)\\);console.log\\('exists=',fs.existsSync\\(kf\\)\\);if\\(fs.existsSync\\(kf\\)\\){const txt=fs.readFileSync\\(kf,'utf8'\\);console.log\\('len=',txt.length\\);try{JSON.parse\\(txt\\);console.log\\('keyfile JSON OK'\\)}catch\\(e\\){console.log\\('keyfile JSON ERR:',e.message\\)}}\")",
+      "Bash(curl -s -i http://localhost:3000/en)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/en)",
+      "Bash(node -e \"const c=require\\('fs'\\).readFileSync\\('.env','utf8'\\);for\\(const l of c.split\\(/\\\\r?\\\\n/\\)\\){if\\(/^\\(DATABASE_URI|DATABASE_URL|POSTGRES|MONGODB|DB_\\)/.test\\(l\\)\\){const k=l.split\\('='\\)[0];console.log\\(k,'set \\(len',l.length-k.length-1,'\\)'\\)}}\")",
+      "Bash(pnpm generate:importmap)"
     ]
   }
 }

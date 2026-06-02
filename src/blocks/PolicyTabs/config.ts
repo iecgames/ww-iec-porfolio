@@ -22,6 +22,17 @@ export const PolicyTabs: Block = {
           required: true,
         },
         {
+          name: 'icon',
+          type: 'text',
+          label: 'Tab Icon',
+          admin: {
+            description: 'Tìm và chọn icon (Tabler) hiển thị trước tên tab.',
+            components: {
+              Field: '@/fields/IconPicker/IconPickerField#IconPickerField',
+            },
+          },
+        },
+        {
           name: 'items',
           type: 'array',
           label: 'Checklist Items',
