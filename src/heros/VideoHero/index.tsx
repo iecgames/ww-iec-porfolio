@@ -170,6 +170,7 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
               loop
               muted
               playsInline
+              preload="metadata"
               className="absolute inset-0 w-full h-full object-cover"
             >
               <source src={uploadedVideoUrl} />
@@ -179,7 +180,7 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
           {videoSource === 'youtube' && youtubeId && (
             <iframe
               className="absolute top-1/2 left-1/2 w-[177.77777778vh] h-[56.25vw] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&playlist=${youtubeId}&controls=0&rel=0&disablekb=1&modestbranding=1&playsinline=1&vq=hd1080`}
+              src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&controls=0&rel=0&disablekb=1&vq=hd1080`}
               allow="autoplay; encrypted-media"
               title="Background video"
             />
