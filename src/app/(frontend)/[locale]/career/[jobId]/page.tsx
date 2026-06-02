@@ -3,14 +3,11 @@ import type { Metadata } from 'next'
 import configPromise from '@payload-config'
 import {
   IconArrowLeft,
-  IconArrowRight,
   IconBrandLinkedin,
   IconBriefcase,
-  IconBrush,
   IconCalendarClock,
   IconCash,
   IconClock,
-  IconCode,
   IconMapPin,
   IconStack2,
 } from '@tabler/icons-react'
@@ -22,6 +19,7 @@ import { cache } from 'react'
 
 import { SendUsCVBlock } from '@/blocks/SendUsCV/Component'
 import { JobApplyModal } from '@/components/JobApplyModal'
+import { JobCard, type JobCardData } from '@/components/JobCard'
 import { Reveal, RevealGroup, RevealItem } from '@/components/Reveal'
 import RichText from '@/components/RichText'
 import { ShareButtonOutline } from '@/components/ShareWidget/ShareButtonOutline'
@@ -414,23 +412,7 @@ function Section({
   )
 }
 
-function relatedDeptIcon(dept: string) {
-  const d = dept.toLowerCase()
-  if (d.includes('engineer') || d.includes('dev') || d.includes('tech'))
-    return <IconCode size={14} />
-  if (d.includes('art') || d.includes('design') || d.includes('ui') || d.includes('ux'))
-    return <IconBrush size={14} />
-  return <IconStack2 size={14} />
-}
-
-type RelatedJobItem = {
-  id: string
-  title: string
-  department: string
-  location: string
-  salaryLabel?: string | null
-  linkedinUrl?: string | null
-}
+type RelatedJobItem = JobCardData
 
 async function RelatedJobsSection({
   currentJobId,
@@ -479,54 +461,7 @@ async function RelatedJobsSection({
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('relatedJobs')}</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {docs.map((job) => (
-            <div
-              key={job.id}
-              className="bg-white border border-gray-200 rounded-xl px-5 py-4 flex items-center justify-between gap-4 hover:border-blue-300 hover:shadow-sm transition-all duration-200"
-            >
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-gray-900 text-sm mb-2 truncate">
-                  <Link href={`/career/${job.id}`} className="hover:text-primary transition-colors">
-                    {job.title}
-                  </Link>
-                </h3>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
-                  <span className="flex items-center gap-1">
-                    {relatedDeptIcon(job.department)}
-                    {job.department}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <IconMapPin size={14} />
-                    {job.location}
-                  </span>
-                  {job.salaryLabel && (
-                    <span className="flex items-center gap-1 text-blue-600 font-medium">
-                      <span className="inline-block w-3.5 h-3.5 text-center leading-none">💼</span>
-                      {job.salaryLabel}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {job.linkedinUrl && (
-                  <a
-                    href={job.linkedinUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label="View on LinkedIn"
-                    className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:text-blue-600 hover:border-blue-300 transition-colors"
-                  >
-                    <IconBrandLinkedin size={16} />
-                  </a>
-                )}
-                <Link
-                  href={`/career/${job.id}`}
-                  aria-label="View job details"
-                  className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white transition-colors"
-                >
-                  <IconArrowRight size={16} />
-                </Link>
-              </div>
-            </div>
+            <JobCard key={job.id} job={job} />
           ))}
         </div>
       </Reveal>

@@ -51,7 +51,6 @@ export type SendUsCVProps = {
   subtitle?: string
   cvUrl?: string
   innovatorLabel?: string
-  avatarUrls?: string[]
   socials?: SocialItem[]
   applyLabels: ApplyLabels
 }
@@ -82,7 +81,6 @@ export function SendUsCVClient({
   heading,
   subtitle,
   innovatorLabel,
-  avatarUrls = [],
   socials = [],
   applyLabels,
 }: SendUsCVProps) {
@@ -252,23 +250,10 @@ export function SendUsCVClient({
           </div>
         )}
 
-        {/* Stacked avatars + innovator label */}
-        {(avatarUrls.length > 0 || innovatorLabel) && (
+        {/* Innovator label */}
+        {innovatorLabel && (
           <div className="flex items-center gap-3">
-            {avatarUrls.length > 0 && (
-              <div className="flex -space-x-2">
-                {avatarUrls.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt=""
-                    className="w-8 h-8 rounded-full border-2 border-[#0f1729] object-cover"
-                    style={{ zIndex: avatarUrls.length - i }}
-                  />
-                ))}
-              </div>
-            )}
-            {innovatorLabel && <span className="text-sm text-gray-300">{innovatorLabel}</span>}
+            <span className="text-sm text-gray-300">{innovatorLabel}</span>
           </div>
         )}
       </div>

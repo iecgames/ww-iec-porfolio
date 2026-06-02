@@ -1074,12 +1074,6 @@ export interface SendUsCVBlock {
    */
   cvUrl?: string | null;
   innovatorLabel?: string | null;
-  innovatorAvatars?:
-    | {
-        avatar: string | Media;
-        id?: string | null;
-      }[]
-    | null;
   /**
    * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
    */
@@ -1681,6 +1675,9 @@ export interface Job {
    * e.g. "Competitive" or "$80k–$120k"
    */
   salaryLabel?: string | null;
+  /**
+   * Link to the job posting on an external site (e.g. LinkedIn).
+   */
   linkedinUrl?: string | null;
   /**
    * One-paragraph summary shown under the title on the detail page.
@@ -2443,12 +2440,6 @@ export interface SendUsCVBlockSelect<T extends boolean = true> {
   subtitle?: T;
   cvUrl?: T;
   innovatorLabel?: T;
-  innovatorAvatars?:
-    | T
-    | {
-        avatar?: T;
-        id?: T;
-      };
   anchor?: T;
   id?: T;
   blockName?: T;

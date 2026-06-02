@@ -144,8 +144,11 @@ export const Jobs: CollectionConfig = {
                 {
                   name: 'linkedinUrl',
                   type: 'text',
-                  label: 'LinkedIn Job URL',
-                  admin: { width: '50%' },
+                  label: 'External Job Detail',
+                  admin: {
+                    width: '50%',
+                    description: 'Link to the job posting on an external site (e.g. LinkedIn).',
+                  },
                 },
               ],
             },

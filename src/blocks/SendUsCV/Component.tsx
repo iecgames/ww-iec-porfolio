@@ -1,4 +1,4 @@
-import type { Media, SendUsCVBlock as SendUsCVBlockProps, Social } from '@/payload-types'
+import type { SendUsCVBlock as SendUsCVBlockProps, Social } from '@/payload-types'
 import configPromise from '@payload-config'
 import { getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
@@ -10,7 +10,6 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
   subtitle,
   cvUrl,
   innovatorLabel,
-  innovatorAvatars,
 }) => {
   const payload = await getPayload({ config: configPromise })
   const t = await getTranslations('JobDetail')
@@ -27,16 +26,6 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
     platform: doc.platform,
     url: doc.url,
   }))
-
-  const avatarUrls: string[] = []
-  if (innovatorAvatars?.length) {
-    for (const item of innovatorAvatars) {
-      if (item.avatar && typeof item.avatar === 'object') {
-        const media = item.avatar as Media
-        if (media.url) avatarUrls.push(media.url)
-      }
-    }
-  }
 
   const applyLabels: ApplyLabels = {
     triggerLabel: t('sendCV.trigger'),
@@ -70,7 +59,6 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
         subtitle={subtitle ?? undefined}
         cvUrl={cvUrl ?? undefined}
         innovatorLabel={innovatorLabel ?? undefined}
-        avatarUrls={avatarUrls}
         socials={socials}
         applyLabels={applyLabels}
       />

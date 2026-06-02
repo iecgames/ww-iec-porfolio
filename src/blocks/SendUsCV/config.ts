@@ -38,19 +38,5 @@ export const SendUsCV: Block = {
       label: 'Innovator Label',
       localized: true,
     },
-    {
-      name: 'innovatorAvatars',
-      type: 'array',
-      label: 'Innovator Avatars (stacked)',
-      maxRows: 5,
-      fields: [
-        {
-          name: 'avatar',
-          type: 'upload',
-          relationTo: 'media',
-          required: true,
-        },
-      ],
-    },
   ],
 }
