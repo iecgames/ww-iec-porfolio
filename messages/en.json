@@ -5,7 +5,14 @@
   "Search": {
     "title": "Search",
     "noResults": "No results found.",
-    "placeholder": "Search..."
+    "placeholder": "Search...",
+    "searching": "Searching…",
+    "typeToStart": "Type to start searching…",
+    "groups": {
+      "posts": "Posts",
+      "jobs": "Jobs",
+      "categories": "Categories"
+    }
   },
   "Posts": {
     "title": "Posts",
@@ -14,7 +21,8 @@
     "latestUpdates": "Latest updates",
     "all": "All",
     "noPostsInCategory": "No posts in this category.",
-    "loadMore": "View more news"
+    "loadMore": "View more news",
+    "postsInCategory": "{count, plural, =0 {No posts} one {# post} other {# posts}}"
   },
   "RelatedPosts": {
     "eyebrow": "Keep exploring",

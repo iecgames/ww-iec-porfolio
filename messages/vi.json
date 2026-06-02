@@ -5,7 +5,14 @@
   "Search": {
     "title": "Tìm kiếm",
     "noResults": "Không tìm thấy kết quả.",
-    "placeholder": "Tìm kiếm..."
+    "placeholder": "Tìm kiếm...",
+    "searching": "Đang tìm…",
+    "typeToStart": "Nhập để bắt đầu tìm kiếm…",
+    "groups": {
+      "posts": "Bài viết",
+      "jobs": "Tuyển dụng",
+      "categories": "Danh mục"
+    }
   },
   "Posts": {
     "title": "Bài viết",
@@ -14,7 +21,8 @@
     "latestUpdates": "Cập nhật mới nhất",
     "all": "Tất cả",
     "noPostsInCategory": "Không có bài viết nào trong danh mục này.",
-    "loadMore": "Xem thêm tin tức"
+    "loadMore": "Xem thêm tin tức",
+    "postsInCategory": "{count, plural, other {# bài viết}}"
   },
   "RelatedPosts": {
     "eyebrow": "Tiếp tục khám phá",

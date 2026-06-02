@@ -13,7 +13,7 @@ import { RippleLink } from '@/components/RippleLink'
 
 /* ──────────── helpers ──────────── */
 
-function formatPostDate(timestamp?: string | null): string {
+export function formatPostDate(timestamp?: string | null): string {
   if (!timestamp) return ''
   const date = new Date(timestamp)
   const DD = String(date.getDate()).padStart(2, '0')
@@ -22,7 +22,7 @@ function formatPostDate(timestamp?: string | null): string {
   return `${DD}/${MM}/${YYYY}`
 }
 
-function getTags(tags?: (string | Tag)[] | null): Tag[] {
+export function getTags(tags?: (string | Tag)[] | null): Tag[] {
   if (!Array.isArray(tags)) return []
   return tags.filter((t): t is Tag => typeof t === 'object' && t !== null)
 }
@@ -41,7 +41,7 @@ function extractPlainText(node: unknown, max: number = 180): string {
   return out.length > max ? out.slice(0, max).trimEnd() + '…' : out
 }
 
-function getPostExcerpt(post: Post, max: number = 180): string {
+export function getPostExcerpt(post: Post, max: number = 180): string {
   if (post.meta?.description) {
     return post.meta.description.length > max
       ? post.meta.description.slice(0, max).trimEnd() + '…'
@@ -146,7 +146,7 @@ const PhotoCard: React.FC<{ post: Post; className?: string }> = ({ post, classNa
 
 /* ──────────── decorations ──────────── */
 
-const Decorations: React.FC = () => {
+export const Decorations: React.FC = () => {
   const reduced = useReducedMotion()
   return (
     <>
