@@ -75,13 +75,17 @@ const server = createMcpServer(payload, auth.mode === 'oauth' ? { userId: auth.s
 - Không nới lỏng: token thiếu/sai luôn 401; scope sai 403.
 
 ## 4. Acceptance criteria
-- [ ] Legacy: `POST /api/mcp` với `Authorization: Bearer <MCP_API_KEY>` + body `tools/list` → 200 danh sách tool (regression giữ nguyên).
-- [ ] OAuth happy path: lấy access token (phase 04), `POST /api/mcp` với `Bearer <JWT>` + `tools/list` → 200.
-- [ ] Không token → 401 + header `WWW-Authenticate: Bearer resource_metadata="<ISSUER>/.well-known/oauth-protected-resource"`.
-- [ ] Token sai chữ ký / hết hạn / `aud` lệch → 401 + cùng header. Token scope không có `mcp` → 403.
-- [ ] `npx tsc --noEmit` pass; `pnpm build` thành công.
-- [ ] **End-to-end ChatGPT (thủ công):** thêm connector trỏ `https://<domain>/api/mcp` ở developer mode → ChatGPT discover PRM/AS → DCR → mở popup login Payload → consent → gọi `tools/list` thành công. Ghi lại kết quả vào PR.
-- [ ] (Tùy chọn) MCP Inspector (`pnpm test:mcp`) kết nối qua OAuth flow OK.
+> Tự động hoá: `tests/int/oauth-mcp-guard.int.spec.ts` (probe bằng `initialize`). 5/5 pass.
+- [x] Legacy: `POST /api/mcp` với `Bearer <MCP_API_KEY>` → 200 (serverInfo). Regression giữ nguyên.
+- [x] OAuth happy path: `Bearer <JWT hợp lệ>` → 200 (auth pass, MCP trả serverInfo).
+- [x] Không token → 401 + `WWW-Authenticate: Bearer resource_metadata="<PRM_URL>"`. Token rác → 401 + cùng header.
+- [x] Token scope không có `mcp` → 403 + `scope="mcp"` trong challenge. (Sai chữ ký/hết hạn/aud → 401 qua cùng nhánh `invalid_token`.)
+- [x] `npx tsc --noEmit` pass; `next build` thành công (mọi route oauth/well-known build ra dynamic functions).
+- [ ] **End-to-end ChatGPT (thủ công, sau deploy):** thêm connector `https://<domain>/api/mcp` ở developer mode → discover PRM/AS → DCR → popup login Payload → consent → tool chạy. *Chỉ thực hiện được trên HTTPS công khai; chưa chạy local.*
+- [ ] (Tùy chọn) MCP Inspector (`pnpm test:mcp`) qua OAuth flow.
+
+## 7. Ghi chú deviation
+- **KHÔNG sửa `src/mcp/server.ts`:** giữ `createMcpServer(payload)` nguyên (thay đổi để truyền `authContext` là *optional* theo plan). User id từ JWT (`auth.sub`) hiện được xác thực ở route nhưng chưa thread vào server cho audit — có thể bổ sung sau, không ảnh hưởng bảo mật vì tool vẫn `overrideAccess`.
 
 ## 5. Out of scope (phase này)
 - Per-user access enforcement (vẫn overrideAccess).

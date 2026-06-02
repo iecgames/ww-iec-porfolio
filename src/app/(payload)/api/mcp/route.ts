@@ -3,17 +3,23 @@
  *
  * Endpoint: POST|GET|DELETE /api/mcp
  *
- * Authentication: Authorization: Bearer <MCP_API_KEY>
+ * Authentication (either one):
+ *   • Authorization: Bearer <MCP_API_KEY>          (legacy static key)
+ *   • Authorization: Bearer <OAuth 2.1 access JWT>  (issued by this app's AS)
+ *
+ * Unauthenticated requests get 401 + a WWW-Authenticate header pointing at the
+ * protected-resource metadata (RFC 9728) so MCP clients (ChatGPT) start the
+ * OAuth flow automatically.
  *
  * Every request creates a fresh McpServer + transport instance.
  * No session state is persisted; each AI Agent turn is self-contained.
- *
- * CORS is open for all origins (endpoint is key-protected).
  */
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 
+import { PRM_URL, SUPPORTED_SCOPE } from '@/oauth/config'
+import { verifyAccessToken } from '@/oauth/jwt'
 import { createMcpServer } from '../../../../mcp/server'
 
 // ─── CORS headers ────────────────────────────────────────────────────────────
@@ -22,7 +28,7 @@ const CORS_HEADERS: Record<string, string> = {
   'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   'Access-Control-Allow-Headers':
     'Content-Type, Authorization, mcp-session-id, Last-Event-ID, mcp-protocol-version',
-  'Access-Control-Expose-Headers': 'mcp-session-id, mcp-protocol-version',
+  'Access-Control-Expose-Headers': 'mcp-session-id, mcp-protocol-version, WWW-Authenticate',
 }
 
 function corsResponse(status: number, body?: BodyInit | null): Response {
@@ -30,27 +36,54 @@ function corsResponse(status: number, body?: BodyInit | null): Response {
 }
 
 // ─── Auth guard ───────────────────────────────────────────────────────────────
-function isAuthorized(request: Request): boolean {
-  const apiKey = process.env.MCP_API_KEY
-  if (!apiKey) return false // key not configured → deny all
+type AuthResult =
+  | { ok: true; mode: 'apikey' }
+  | { ok: true; mode: 'oauth'; sub: string; client_id?: string }
+  | { ok: false; error: 'invalid_token' | 'insufficient_scope' | 'missing_token' }
 
+async function authenticate(request: Request): Promise<AuthResult> {
   const authHeader = request.headers.get('authorization') ?? ''
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
-  return token === apiKey
+  if (!token) return { ok: false, error: 'missing_token' }
+
+  // 1) Legacy static API key.
+  const apiKey = process.env.MCP_API_KEY
+  if (apiKey && token === apiKey) return { ok: true, mode: 'apikey' }
+
+  // 2) OAuth 2.1 access token (RS256 JWT) — verifies iss/aud/exp/signature.
+  try {
+    const claims = await verifyAccessToken(token)
+    const scope = typeof claims.scope === 'string' ? claims.scope : ''
+    if (scope && !scope.split(' ').includes(SUPPORTED_SCOPE)) {
+      return { ok: false, error: 'insufficient_scope' }
+    }
+    return { ok: true, mode: 'oauth', sub: String(claims.sub), client_id: claims.client_id as string | undefined }
+  } catch {
+    return { ok: false, error: 'invalid_token' }
+  }
+}
+
+function unauthorized(error: 'invalid_token' | 'insufficient_scope' | 'missing_token'): Response {
+  const insufficient = error === 'insufficient_scope'
+  const challenge =
+    `Bearer resource_metadata="${PRM_URL}"` + (insufficient ? `, scope="${SUPPORTED_SCOPE}"` : '')
+  return new Response(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      error: { code: -32001, message: insufficient ? 'Insufficient scope' : 'Unauthorized' },
+      id: null,
+    }),
+    {
+      status: insufficient ? 403 : 401,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json', 'WWW-Authenticate': challenge },
+    },
+  )
 }
 
 // ─── Core handler ─────────────────────────────────────────────────────────────
 async function handleMcp(request: Request): Promise<Response> {
-  if (!isAuthorized(request)) {
-    return corsResponse(
-      401,
-      JSON.stringify({
-        jsonrpc: '2.0',
-        error: { code: -32001, message: 'Unauthorized' },
-        id: null,
-      }),
-    )
-  }
+  const auth = await authenticate(request)
+  if (!auth.ok) return unauthorized(auth.error)
 
   const payload = await getPayload({ config })
   const server = createMcpServer(payload)
