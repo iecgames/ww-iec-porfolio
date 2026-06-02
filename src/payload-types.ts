@@ -80,6 +80,9 @@ export interface Config {
     subscribers: Subscriber;
     'email-campaigns': EmailCampaign;
     contactSubmissions: ContactSubmission;
+    'oauth-clients': OauthClient;
+    'oauth-codes': OauthCode;
+    'oauth-refresh-tokens': OauthRefreshToken;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -110,6 +113,9 @@ export interface Config {
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     'email-campaigns': EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
     contactSubmissions: ContactSubmissionsSelect<false> | ContactSubmissionsSelect<true>;
+    'oauth-clients': OauthClientsSelect<false> | OauthClientsSelect<true>;
+    'oauth-codes': OauthCodesSelect<false> | OauthCodesSelect<true>;
+    'oauth-refresh-tokens': OauthRefreshTokensSelect<false> | OauthRefreshTokensSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1852,6 +1858,70 @@ export interface ContactSubmission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-clients".
+ */
+export interface OauthClient {
+  id: string;
+  client_id: string;
+  client_secret?: string | null;
+  client_name?: string | null;
+  redirect_uris?:
+    | {
+        uri: string;
+        id?: string | null;
+      }[]
+    | null;
+  grant_types?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  token_endpoint_auth_method?: string | null;
+  scope?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-codes".
+ */
+export interface OauthCode {
+  id: string;
+  code: string;
+  client_id: string;
+  user: string | User;
+  redirect_uri: string;
+  code_challenge: string;
+  code_challenge_method?: string | null;
+  scope?: string | null;
+  resource?: string | null;
+  expires_at: string;
+  used?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-refresh-tokens".
+ */
+export interface OauthRefreshToken {
+  id: string;
+  token_hash: string;
+  client_id: string;
+  user: string | User;
+  scope?: string | null;
+  resource?: string | null;
+  expires_at: string;
+  revoked?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -2099,6 +2169,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'contactSubmissions';
         value: string | ContactSubmission;
+      } | null)
+    | ({
+        relationTo: 'oauth-clients';
+        value: string | OauthClient;
+      } | null)
+    | ({
+        relationTo: 'oauth-codes';
+        value: string | OauthCode;
+      } | null)
+    | ({
+        relationTo: 'oauth-refresh-tokens';
+        value: string | OauthRefreshToken;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2963,6 +3045,59 @@ export interface ContactSubmissionsSelect<T extends boolean = true> {
   email?: T;
   subject?: T;
   message?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-clients_select".
+ */
+export interface OauthClientsSelect<T extends boolean = true> {
+  client_id?: T;
+  client_secret?: T;
+  client_name?: T;
+  redirect_uris?:
+    | T
+    | {
+        uri?: T;
+        id?: T;
+      };
+  grant_types?: T;
+  token_endpoint_auth_method?: T;
+  scope?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-codes_select".
+ */
+export interface OauthCodesSelect<T extends boolean = true> {
+  code?: T;
+  client_id?: T;
+  user?: T;
+  redirect_uri?: T;
+  code_challenge?: T;
+  code_challenge_method?: T;
+  scope?: T;
+  resource?: T;
+  expires_at?: T;
+  used?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "oauth-refresh-tokens_select".
+ */
+export interface OauthRefreshTokensSelect<T extends boolean = true> {
+  token_hash?: T;
+  client_id?: T;
+  user?: T;
+  scope?: T;
+  resource?: T;
+  expires_at?: T;
+  revoked?: T;
   updatedAt?: T;
   createdAt?: T;
 }

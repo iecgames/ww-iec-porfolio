@@ -9,7 +9,9 @@
   # Payload/Next build cần nhiều RAM, tránh OOM khi build
   NODE_OPTIONS = "--max-old-space-size=4096 --no-deprecation"
   # NEXT_PUBLIC_* là biến public theo thiết kế (nhúng vào client) -> bỏ qua secret scan
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL"
+  # OAUTH_JWT_PUBLIC_KEY là public key (an toàn công khai); OAUTH_JWT_PRIVATE_KEY là
+  # base64 PEM nên secret-scan dễ báo nhầm -> khai báo omit có chủ đích.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,OAUTH_JWT_PRIVATE_KEY,OAUTH_JWT_PUBLIC_KEY"
   # File template/test chỉ chứa placeholder, không phải secret thật -> không scan
   SECRETS_SCAN_OMIT_PATHS = ".env.example,test.env"
 

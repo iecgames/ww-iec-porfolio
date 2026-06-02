@@ -14,6 +14,9 @@ import { Games } from './collections/Games'
 import { JobApplications } from './collections/JobApplications'
 import { Jobs } from './collections/Jobs'
 import { Media } from './collections/Media'
+import { OAuthClients } from './collections/OAuthClients'
+import { OAuthCodes } from './collections/OAuthCodes'
+import { OAuthRefreshTokens } from './collections/OAuthRefreshTokens'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Social } from './collections/Social'
@@ -89,6 +92,9 @@ export default buildConfig({
     Subscribers,
     EmailCampaigns,
     ContactSubmissions,
+    OAuthClients,
+    OAuthCodes,
+    OAuthRefreshTokens,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   endpoints: [unsubscribeEndpoint, sendCampaignEndpoint],
