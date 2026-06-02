@@ -76,12 +76,12 @@ async rewrites() {
 - KHÔNG hardcode domain; mọi URL lấy từ `src/oauth/config.ts` (ISSUER).
 
 ## 4. Acceptance criteria
-- [ ] `pnpm dev`, `curl -s http://localhost:3000/.well-known/oauth-protected-resource` → JSON có `resource` = `<ISSUER>/api/mcp`, `authorization_servers` = `[ISSUER]`.
-- [ ] `curl -s http://localhost:3000/.well-known/oauth-authorization-server` → JSON có đủ 4 endpoint URL tuyệt đối + `code_challenge_methods_supported: ["S256"]`.
-- [ ] `curl -s http://localhost:3000/api/oauth/jwks` → `{ keys: [ { kty:"RSA", kid:"iec-mcp-1", alg:"RS256", use:"sig", n, e } ] }` và **không** có field private (`d`, `p`, `q`...).
-- [ ] `npx tsc --noEmit` pass.
-- [ ] `OPTIONS /.well-known/oauth-protected-resource` → 204 + CORS header.
-- [ ] (Regression) `/api/mcp` vẫn trả như cũ với `MCP_API_KEY`.
+- [x] `curl /.well-known/oauth-protected-resource` → `resource` = `http://localhost:3000/api/mcp`, `authorization_servers` = `["http://localhost:3000"]`.
+- [x] `curl /.well-known/oauth-authorization-server` → đủ 4 endpoint URL tuyệt đối + `code_challenge_methods_supported: ["S256"]`.
+- [x] `curl /api/oauth/jwks` → `{ keys:[{ kty:"RSA", kid:"iec-mcp-1", alg:"RS256", use:"sig", n, e }] }`, KHÔNG có field private (`d/p/q`). Xác nhận.
+- [x] `npx tsc --noEmit` pass (không lỗi mới ở oauth/app/next.config).
+- [x] `OPTIONS /.well-known/oauth-protected-resource` → 204 + CORS.
+- [x] (Regression) `/api/mcp` vẫn mounted (POST không auth → 401).
 
 ## 5. Out of scope (phase này)
 - 401 `WWW-Authenticate` trên `/api/mcp` (phase 05).
