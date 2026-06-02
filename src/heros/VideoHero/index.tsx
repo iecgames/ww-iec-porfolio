@@ -204,7 +204,7 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
         )}
       </div>
 
-      {/* ── Blue gradient overlay (left → transparent) ── */}
+      {/* ── Shared gradient overlay (fades + brand diagonal) ── */}
       <div
         className="absolute inset-0 z-10 pointer-events-none"
         style={{
@@ -216,8 +216,28 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
             // ② Sky-blue diagonal highlight từ góc trên-trái
             //   'linear-gradient(60deg, rgba(56,189,248,0.22) 0%, rgba(56,189,248,0.08) 35%, transparent 60%)',
             'linear-gradient(60deg, rgba(37,99,235,0.5) 0%, rgba(56,189,248,0.08) 35%, transparent 60%)',
-            // ③ White panel bên trái cho text đọc được
+          ].join(', '),
+        }}
+      />
+
+      {/* ── Readability panel — desktop: left→right white fade ── */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none hidden md:block"
+        style={{
+          background:
             'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.93) 28%, rgba(255,255,255,0.1) 62%, transparent 80%)',
+        }}
+      />
+
+      {/* ── Readability panel — mobile: light veil giữ chữ luôn nổi trên video ── */}
+      <div
+        className="absolute inset-0 z-10 pointer-events-none md:hidden"
+        style={{
+          background: [
+            // Veil ngang: trắng đậm bên trái (nơi chữ căn trái), nhạt dần nhưng KHÔNG về 0 để chữ mép phải vẫn đọc được
+            'linear-gradient(to right, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.7) 72%, rgba(255,255,255,0.45) 100%)',
+            // Tăng nhẹ độ phủ ở dải giữa theo chiều dọc — vùng chữ được căn giữa
+            'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 40%, rgba(255,255,255,0.5) 62%, transparent 80%)',
           ].join(', '),
         }}
       />

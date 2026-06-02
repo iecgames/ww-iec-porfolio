@@ -8,6 +8,7 @@ import { LanguageSwitcher } from '@/components/LanguageSwitcher'
 import { CMSLink } from '@/components/Link'
 import { useSearchModal } from '@/providers/SearchModal'
 import { IconSearch } from '@tabler/icons-react'
+import { MobileMenu } from '../MobileMenu'
 
 const navLinkClass =
   'relative inline-block px-1 py-1 text-lg font-medium uppercase tracking-wide text-foreground transition-colors hover:text-primary after:absolute after:left-1 after:right-1 after:-bottom-0.5 after:h-0.5 after:bg-primary after:origin-left after:scale-x-0 after:transition-transform after:duration-300 hover:after:scale-x-100'
@@ -34,33 +35,38 @@ function SearchBarButton() {
   )
 }
 
-export const HeaderNav: React.FC<{ data: HeaderType; centered?: boolean }> = ({
-  data,
-  centered,
-}) => {
+export const HeaderNav: React.FC<{
+  data: HeaderType
+  centered?: boolean
+}> = ({ data, centered }) => {
   const navItems = data?.navItems || []
 
   const links = navItems.map(({ link }, i) => (
     <CMSLink key={i} {...link} appearance="inline" className={navLinkClass} />
   ))
 
-  if (centered) {
-    return (
-      <>
-        <nav className="flex gap-6 items-center justify-center">{links}</nav>
-        <div className="flex-1 flex justify-end items-center gap-3">
-          <SearchBarButton />
-          <LanguageSwitcher />
-        </div>
-      </>
-    )
-  }
-
+  // Desktop (md+): the actions group (search + language) stays pinned right via
+  // `justify-end`, and only its `flex-grow` transitions (1 → 0). That smoothly
+  // glides the nav from center → right with a plain CSS transition — no layout
+  // thrash, no jank. Mobile (<md): everything collapses into the hamburger menu.
   return (
-    <nav className="flex gap-3 items-center">
-      {links}
-      <SearchBarButton />
-      <LanguageSwitcher />
-    </nav>
+    <>
+      <nav className="hidden gap-6 items-center lg:flex">{links}</nav>
+      <div
+        className="hidden items-center justify-end gap-3 lg:flex"
+        style={{
+          flexGrow: centered ? 1 : 0,
+          transition: 'flex-grow 500ms cubic-bezier(0.22, 1, 0.36, 1)',
+        }}
+      >
+        <SearchBarButton />
+        <LanguageSwitcher />
+      </div>
+
+      {/* Mobile / tablet: hamburger + full-screen menu */}
+      <div className="ml-auto lg:hidden">
+        <MobileMenu navItems={navItems} />
+      </div>
+    </>
   )
 }

@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 
 import type { Header } from '@/payload-types'
 
@@ -22,22 +22,52 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, logoSrc, logoA
   const { transparent } = useTransparentHeader()
   const isTransparent = isPostsPage || transparent
 
+  // Track scroll to give the pinned header a solid background once it leaves the top.
+  // Hysteresis band (8↔24px) prevents the state from flickering right at the threshold.
+  const [scrolled, setScrolled] = useState(false)
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY
+      setScrolled((prev) => {
+        if (!prev && y > 24) return true
+        if (prev && y < 8) return false
+        return prev
+      })
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  // Solid bg on normal pages always; on transparent pages only after scrolling.
+  const solid = !isTransparent || scrolled
+  // Big centered hero layout only at the very top of a transparent page.
+  const centered = isTransparent && !scrolled
+
   return (
     <header
       className={cn(
-        'relative z-20 bg-transparent',
-        !isTransparent && 'border-b border-gray-200/70',
+        // Transition only paint properties — layout glide is handled in HeaderNav via flex-grow.
+        'sticky top-0 z-50 transition-[background-color,box-shadow,border-color] duration-300',
+        solid
+          ? 'bg-white/70 backdrop-blur-md border-b border-gray-200/70 shadow-md'
+          : 'bg-transparent',
       )}
       style={{ fontFamily: 'var(--font-space-grotesk, system-ui, sans-serif)' }}
     >
       <div className="container">
-        <div className={cn('flex items-center', isTransparent ? 'py-10' : 'py-8 justify-between')}>
-          <div className={isTransparent ? 'flex-1' : ''}>
+        <div
+          className={cn(
+            'flex items-center gap-3 transition-[padding] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+            centered ? 'py-10' : 'py-4',
+          )}
+        >
+          <div className="flex-1">
             <Link href="/">
               <Logo loading="eager" priority="high" src={logoSrc} alt={logoAlt} />
             </Link>
           </div>
-          <HeaderNav data={data} centered={isTransparent} />
+          <HeaderNav data={data} centered={centered} />
         </div>
       </div>
     </header>

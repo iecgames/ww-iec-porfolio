@@ -5,7 +5,7 @@ import { IconWorld } from '@tabler/icons-react'
 import { usePathname, useRouter } from 'next/navigation'
 import React, { useTransition } from 'react'
 
-const locales = [
+export const locales = [
   {
     code: 'vi',
     label: 'Tiếng Việt',
@@ -21,7 +21,7 @@ const locales = [
 const LOCALE_CODES: readonly string[] = locales.map((l) => l.code)
 
 /** Small rounded flag chip. */
-function FlagBadge({ src, alt }: { src: string; alt: string }) {
+export function FlagBadge({ src, alt }: { src: string; alt: string }) {
   return (
     <span className="inline-flex h-4 w-6 shrink-0 overflow-hidden rounded-[3px] ring-1 ring-black/10">
       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -30,7 +30,8 @@ function FlagBadge({ src, alt }: { src: string; alt: string }) {
   )
 }
 
-export const LanguageSwitcher: React.FC = () => {
+/** Shared locale state + switch logic (preserves the current path, swaps the prefix). */
+export function useLocaleSwitcher() {
   const router = useRouter()
   // Real URL pathname incl. the locale prefix, e.g. "/vi/career".
   const pathname = usePathname()
@@ -52,6 +53,12 @@ export const LanguageSwitcher: React.FC = () => {
       router.replace(target)
     })
   }
+
+  return { locale, switchLocale, isPending }
+}
+
+export const LanguageSwitcher: React.FC = () => {
+  const { locale, switchLocale, isPending } = useLocaleSwitcher()
 
   return (
     <Dropdown placement="bottom-end">
