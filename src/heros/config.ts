@@ -7,6 +7,7 @@ import { Content } from '@/blocks/Content/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { PolicyTabs } from '@/blocks/PolicyTabs/config'
 import { linkGroup } from '@/fields/linkGroup'
+import { buttonLink } from '@/heros/fields/buttonLink'
 
 export const hero: Field = {
   name: 'hero',
@@ -108,14 +109,7 @@ export const hero: Field = {
         condition: (_, { type } = {}) => type === 'videoHero',
       },
     },
-    {
-      name: 'primaryButtonUrl',
-      type: 'text',
-      label: 'Primary Button URL',
-      admin: {
-        condition: (_, { type } = {}) => type === 'videoHero',
-      },
-    },
+    buttonLink('primaryButton', 'Primary Button Link'),
     {
       name: 'secondaryButtonLabel',
       type: 'text',
@@ -125,14 +119,7 @@ export const hero: Field = {
         condition: (_, { type } = {}) => type === 'videoHero',
       },
     },
-    {
-      name: 'secondaryButtonUrl',
-      type: 'text',
-      label: 'Secondary Button URL',
-      admin: {
-        condition: (_, { type } = {}) => type === 'videoHero',
-      },
-    },
+    buttonLink('secondaryButton', 'Secondary Button Link'),
     {
       name: 'videoPopupUrl',
       type: 'text',

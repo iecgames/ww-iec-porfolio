@@ -1,3 +1,5 @@
+import type { Block } from 'payload'
+import { anchorField } from '@/blocks/anchorField'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
@@ -15,11 +17,18 @@ import { FeatureTabs } from '@/blocks/FeatureTabs/config'
 import { GamesPortfolio } from '@/blocks/GamesPortfolio/config'
 import { IECLife } from '@/blocks/IECLife/config'
 
+/** Append the shared Anchor ID field to a block so every section is linkable. */
+const withAnchor = (block: Block): Block => ({
+  ...block,
+  fields: [...block.fields, anchorField],
+})
+
 /**
  * Blocks available on both the Pages collection and the Home global,
  * so editors can compose any layout from the same set of blocks.
+ * Every block gets an Anchor ID field (see {@link withAnchor}).
  */
-export const sharedLayoutBlocks = [
+export const sharedLayoutBlocks: Block[] = [
   CallToAction,
   Content,
   MediaBlock,
@@ -35,4 +44,4 @@ export const sharedLayoutBlocks = [
   FeatureTabs,
   IECLife,
   CategoryShowcase,
-]
+].map(withAnchor)

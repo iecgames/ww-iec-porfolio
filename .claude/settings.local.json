@@ -12,7 +12,10 @@
       "Bash(curl -s -i http://localhost:3000/en)",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:3000/en)",
       "Bash(node -e \"const c=require\\('fs'\\).readFileSync\\('.env','utf8'\\);for\\(const l of c.split\\(/\\\\r?\\\\n/\\)\\){if\\(/^\\(DATABASE_URI|DATABASE_URL|POSTGRES|MONGODB|DB_\\)/.test\\(l\\)\\){const k=l.split\\('='\\)[0];console.log\\(k,'set \\(len',l.length-k.length-1,'\\)'\\)}}\")",
-      "Bash(pnpm generate:importmap)"
+      "Bash(pnpm generate:importmap)",
+      "Bash(sed -n '60,80p' \"src/collections/Pages/index.ts\")",
+      "Bash(sed -n '25,45p' \"src/Home/config.ts\")",
+      "Bash(sed -n '25,45p' \"src/Career/config.ts\")"
     ]
   }
 }

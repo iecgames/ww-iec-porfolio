@@ -203,9 +203,43 @@ export interface Page {
       | (CallToActionBlock | ContentBlock | MediaBlock | BannerBlock | CodeBlock | PolicyTabsBlock)[]
       | null;
     primaryButtonLabel?: string | null;
-    primaryButtonUrl?: string | null;
+    primaryButton?: {
+      type?: ('reference' | 'section' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null);
+      /**
+       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       */
+      section?: string | null;
+      url?: string | null;
+    };
     secondaryButtonLabel?: string | null;
-    secondaryButtonUrl?: string | null;
+    secondaryButton?: {
+      type?: ('reference' | 'section' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null);
+      /**
+       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       */
+      section?: string | null;
+      url?: string | null;
+    };
     /**
      * YouTube or direct video URL to open in a popup when the play button is clicked
      */
@@ -498,6 +532,10 @@ export interface CallToActionBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'cta';
@@ -672,6 +710,10 @@ export interface ContentBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -777,6 +819,10 @@ export interface ArchiveBlock {
         value: string | Post;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
@@ -803,6 +849,10 @@ export interface FormBlock {
     };
     [k: string]: unknown;
   } | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
@@ -988,6 +1038,10 @@ export interface Form {
 export interface JobBoardBlock {
   heading?: string | null;
   subtitle?: string | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'jobBoard';
@@ -1010,6 +1064,10 @@ export interface SendUsCVBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'sendUsCV';
@@ -1043,6 +1101,10 @@ export interface NewsletterSignupBlock {
     email?: string | null;
     address?: string | null;
   };
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'newsletterSignup';
@@ -1183,6 +1245,10 @@ export interface AboutWithStatsBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'aboutWithStats';
@@ -1196,6 +1262,10 @@ export interface GamesPortfolioBlock {
   heading: string;
   populateBy?: ('collection' | 'selection') | null;
   selectedGames?: (string | Game)[] | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'gamesPortfolio';
@@ -1399,6 +1469,10 @@ export interface CoreValuesShowcaseBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'coreValuesShowcase';
@@ -1445,6 +1519,10 @@ export interface CareersHighlightBlock {
     route?: ('/' | '/posts' | '/career' | '/search') | null;
     url?: string | null;
   };
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'careersHighlight';
@@ -1476,6 +1554,10 @@ export interface FeatureTabsBlock {
         id?: string | null;
       }[]
     | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'featureTabs';
@@ -1492,6 +1574,10 @@ export interface IECLifeBlock {
    * How many recent posts to show (1 featured + the rest in the side list).
    */
   limit?: number | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'iecLife';
@@ -1529,6 +1615,10 @@ export interface CategoryShowcaseBlock {
    * Label for the dark CTA button under the description.
    */
   ctaLabel?: string | null;
+  /**
+   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
+   */
+  anchor?: string | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'categoryShowcase';
@@ -2073,9 +2163,25 @@ export interface PagesSelect<T extends boolean = true> {
               policyTabs?: T | PolicyTabsBlockSelect<T>;
             };
         primaryButtonLabel?: T;
-        primaryButtonUrl?: T;
+        primaryButton?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              section?: T;
+              url?: T;
+            };
         secondaryButtonLabel?: T;
-        secondaryButtonUrl?: T;
+        secondaryButton?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              section?: T;
+              url?: T;
+            };
         videoPopupUrl?: T;
         eyebrow?: T;
         brandHeading?: T;
@@ -2175,6 +2281,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2202,6 +2309,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2211,6 +2319,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
  */
 export interface MediaBlockSelect<T extends boolean = true> {
   media?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2266,6 +2375,7 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2277,6 +2387,7 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2287,6 +2398,7 @@ export interface FormBlockSelect<T extends boolean = true> {
 export interface JobBoardBlockSelect<T extends boolean = true> {
   heading?: T;
   subtitle?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2305,6 +2417,7 @@ export interface SendUsCVBlockSelect<T extends boolean = true> {
         avatar?: T;
         id?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2330,6 +2443,7 @@ export interface NewsletterSignupBlockSelect<T extends boolean = true> {
         email?: T;
         address?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2384,6 +2498,7 @@ export interface AboutWithStatsBlockSelect<T extends boolean = true> {
         sizePercent?: T;
         id?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2396,6 +2511,7 @@ export interface GamesPortfolioBlockSelect<T extends boolean = true> {
   heading?: T;
   populateBy?: T;
   selectedGames?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2447,6 +2563,7 @@ export interface CoreValuesShowcaseBlockSelect<T extends boolean = true> {
             };
         id?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2471,6 +2588,7 @@ export interface CareersHighlightBlockSelect<T extends boolean = true> {
         route?: T;
         url?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2487,6 +2605,7 @@ export interface FeatureTabsBlockSelect<T extends boolean = true> {
         description?: T;
         id?: T;
       };
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2499,6 +2618,7 @@ export interface IECLifeBlockSelect<T extends boolean = true> {
   heading?: T;
   ctaLabel?: T;
   limit?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -2512,6 +2632,7 @@ export interface CategoryShowcaseBlockSelect<T extends boolean = true> {
   description?: T;
   category?: T;
   ctaLabel?: T;
+  anchor?: T;
   id?: T;
   blockName?: T;
 }
@@ -3208,9 +3329,43 @@ export interface Home {
       | (CallToActionBlock | ContentBlock | MediaBlock | BannerBlock | CodeBlock | PolicyTabsBlock)[]
       | null;
     primaryButtonLabel?: string | null;
-    primaryButtonUrl?: string | null;
+    primaryButton?: {
+      type?: ('reference' | 'section' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null);
+      /**
+       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       */
+      section?: string | null;
+      url?: string | null;
+    };
     secondaryButtonLabel?: string | null;
-    secondaryButtonUrl?: string | null;
+    secondaryButton?: {
+      type?: ('reference' | 'section' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null);
+      /**
+       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       */
+      section?: string | null;
+      url?: string | null;
+    };
     /**
      * YouTube or direct video URL to open in a popup when the play button is clicked
      */
@@ -3353,9 +3508,43 @@ export interface Career {
       | (CallToActionBlock | ContentBlock | MediaBlock | BannerBlock | CodeBlock | PolicyTabsBlock)[]
       | null;
     primaryButtonLabel?: string | null;
-    primaryButtonUrl?: string | null;
+    primaryButton?: {
+      type?: ('reference' | 'section' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null);
+      /**
+       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       */
+      section?: string | null;
+      url?: string | null;
+    };
     secondaryButtonLabel?: string | null;
-    secondaryButtonUrl?: string | null;
+    secondaryButton?: {
+      type?: ('reference' | 'section' | 'custom') | null;
+      newTab?: boolean | null;
+      reference?:
+        | ({
+            relationTo: 'pages';
+            value: string | Page;
+          } | null)
+        | ({
+            relationTo: 'posts';
+            value: string | Post;
+          } | null);
+      /**
+       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       */
+      section?: string | null;
+      url?: string | null;
+    };
     /**
      * YouTube or direct video URL to open in a popup when the play button is clicked
      */
@@ -3579,9 +3768,25 @@ export interface HomeSelect<T extends boolean = true> {
               policyTabs?: T | PolicyTabsBlockSelect<T>;
             };
         primaryButtonLabel?: T;
-        primaryButtonUrl?: T;
+        primaryButton?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              section?: T;
+              url?: T;
+            };
         secondaryButtonLabel?: T;
-        secondaryButtonUrl?: T;
+        secondaryButton?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              section?: T;
+              url?: T;
+            };
         videoPopupUrl?: T;
         eyebrow?: T;
         brandHeading?: T;
@@ -3675,9 +3880,25 @@ export interface CareerSelect<T extends boolean = true> {
               policyTabs?: T | PolicyTabsBlockSelect<T>;
             };
         primaryButtonLabel?: T;
-        primaryButtonUrl?: T;
+        primaryButton?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              section?: T;
+              url?: T;
+            };
         secondaryButtonLabel?: T;
-        secondaryButtonUrl?: T;
+        secondaryButton?:
+          | T
+          | {
+              type?: T;
+              newTab?: T;
+              reference?: T;
+              section?: T;
+              url?: T;
+            };
         videoPopupUrl?: T;
         eyebrow?: T;
         brandHeading?: T;

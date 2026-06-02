@@ -2,6 +2,8 @@ import React, { Fragment } from 'react'
 
 import type { Page } from '@/payload-types'
 
+import { toAnchorId } from '@/blocks/anchorField'
+import { cn } from '@/utilities/ui'
 import { ArchiveBlock } from '@/blocks/ArchiveBlock/Component'
 import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
@@ -59,8 +61,13 @@ export const RenderBlocks: React.FC<{
 
           if (Block) {
             const isFlush = flushBlocks.has(blockType)
+            const anchorId = toAnchorId('anchor' in block ? block.anchor : undefined)
             return (
-              <div className={isFlush ? undefined : 'my-16'} key={index}>
+              <div
+                id={anchorId}
+                className={cn(isFlush ? undefined : 'my-16', anchorId && 'scroll-mt-24')}
+                key={index}
+              >
                 {/* @ts-expect-error there may be some mismatch between the expected types here */}
                 <Block {...block} disableInnerContainer />
               </div>
