@@ -1,0 +1,14 @@
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  # Bật corepack để Netlify dùng đúng pnpm version trong package.json
+  NETLIFY_USE_PNPM = "true"
+  # Payload/Next build cần nhiều RAM, tránh OOM khi build
+  NODE_OPTIONS = "--max-old-space-size=4096 --no-deprecation"
+
+# Next.js runtime (tự xử lý SSR, API routes, Payload admin qua serverless functions)
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
