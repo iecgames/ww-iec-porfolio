@@ -11,6 +11,7 @@ export const PostHero: React.FC<{
   post: Post
 }> = ({ post }) => {
   const { categories, heroImage, meta, populatedAuthors, publishedAt, title } = post
+  const description = meta?.description
 
   const displayImage =
     heroImage && typeof heroImage !== 'string'
@@ -27,12 +28,7 @@ export const PostHero: React.FC<{
       <div className="relative w-full max-w-6xl mx-auto overflow-hidden rounded-2xl md:rounded-3xl ring-1 ring-black/5 shadow-sm isolate">
         <div className="relative aspect-16/10 md:aspect-21/9 w-full bg-muted">
           {displayImage && (
-            <Media
-              fill
-              priority
-              imgClassName="object-cover"
-              resource={displayImage}
-            />
+            <Media fill priority imgClassName="object-cover" resource={displayImage} />
           )}
 
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/10" />
@@ -61,6 +57,12 @@ export const PostHero: React.FC<{
               <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight leading-tight mb-5 drop-shadow-sm">
                 {title}
               </h1>
+
+              {description && (
+                <p className="text-sm sm:text-base text-white/85 leading-relaxed mb-5 max-w-2xl line-clamp-3 drop-shadow-sm">
+                  {description}
+                </p>
+              )}
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-white/85">
                 {hasAuthors && (

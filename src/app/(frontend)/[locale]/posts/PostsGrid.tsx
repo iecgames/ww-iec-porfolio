@@ -3,6 +3,7 @@
 import { Card, type CardPostData } from '@/components/Card'
 import type { Category } from '@/payload-types'
 import { AnimatePresence, motion, type Variants } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
 
@@ -10,6 +11,7 @@ type Props = {
   initialPosts: CardPostData[]
   initialTotal: number
   categories: Pick<Category, 'id' | 'title'>[]
+  locale: string
 }
 
 const EASE_OUT_EXPO = [0.22, 1, 0.36, 1] as const
@@ -39,7 +41,8 @@ const itemVariants: Variants = {
   },
 }
 
-export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
+export function PostsGrid({ initialPosts, initialTotal, categories, locale }: Props) {
+  const t = useTranslations('Posts')
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [posts, setPosts] = useState<CardPostData[]>(initialPosts)
   const [total, setTotal] = useState(initialTotal)
@@ -61,6 +64,7 @@ export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
         sort: '-publishedAt',
         limit: '12',
         depth: '1',
+        locale,
       })
       const res = await fetch(`/api/posts?${params}`)
       if (!res.ok) return
@@ -71,7 +75,7 @@ export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
   }
 
   const filterItems: { id: string | null; title: string }[] = [
-    { id: null, title: 'Tất cả' },
+    { id: null, title: t('all') },
     ...categories.map((c) => ({ id: c.id as string, title: c.title })),
   ]
 
@@ -87,7 +91,7 @@ export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
         <div className="flex items-center gap-3 mr-2">
           <div className="w-1 h-5 rounded-full" style={{ backgroundColor: '#1447e6' }} />
           <h2 className="text-xs font-bold uppercase tracking-widest text-foreground">
-            Cập nhật mới nhất
+            {t('latestUpdates')}
           </h2>
         </div>
 
@@ -139,7 +143,7 @@ export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
                 exit="exit"
                 layout
               >
-                <Card doc={post} relationTo="posts" showCategories />
+                <Card doc={post} relationTo="posts" showCategories showDescription />
               </motion.div>
             ))
           ) : (
@@ -150,7 +154,7 @@ export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
               exit={{ opacity: 0 }}
               className="col-span-full text-sm text-muted-foreground py-8 text-center"
             >
-              Không có bài viết nào trong danh mục này.
+              {t('noPostsInCategory')}
             </motion.p>
           )}
         </AnimatePresence>
@@ -169,7 +173,7 @@ export function PostsGrid({ initialPosts, initialTotal, categories }: Props) {
             className="border text-foreground px-10 py-3 text-xs font-bold uppercase tracking-widest hover:bg-muted transition-colors rounded-full"
             style={{ borderColor: '#1447e6', color: '#1447e6' }}
           >
-            Xem thêm tin tức
+            {t('loadMore')}
           </Link>
         </motion.div>
       )}

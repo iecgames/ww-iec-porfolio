@@ -8,7 +8,13 @@
     "placeholder": "Search..."
   },
   "Posts": {
-    "title": "Posts"
+    "title": "Posts",
+    "featured": "Featured",
+    "readMore": "Read more",
+    "latestUpdates": "Latest updates",
+    "all": "All",
+    "noPostsInCategory": "No posts in this category.",
+    "loadMore": "View more news"
   },
   "RelatedPosts": {
     "eyebrow": "Keep exploring",

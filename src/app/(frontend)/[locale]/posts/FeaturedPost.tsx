@@ -4,6 +4,7 @@ import { Media } from '@/components/Media'
 import type { Post } from '@/payload-types'
 import { Card, CardBody, Chip } from '@heroui/react'
 import { motion } from 'framer-motion'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import React from 'react'
 
@@ -21,6 +22,7 @@ function formatDateDDMMYYYY(timestamp: string): string {
 }
 
 export const FeaturedPost: React.FC<{ post: FeaturedPostData }> = ({ post }) => {
+  const t = useTranslations('Posts')
   const image =
     post.heroImage && typeof post.heroImage !== 'string'
       ? post.heroImage
@@ -82,7 +84,7 @@ export const FeaturedPost: React.FC<{ post: FeaturedPostData }> = ({ post }) => 
                     <path d="M12 2l2.39 7.36H22l-6.18 4.49L18.21 22 12 17.27 5.79 22l2.39-8.15L2 9.36h7.61z" />
                   </svg>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-foreground">
-                    Tin nổi bật
+                    {t('featured')}
                   </span>
                 </div>
               </div>
@@ -176,7 +178,7 @@ export const FeaturedPost: React.FC<{ post: FeaturedPostData }> = ({ post }) => 
             className="relative inline-flex items-center gap-2 font-semibold text-sm w-fit text-primary group/cta"
           >
             <span className="relative">
-              Đọc thêm
+              {t('readMore')}
               <span className="absolute -bottom-0.5 left-0 h-0.5 w-0 bg-primary transition-all duration-300 group-hover/cta:w-full" />
             </span>
             <svg

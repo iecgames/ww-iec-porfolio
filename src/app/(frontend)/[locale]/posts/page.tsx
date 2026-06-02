@@ -9,7 +9,12 @@ import { PostsGrid } from './PostsGrid'
 export const dynamic = 'force-static'
 export const revalidate = 600
 
-export default async function Page() {
+type Args = {
+  params: Promise<{ locale: string }>
+}
+
+export default async function Page({ params: paramsPromise }: Args) {
+  const { locale } = await paramsPromise
   const payload = await getPayload({ config: configPromise })
 
   const [posts, categories] = await Promise.all([
@@ -18,6 +23,7 @@ export default async function Page() {
       depth: 1,
       limit: 13,
       overrideAccess: false,
+      locale: locale as 'en' | 'vi',
       sort: '-publishedAt',
       select: {
         title: true,
@@ -33,6 +39,7 @@ export default async function Page() {
       collection: 'categories',
       limit: 100,
       depth: 0,
+      locale: locale as 'en' | 'vi',
       sort: 'title',
       select: { title: true },
     }),
@@ -204,6 +211,7 @@ export default async function Page() {
             initialPosts={restPosts}
             initialTotal={posts.totalDocs}
             categories={categories.docs.map((c) => ({ id: c.id, title: c.title }))}
+            locale={locale}
           />
         </div>
       )}

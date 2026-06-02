@@ -8,7 +8,13 @@
     "placeholder": "Tìm kiếm..."
   },
   "Posts": {
-    "title": "Bài viết"
+    "title": "Bài viết",
+    "featured": "Tin nổi bật",
+    "readMore": "Đọc thêm",
+    "latestUpdates": "Cập nhật mới nhất",
+    "all": "Tất cả",
+    "noPostsInCategory": "Không có bài viết nào trong danh mục này.",
+    "loadMore": "Xem thêm tin tức"
   },
   "RelatedPosts": {
     "eyebrow": "Tiếp tục khám phá",

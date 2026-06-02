@@ -17,7 +17,8 @@
       "Bash(sed -n '25,45p' \"src/Home/config.ts\")",
       "Bash(sed -n '25,45p' \"src/Career/config.ts\")",
       "Bash(xargs -I{} sed -n '{},+18p' src/payload-types.ts)",
-      "Bash(node -e \"const s=require\\('./package.json'\\).scripts; console.log\\(Object.keys\\(s\\).filter\\(k=>k.includes\\('generate'\\)||k.includes\\('types'\\)\\).map\\(k=>k+': '+s[k]\\).join\\('\\\\n'\\)\\)\")"
+      "Bash(node -e \"const s=require\\('./package.json'\\).scripts; console.log\\(Object.keys\\(s\\).filter\\(k=>k.includes\\('generate'\\)||k.includes\\('types'\\)\\).map\\(k=>k+': '+s[k]\\).join\\('\\\\n'\\)\\)\")",
+      "Bash(xargs cat)"
     ]
   }
 }
