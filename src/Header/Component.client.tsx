@@ -31,16 +31,10 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, logoSrc, logoA
       style={{ fontFamily: 'var(--font-space-grotesk, system-ui, sans-serif)' }}
     >
       <div className="container">
-        <div className={cn('flex items-center', isTransparent ? 'py-12' : 'py-8 justify-between')}>
+        <div className={cn('flex items-center', isTransparent ? 'py-10' : 'py-8 justify-between')}>
           <div className={isTransparent ? 'flex-1' : ''}>
             <Link href="/">
-              <Logo
-                loading="eager"
-                priority="high"
-                className="invert"
-                src={logoSrc}
-                alt={logoAlt}
-              />
+              <Logo loading="eager" priority="high" src={logoSrc} alt={logoAlt} />
             </Link>
           </div>
           <HeaderNav data={data} centered={isTransparent} />

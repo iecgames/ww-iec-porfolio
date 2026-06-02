@@ -123,13 +123,16 @@
     "backHome": "Về trang chủ"
   },
   "NewsletterSignup": {
-    "emailPlaceholder": "Địa chỉ email của bạn",
-    "namePlaceholder": "Tên của bạn (tùy chọn)",
-    "submit": "Đăng ký",
-    "submitting": "Đang đăng ký…",
-    "successTitle": "Đăng ký thành công!",
-    "successBody": "Cảm ơn bạn đã đăng ký. Chúng tôi sẽ gửi các cập nhật mới nhất đến hộp thư của bạn.",
-    "privacy": "Chúng tôi tôn trọng quyền riêng tư của bạn. Hủy đăng ký bất cứ lúc nào.",
-    "errorEmail": "Vui lòng nhập địa chỉ email hợp lệ."
+    "namePlaceholder": "Tên của bạn",
+    "emailPlaceholder": "Email của bạn",
+    "subjectPlaceholder": "Tiêu đề",
+    "messageLabel": "Nội dung",
+    "messagePlaceholder": "Nhập nội dung tin nhắn của bạn",
+    "submit": "Gửi tin nhắn",
+    "submitting": "Đang gửi…",
+    "successTitle": "Đã gửi thành công!",
+    "successBody": "Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.",
+    "errorEmail": "Vui lòng nhập địa chỉ email hợp lệ.",
+    "errorRequired": "Vui lòng nhập tên và nội dung tin nhắn."
   }
 }

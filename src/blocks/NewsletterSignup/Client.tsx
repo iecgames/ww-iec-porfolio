@@ -1,49 +1,78 @@
 'use client'
 
-import { subscribeNewsletter } from '@/actions/subscribeNewsletter'
-import { IconCheck, IconLoader2, IconMail, IconSparkles } from '@tabler/icons-react'
+import { submitContact } from '@/actions/submitContact'
+import {
+  IconCheck,
+  IconLoader2,
+  IconMail,
+  IconMapPin,
+  IconPhone,
+  IconSend,
+} from '@tabler/icons-react'
 import { useState, useTransition } from 'react'
 
 export type NewsletterLabels = {
-  emailPlaceholder: string
   namePlaceholder: string
+  emailPlaceholder: string
+  subjectPlaceholder: string
+  messageLabel: string
+  messagePlaceholder: string
   submit: string
   submitting: string
   successTitle: string
   successBody: string
-  privacy: string
   errorEmail: string
+  errorRequired: string
 }
+
+type ContactInfo = {
+  title?: string | null
+  description?: string | null
+  phones?: ({ number?: string | null; id?: string | null } | null)[] | null
+  email?: string | null
+  address?: string | null
+} | null
 
 type Props = {
   eyebrow?: string | null
   heading: string
   subtitle?: string | null
+  contact?: ContactInfo
   labels: NewsletterLabels
 }
 
-export function NewsletterSignupClient({ eyebrow, heading, subtitle, labels }: Props) {
-  const [email, setEmail] = useState('')
+export function NewsletterSignupClient({ eyebrow, heading, subtitle, contact, labels }: Props) {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [isPending, startTransition] = useTransition()
+
+  const phones = (contact?.phones ?? []).filter((p) => p?.number)
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
 
+    if (!name.trim() || !message.trim()) {
+      setError(labels.errorRequired)
+      return
+    }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError(labels.errorEmail)
       return
     }
 
     const fd = new FormData()
+    fd.set('name', name)
     fd.set('email', email)
-    if (name) fd.set('name', name)
+    if (subject) fd.set('subject', subject)
+    fd.set('message', message)
 
     startTransition(async () => {
-      const result = await subscribeNewsletter(fd)
+      const result = await submitContact(fd)
       if (result.ok) {
         setSuccess(true)
       } else {
@@ -53,99 +82,195 @@ export function NewsletterSignupClient({ eyebrow, heading, subtitle, labels }: P
   }
 
   return (
-    <section className="relative overflow-hidden bg-[#0f0c29] py-20 px-4 sm:px-6">
-      {/* Decorative blobs */}
-      <div className="pointer-events-none absolute inset-0" aria-hidden>
-        <div className="absolute -top-40 -left-40 w-120 h-120 rounded-full bg-indigo-700/30 blur-3xl" />
-        <div className="absolute -bottom-32 -right-32 w-100 h-100 rounded-full bg-violet-700/30 blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-175 h-100 rounded-full bg-blue-900/20 blur-3xl" />
-        {/* dot grid */}
-        <svg className="absolute inset-0 w-full h-full opacity-[0.035]">
-          <defs>
-            <pattern id="ns-dots" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-              <circle cx="2" cy="2" r="1.5" fill="white" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#ns-dots)" />
-        </svg>
+    <section className="relative overflow-hidden bg-linear-to-b from-sky-50 via-white to-transparent py-20 px-4 sm:px-6">
+      {/* Decorative blobs (kept in the upper area so the bottom edge fades cleanly) */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-2/3" aria-hidden>
+        <div className="absolute -top-40 -left-40 w-120 h-120 rounded-full bg-sky-200/40 blur-3xl" />
+        <div className="absolute top-0 -right-24 w-120 h-100 rounded-full bg-blue-200/35 blur-3xl" />
       </div>
 
-      <div className="relative z-10 mx-auto max-w-2xl text-center">
-        {/* Mail icon badge */}
-        <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-indigo-500/20 border border-indigo-400/25 mb-6 ring-4 ring-indigo-500/10">
-          <IconMail size={26} className="text-indigo-300" />
+      <div className="relative z-10 mx-auto max-w-5xl">
+        {/* Header */}
+        <div className="text-center mb-12 max-w-2xl mx-auto">
+          {eyebrow && (
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-[#006FEE]">
+              {eyebrow}
+            </p>
+          )}
+          <h2 className="text-3xl sm:text-4xl font-bold text-slate-900 leading-tight mb-4">
+            {heading}
+          </h2>
+          {subtitle && <p className="text-base sm:text-lg text-slate-500">{subtitle}</p>}
         </div>
 
-        {/* Eyebrow */}
-        {eyebrow && (
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-indigo-400">
-            {eyebrow}
-          </p>
-        )}
-
-        {/* Heading */}
-        <h2 className="text-3xl sm:text-4xl font-bold text-white leading-tight mb-4">{heading}</h2>
-
-        {/* Subtitle */}
-        {subtitle && (
-          <p className="text-base sm:text-lg text-indigo-100/60 mb-10 max-w-lg mx-auto">
-            {subtitle}
-          </p>
-        )}
-
-        {/* Success state */}
-        {success ? (
-          <div className="flex flex-col items-center gap-3 py-6">
-            <div className="w-14 h-14 rounded-full bg-green-500/15 border border-green-400/30 flex items-center justify-center">
-              <IconCheck size={26} className="text-green-400" />
-            </div>
-            <p className="text-lg font-semibold text-white">{labels.successTitle}</p>
-            <p className="text-sm text-indigo-200/60 max-w-xs">{labels.successBody}</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-md mx-auto">
-            {/* Name */}
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={labels.namePlaceholder}
-              autoComplete="name"
-              maxLength={200}
-              className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none focus:border-indigo-400/50 focus:ring-2 focus:ring-indigo-500/20 transition"
+        {/* Card */}
+        <div className="grid lg:grid-cols-5 rounded-3xl bg-white shadow-[0_30px_80px_-30px_rgba(0,111,238,0.35)] ring-1 ring-slate-900/5 overflow-hidden">
+          {/* Left: contact info panel */}
+          <div className="lg:col-span-2 relative overflow-hidden bg-linear-to-br from-[#006FEE] via-[#0b86f5] to-[#0EA5E9] p-8 sm:p-10 text-white">
+            {/* decorative circles (like the reference) */}
+            <div
+              className="pointer-events-none absolute -bottom-16 -left-10 w-56 h-56 rounded-full bg-white/10"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -bottom-24 left-16 w-48 h-48 rounded-full bg-white/5"
+              aria-hidden
+            />
+            <div
+              className="pointer-events-none absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-xl"
+              aria-hidden
             />
 
-            {/* Email + button */}
-            <div className="flex gap-2">
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder={labels.emailPlaceholder}
-                autoComplete="email"
-                className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/35 outline-none focus:border-indigo-400/50 focus:ring-2 focus:ring-indigo-500/20 transition"
-              />
-              <button
-                type="submit"
-                disabled={isPending}
-                className="shrink-0 inline-flex items-center gap-2 rounded-xl bg-indigo-500 hover:bg-indigo-400 active:bg-indigo-600 disabled:opacity-55 px-5 py-3 text-sm font-semibold text-white transition-colors cursor-pointer"
-              >
-                {isPending ? (
-                  <IconLoader2 size={16} className="animate-spin" />
-                ) : (
-                  <IconSparkles size={16} />
+            <div className="relative z-10">
+              {contact?.title && <h3 className="text-xl font-bold mb-3">{contact.title}</h3>}
+              {contact?.description && (
+                <p className="text-sm text-white/70 leading-relaxed mb-10 max-w-xs">
+                  {contact.description}
+                </p>
+              )}
+
+              <ul className="space-y-6">
+                {phones.length > 0 && (
+                  <li className="flex items-start gap-4">
+                    <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 ring-1 ring-white/20">
+                      <IconPhone size={18} className="text-white" />
+                    </span>
+                    <div className="flex flex-col gap-0.5 pt-1.5">
+                      {phones.map((p, i) => (
+                        <a
+                          key={p?.id ?? i}
+                          href={`tel:${p?.number?.replace(/\s+/g, '')}`}
+                          className="text-sm text-white/90 hover:text-white transition-colors"
+                        >
+                          {p?.number}
+                        </a>
+                      ))}
+                    </div>
+                  </li>
                 )}
-                <span>{isPending ? labels.submitting : labels.submit}</span>
-              </button>
+
+                {contact?.email && (
+                  <li className="flex items-center gap-4">
+                    <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 ring-1 ring-white/20">
+                      <IconMail size={18} className="text-white" />
+                    </span>
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="text-sm text-white/90 hover:text-white transition-colors break-all"
+                    >
+                      {contact.email}
+                    </a>
+                  </li>
+                )}
+
+                {contact?.address && (
+                  <li className="flex items-center gap-4">
+                    <span className="shrink-0 inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/15 ring-1 ring-white/20">
+                      <IconMapPin size={18} className="text-white" />
+                    </span>
+                    <span className="text-sm text-white/90">{contact.address}</span>
+                  </li>
+                )}
+              </ul>
             </div>
+          </div>
 
-            {error && <p className="text-sm text-red-400 text-left px-1">{error}</p>}
+          {/* Right: form */}
+          <div className="lg:col-span-3 p-8 sm:p-10">
+            {success ? (
+              <div className="flex flex-col items-center justify-center text-center gap-3 h-full py-10">
+                <div className="w-16 h-16 rounded-full bg-green-100 border border-green-200 flex items-center justify-center">
+                  <IconCheck size={30} className="text-green-600" />
+                </div>
+                <p className="text-lg font-semibold text-slate-900">{labels.successTitle}</p>
+                <p className="text-sm text-slate-500 max-w-xs">{labels.successBody}</p>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <Field label={labels.namePlaceholder}>
+                    <input
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      autoComplete="name"
+                      maxLength={200}
+                      className="contact-input"
+                    />
+                  </Field>
+                  <Field label={labels.emailPlaceholder}>
+                    <input
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      autoComplete="email"
+                      className="contact-input"
+                    />
+                  </Field>
+                </div>
 
-            <p className="text-xs text-indigo-200/35 text-center mt-1">{labels.privacy}</p>
-          </form>
-        )}
+                <Field label={labels.subjectPlaceholder}>
+                  <input
+                    type="text"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    maxLength={200}
+                    className="contact-input"
+                  />
+                </Field>
+
+                <Field label={labels.messageLabel} accent>
+                  <textarea
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder={labels.messagePlaceholder}
+                    rows={3}
+                    maxLength={5000}
+                    className="contact-input resize-none placeholder:text-slate-400"
+                  />
+                </Field>
+
+                {error && <p className="text-sm text-red-500 -mt-2">{error}</p>}
+
+                <div>
+                  <button
+                    type="submit"
+                    disabled={isPending}
+                    className="inline-flex items-center gap-2 rounded-xl bg-linear-to-r from-[#006FEE] to-[#0EA5E9] hover:opacity-90 active:opacity-100 disabled:opacity-55 px-7 py-3.5 text-sm font-semibold text-white shadow-lg shadow-[#006FEE]/30 transition-all hover:-translate-y-0.5 hover:shadow-[#006FEE]/40 cursor-pointer"
+                  >
+                    {isPending ? (
+                      <IconLoader2 size={16} className="animate-spin" />
+                    ) : (
+                      <IconSend size={16} />
+                    )}
+                    <span>{isPending ? labels.submitting : labels.submit}</span>
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
+        </div>
       </div>
     </section>
+  )
+}
+
+function Field({
+  label,
+  accent,
+  children,
+}: {
+  label: string
+  accent?: boolean
+  children: React.ReactNode
+}) {
+  return (
+    <label className="group flex flex-col gap-1.5">
+      <span className={`text-xs font-semibold ${accent ? 'text-[#006FEE]' : 'text-slate-500'}`}>
+        {label}
+      </span>
+      {children}
+    </label>
   )
 }

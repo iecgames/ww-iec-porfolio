@@ -7,6 +7,7 @@ export const NewsletterSignupBlock: React.FC<Props & { id?: string }> = async ({
   eyebrow,
   heading,
   subtitle,
+  contact,
 }) => {
   const t = await getTranslations('NewsletterSignup')
 
@@ -15,15 +16,19 @@ export const NewsletterSignupBlock: React.FC<Props & { id?: string }> = async ({
       eyebrow={eyebrow}
       heading={heading ?? ''}
       subtitle={subtitle}
+      contact={contact}
       labels={{
-        emailPlaceholder: t('emailPlaceholder'),
         namePlaceholder: t('namePlaceholder'),
+        emailPlaceholder: t('emailPlaceholder'),
+        subjectPlaceholder: t('subjectPlaceholder'),
+        messageLabel: t('messageLabel'),
+        messagePlaceholder: t('messagePlaceholder'),
         submit: t('submit'),
         submitting: t('submitting'),
         successTitle: t('successTitle'),
         successBody: t('successBody'),
-        privacy: t('privacy'),
         errorEmail: t('errorEmail'),
+        errorRequired: t('errorRequired'),
       }}
     />
   )

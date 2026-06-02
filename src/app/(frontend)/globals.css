@@ -249,6 +249,25 @@
 }
 
 @layer components {
+  /* Underline-style input used by the Get In Touch / contact block. */
+  .contact-input {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--color-border);
+    background: transparent;
+    padding: 0.4rem 0 0.5rem;
+    font-size: 0.95rem;
+    color: oklch(20.5% 0 0deg);
+    outline: none;
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+  }
+  .contact-input:focus {
+    border-bottom-color: #006fee;
+    box-shadow: 0 1px 0 0 #006fee;
+  }
+
   /* Bold spans inside elements with this class get the brand gradient + a soft brand-colored glow.
      Used by the AboutWithStats heading and any other place that wants the same treatment. */
   .brand-gradient-bold :is(strong, b) {

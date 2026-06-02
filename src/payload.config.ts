@@ -8,6 +8,7 @@ import { defaultLexical } from '@/fields/defaultLexical'
 import { emailAdapter } from './adapters/email'
 import { Career } from './Career/config'
 import { Categories } from './collections/Categories'
+import { ContactSubmissions } from './collections/ContactSubmissions'
 import { EmailCampaigns } from './collections/EmailCampaigns'
 import { Games } from './collections/Games'
 import { JobApplications } from './collections/JobApplications'
@@ -87,6 +88,7 @@ export default buildConfig({
     Games,
     Subscribers,
     EmailCampaigns,
+    ContactSubmissions,
   ],
   cors: [getServerSideURL()].filter(Boolean),
   endpoints: [unsubscribeEndpoint, sendCampaignEndpoint],

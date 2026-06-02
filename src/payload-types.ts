@@ -79,6 +79,7 @@ export interface Config {
     games: Game;
     subscribers: Subscriber;
     'email-campaigns': EmailCampaign;
+    contactSubmissions: ContactSubmission;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -108,6 +109,7 @@ export interface Config {
     games: GamesSelect<false> | GamesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
     'email-campaigns': EmailCampaignsSelect<false> | EmailCampaignsSelect<true>;
+    contactSubmissions: ContactSubmissionsSelect<false> | ContactSubmissionsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1018,11 +1020,29 @@ export interface SendUsCVBlock {
  */
 export interface NewsletterSignupBlock {
   /**
-   * Small label above the heading, e.g. "Stay in the loop"
+   * Small label above the heading, e.g. "Contact us"
    */
   eyebrow?: string | null;
+  /**
+   * Main section heading, e.g. "Get In Touch"
+   */
   heading: string;
   subtitle?: string | null;
+  contact?: {
+    /**
+     * e.g. "Contact Information"
+     */
+    title?: string | null;
+    description?: string | null;
+    phones?:
+      | {
+          number: string;
+          id?: string | null;
+        }[]
+      | null;
+    email?: string | null;
+    address?: string | null;
+  };
   id?: string | null;
   blockName?: string | null;
   blockType: 'newsletterSignup';
@@ -1704,6 +1724,19 @@ export interface EmailCampaign {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contactSubmissions".
+ */
+export interface ContactSubmission {
+  id: string;
+  name: string;
+  email: string;
+  subject?: string | null;
+  message: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1947,6 +1980,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'email-campaigns';
         value: string | EmailCampaign;
+      } | null)
+    | ({
+        relationTo: 'contactSubmissions';
+        value: string | ContactSubmission;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -2279,6 +2316,20 @@ export interface NewsletterSignupBlockSelect<T extends boolean = true> {
   eyebrow?: T;
   heading?: T;
   subtitle?: T;
+  contact?:
+    | T
+    | {
+        title?: T;
+        description?: T;
+        phones?:
+          | T
+          | {
+              number?: T;
+              id?: T;
+            };
+        email?: T;
+        address?: T;
+      };
   id?: T;
   blockName?: T;
 }
@@ -2753,6 +2804,18 @@ export interface EmailCampaignsSelect<T extends boolean = true> {
   status?: T;
   sentAt?: T;
   recipientCount?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "contactSubmissions_select".
+ */
+export interface ContactSubmissionsSelect<T extends boolean = true> {
+  name?: T;
+  email?: T;
+  subject?: T;
+  message?: T;
   updatedAt?: T;
   createdAt?: T;
 }

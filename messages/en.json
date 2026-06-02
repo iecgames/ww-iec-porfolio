@@ -123,13 +123,16 @@
     "backHome": "Back to homepage"
   },
   "NewsletterSignup": {
-    "emailPlaceholder": "Your email address",
-    "namePlaceholder": "Your name (optional)",
-    "submit": "Subscribe",
-    "submitting": "Subscribing…",
-    "successTitle": "You're in!",
-    "successBody": "Thanks for subscribing. We'll send you the latest updates straight to your inbox.",
-    "privacy": "We respect your privacy. Unsubscribe at any time.",
-    "errorEmail": "Please enter a valid email address."
+    "namePlaceholder": "Your Name",
+    "emailPlaceholder": "Your Email",
+    "subjectPlaceholder": "Your Subject",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Write here your message",
+    "submit": "Send Message",
+    "submitting": "Sending…",
+    "successTitle": "Message sent!",
+    "successBody": "Thanks for reaching out. We'll get back to you as soon as possible.",
+    "errorEmail": "Please enter a valid email address.",
+    "errorRequired": "Please fill in your name and message."
   }
 }
