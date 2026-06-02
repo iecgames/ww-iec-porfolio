@@ -229,6 +229,24 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
           }}
         />
 
+        {/* ── Dot-grid (halftone) overlay ── */}
+        <div
+          className="absolute inset-0 z-10 pointer-events-none"
+          style={{
+            backgroundImage: 'radial-gradient(rgba(15,23,42,0.25) 0.4px, transparent 0.8px)',
+            backgroundSize: '5px 5px',
+            // Mờ dần ở mép trái (vùng text) và mép dưới (chỗ fade sang section sau)
+            maskImage:
+              'linear-gradient(to right, transparent 6%, black 34%), linear-gradient(to bottom, black 62%, transparent 90%)',
+            WebkitMaskImage:
+              'linear-gradient(to right, transparent 6%, black 34%), linear-gradient(to bottom, black 62%, transparent 90%)',
+            maskComposite: 'intersect',
+            WebkitMaskComposite: 'source-in',
+            mixBlendMode: 'multiply',
+            opacity: 0.45,
+          }}
+        />
+
         {/* ── Content ── */}
         <div className="relative z-20 h-full flex items-center">
           <div className="w-full md:w-2/3 lg:w-[58%] pl-8 md:pl-16 lg:pl-24 pr-6 py-16 flex flex-col justify-center">

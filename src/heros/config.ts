@@ -197,7 +197,10 @@ export const hero: Field = {
             {
               name: 'suffix',
               type: 'text',
-              admin: { width: '30%', description: 'Unit / sign appended to the number (e.g. "B+", "M+", "+", "%").' },
+              admin: {
+                width: '30%',
+                description: 'Unit / sign appended to the number (e.g. "B+", "M+", "+", "%").',
+              },
             },
             {
               name: 'label',
