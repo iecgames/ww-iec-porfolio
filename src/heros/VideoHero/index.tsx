@@ -4,16 +4,30 @@ import { RippleLink } from '@/components/RippleLink'
 import type { Page } from '@/payload-types'
 import { useTransparentHeader } from '@/providers/TransparentHeader'
 import { resolveLinkHref } from '@/utilities/resolveLinkHref'
+import { cn } from '@/utilities/ui'
 import { IconArrowRight } from '@tabler/icons-react'
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { RenderVideoHeroBlocks } from './RenderVideoHeroBlocks'
 
 type VideoHeroProps = NonNullable<Page['hero'] & { type: 'videoHero' }>
 
 /** Brand-blue gradient used for the hero CTA ripple. */
 const HERO_GRADIENT = 'linear-gradient(135deg, #2563EB 0%, #38BDF8 100%)'
+
+/** True on phone-sized viewports (below Tailwind `md`). Drives the card-vs-background swap. */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
+  return isMobile
+}
 
 function extractYouTubeId(url: string): string | null {
   const patterns = [
@@ -134,6 +148,7 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const { setTransparent } = useTransparentHeader()
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     setTransparent(true)
@@ -175,90 +190,90 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
 
   return (
     <div
-      className="relative w-full h-screen min-h-screen overflow-hidden -mt-50 isolate"
+      className={cn(
+        'relative w-full overflow-hidden isolate',
+        // Desktop kéo hero lên dưới header trong suốt (full-bleed video).
+        // Mobile: KHÔNG kéo lên — để nội dung nằm dưới header, tránh đè chữ.
+        isMobile ? 'min-h-screen -mt-28' : 'h-screen min-h-screen -mt-50',
+      )}
       data-theme="dark"
     >
-      {/* ── Video background ── */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        {videoSource === 'upload' && uploadedVideoUrl && (
-          <video
-            ref={videoRef}
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 w-full h-full object-cover"
-          >
-            <source src={uploadedVideoUrl} />
-          </video>
-        )}
+      {/* Desktop (md+): full-bleed background video + readability overlays.
+          Mobile gets a video card instead (rendered inside the content column). */}
+      {!isMobile && (
+        <>
+          {/* ── Video background ── */}
+          <div className="absolute inset-0 z-0 overflow-hidden">
+            {videoSource === 'upload' && uploadedVideoUrl && (
+              <video
+                ref={videoRef}
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="metadata"
+                className="absolute inset-0 w-full h-full object-cover"
+              >
+                <source src={uploadedVideoUrl} />
+              </video>
+            )}
 
-        {videoSource === 'youtube' && youtubeId && (
-          <iframe
-            className="absolute top-1/2 left-1/2 w-[177.77777778vh] h-[56.25vw] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&controls=0&rel=0&disablekb=1&vq=hd1080`}
-            allow="autoplay; encrypted-media"
-            title="Background video"
+            {videoSource === 'youtube' && youtubeId && (
+              <iframe
+                className="absolute top-1/2 left-1/2 w-[177.77777778vh] h-[56.25vw] min-w-full min-h-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&controls=0&rel=0&disablekb=1&vq=hd1080`}
+                allow="autoplay; encrypted-media"
+                title="Background video"
+              />
+            )}
+          </div>
+
+          {/* ── Shared gradient overlay (fades + brand diagonal) ── */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{
+              background: [
+                // ⓪ Top fade → trắng để header bar nổi bật trên video
+                'linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 5%, rgba(255,255,255,0.25) 10%, transparent 20%)',
+                // ① Bottom fade → white (chuyển tiếp sang section tiếp theo)
+                'linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.7) 78%, rgba(255,255,255,1) 100%)',
+                // ② Sky-blue diagonal highlight từ góc trên-trái
+                'linear-gradient(60deg, rgba(37,99,235,0.5) 0%, rgba(56,189,248,0.08) 35%, transparent 60%)',
+              ].join(', '),
+            }}
           />
-        )}
-      </div>
 
-      {/* ── Shared gradient overlay (fades + brand diagonal) ── */}
-      <div
-        className="absolute inset-0 z-10 pointer-events-none"
-        style={{
-          background: [
-            // ⓪ Top fade → trắng để header bar nổi bật trên video
-            'linear-gradient(to bottom, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.6) 5%, rgba(255,255,255,0.25) 10%, transparent 20%)',
-            // ① Bottom fade → white (chuyển tiếp sang section tiếp theo)
-            'linear-gradient(to bottom, transparent 50%, rgba(255,255,255,0.7) 78%, rgba(255,255,255,1) 100%)',
-            // ② Sky-blue diagonal highlight từ góc trên-trái
-            //   'linear-gradient(60deg, rgba(56,189,248,0.22) 0%, rgba(56,189,248,0.08) 35%, transparent 60%)',
-            'linear-gradient(60deg, rgba(37,99,235,0.5) 0%, rgba(56,189,248,0.08) 35%, transparent 60%)',
-          ].join(', '),
-        }}
-      />
+          {/* ── Readability panel: left→right white fade + tint màu brand ── */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{
+              background: [
+                // Tint hồng phủ nhẹ lên vùng chữ → pastel, tạo chiều sâu
+                'radial-gradient(ellipse 55% 45% at 14% 20%, rgba(236,72,153,0.16) 0%, transparent 60%)',
+                // Nền trắng đảm bảo chữ tối luôn tương phản
+                'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.93) 28%, rgba(255,255,255,0.1) 62%, transparent 80%)',
+              ].join(', '),
+            }}
+          />
 
-      {/* ── Readability panel — desktop: left→right white fade ── */}
-      <div
-        className="absolute inset-0 z-10 pointer-events-none hidden md:block"
-        style={{
-          background:
-            'linear-gradient(to right, rgba(255,255,255,1) 0%, rgba(255,255,255,0.93) 28%, rgba(255,255,255,0.1) 62%, transparent 80%)',
-        }}
-      />
-
-      {/* ── Readability panel — mobile: light veil giữ chữ luôn nổi trên video ── */}
-      <div
-        className="absolute inset-0 z-10 pointer-events-none md:hidden"
-        style={{
-          background: [
-            // Veil ngang: trắng đậm bên trái (nơi chữ căn trái), nhạt dần nhưng KHÔNG về 0 để chữ mép phải vẫn đọc được
-            'linear-gradient(to right, rgba(255,255,255,0.97) 0%, rgba(255,255,255,0.9) 45%, rgba(255,255,255,0.7) 72%, rgba(255,255,255,0.45) 100%)',
-            // Tăng nhẹ độ phủ ở dải giữa theo chiều dọc — vùng chữ được căn giữa
-            'linear-gradient(to bottom, rgba(255,255,255,1) 0%, rgba(255,255,255,0.7) 40%, rgba(255,255,255,0.5) 62%, transparent 80%)',
-          ].join(', '),
-        }}
-      />
-
-      {/* ── Dot-grid (halftone) overlay ── */}
-      <div
-        className="absolute inset-0 z-10 pointer-events-none"
-        style={{
-          backgroundImage: 'radial-gradient(rgba(15,23,42,0.25) 0.4px, transparent 0.8px)',
-          backgroundSize: '5px 5px',
-          // Mờ dần ở mép trái (vùng text) và mép dưới (chỗ fade sang section sau)
-          maskImage:
-            'linear-gradient(to right, transparent 6%, black 34%), linear-gradient(to bottom, black 62%, transparent 90%)',
-          WebkitMaskImage:
-            'linear-gradient(to right, transparent 6%, black 34%), linear-gradient(to bottom, black 62%, transparent 90%)',
-          maskComposite: 'intersect',
-          WebkitMaskComposite: 'source-in',
-          mixBlendMode: 'multiply',
-          opacity: 0.45,
-        }}
-      />
+          {/* ── Dot-grid (halftone) overlay ── */}
+          <div
+            className="absolute inset-0 z-10 pointer-events-none"
+            style={{
+              backgroundImage: 'radial-gradient(rgba(15,23,42,0.25) 0.4px, transparent 0.8px)',
+              backgroundSize: '5px 5px',
+              maskImage:
+                'linear-gradient(to right, transparent 6%, black 34%), linear-gradient(to bottom, black 62%, transparent 90%)',
+              WebkitMaskImage:
+                'linear-gradient(to right, transparent 6%, black 34%), linear-gradient(to bottom, black 62%, transparent 90%)',
+              maskComposite: 'intersect',
+              WebkitMaskComposite: 'source-in',
+              mixBlendMode: 'multiply',
+              opacity: 0.45,
+            }}
+          />
+        </>
+      )}
 
       {/* ── Content ── */}
       <div className="relative z-20 h-full flex items-center">
@@ -274,6 +289,53 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
             >
               {subtitle}
             </motion.p>
+          )}
+
+          {/* ── Mobile: video dạng card nghiêng nhẹ (thay cho background video) ── */}
+          {isMobile && (videoSource === 'upload' ? uploadedVideoUrl : youtubeId) && (
+            <motion.div
+              className="mt-12 w-full"
+              initial={{ opacity: 0, y: 50, rotate: -8, scale: 0.92 }}
+              animate={{ opacity: 1, y: 0, rotate: -3, scale: 1 }}
+              transition={{ duration: 0.85, delay: buttonsDelay + 0.25, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <motion.div
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 5.5, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <div className="relative aspect-video w-full overflow-hidden rounded-3xl border border-slate-500/60 bg-slate-100 shadow-[0_25px_60px_-15px_rgba(37,99,235,0.45)]">
+                  {videoSource === 'upload' && uploadedVideoUrl && (
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      preload="metadata"
+                      className="absolute inset-0 h-full w-full object-cover"
+                    >
+                      <source src={uploadedVideoUrl} />
+                    </video>
+                  )}
+                  {videoSource === 'youtube' && youtubeId && (
+                    <iframe
+                      className="absolute inset-0 h-full w-full"
+                      src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&loop=1&controls=0&rel=0&disablekb=1&playlist=${youtubeId}`}
+                      allow="autoplay; encrypted-media"
+                      title="Intro video"
+                    />
+                  )}
+                  {/* Sheen chéo cho cảm giác card bóng, nổi khối */}
+                  <div
+                    aria-hidden
+                    className="pointer-events-none absolute inset-0"
+                    style={{
+                      background:
+                        'linear-gradient(135deg, rgba(255,255,255,0.22) 0%, transparent 42%)',
+                    }}
+                  />
+                </div>
+              </motion.div>
+            </motion.div>
           )}
 
           {overlayContent && Array.isArray(overlayContent) && overlayContent.length > 0 && (
