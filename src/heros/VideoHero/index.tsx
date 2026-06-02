@@ -2,33 +2,13 @@
 
 import type { Page } from '@/payload-types'
 import { useTransparentHeader } from '@/providers/TransparentHeader'
+import { resolveLinkHref } from '@/utilities/resolveLinkHref'
 import { motion, type Variants } from 'framer-motion'
 import Link from 'next/link'
 import React, { useEffect, useRef, useState } from 'react'
 import { RenderVideoHeroBlocks } from './RenderVideoHeroBlocks'
 
 type VideoHeroProps = NonNullable<Page['hero'] & { type: 'videoHero' }>
-
-type ButtonLink = NonNullable<VideoHeroProps['primaryButton']>
-
-/** Resolve a hero button link group into an href + whether it's external. */
-function resolveButtonHref(link?: ButtonLink | null): { href: string; external: boolean } | null {
-  if (!link) return null
-  if (link.type === 'section' && link.section) {
-    return { href: link.section, external: false }
-  }
-  if (link.type === 'custom' && link.url) {
-    const external = /^https?:\/\//i.test(link.url)
-    return { href: link.url, external }
-  }
-  if (link.type === 'reference' && link.reference && typeof link.reference.value === 'object') {
-    const { relationTo, value } = link.reference
-    if (value?.slug) {
-      return { href: `${relationTo === 'posts' ? '/posts' : ''}/${value.slug}`, external: false }
-    }
-  }
-  return null
-}
 
 /** Renders an internal/section link via next/link, external links via a plain anchor. */
 function HeroLink({
@@ -218,8 +198,8 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
     ? `https://www.youtube.com/embed/${popupYoutubeId}?autoplay=1`
     : (videoPopupUrl ?? null)
 
-  const primaryHref = resolveButtonHref(primaryButton)
-  const secondaryHref = resolveButtonHref(secondaryButton)
+  const primaryHref = resolveLinkHref(primaryButton)
+  const secondaryHref = resolveLinkHref(secondaryButton)
 
   const hasButtons = primaryButtonLabel || secondaryButtonLabel
   const hasPopupBtn = !!videoPopupUrl

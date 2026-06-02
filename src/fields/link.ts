@@ -49,15 +49,19 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
             defaultValue: 'reference',
             options: [
               {
-                label: 'Internal link',
+                label: 'Internal page',
                 value: 'reference',
               },
               {
-                label: 'Section page',
+                label: 'Main pages',
                 value: 'route',
               },
               {
-                label: 'Custom URL',
+                label: 'Anchor on this page',
+                value: 'section',
+              },
+              {
+                label: 'External URL',
                 value: 'custom',
               },
             ],
@@ -94,10 +98,23 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       type: 'select',
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'route',
-        description: 'Pick a built-in section page (route is hardcoded in the app).',
+        description: 'Pick a built-in page (Home, Posts listing, Career, Search).',
       },
-      label: 'Section page',
+      label: 'Main page',
       options: staticRouteOptions,
+      required: true,
+    },
+    {
+      name: 'section',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'section',
+        description: 'Cuộn tới một block (có Anchor ID) trên trang này.',
+        components: {
+          Field: '@/fields/SectionSelect#SectionSelect',
+        },
+      },
+      label: 'Anchor on this page',
       required: true,
     },
     {
@@ -105,8 +122,9 @@ export const link: LinkType = ({ appearances, disableLabel = false, overrides = 
       type: 'text',
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'custom',
+        placeholder: 'https://example.com',
       },
-      label: 'Custom URL',
+      label: 'External URL',
       required: true,
     },
   ]

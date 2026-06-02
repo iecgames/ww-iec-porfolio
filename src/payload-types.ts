@@ -204,7 +204,7 @@ export interface Page {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -216,14 +216,18 @@ export interface Page {
             value: string | Post;
           } | null);
       /**
-       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       * Pick a built-in page (Home, Posts listing, Career, Search).
+       */
+      route?: ('/' | '/posts' | '/career' | '/search') | null;
+      /**
+       * Cuộn tới một block (có Anchor ID) trên trang này.
        */
       section?: string | null;
       url?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -235,7 +239,11 @@ export interface Page {
             value: string | Post;
           } | null);
       /**
-       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       * Pick a built-in page (Home, Posts listing, Career, Search).
+       */
+      route?: ('/' | '/posts' | '/career' | '/search') | null;
+      /**
+       * Cuộn tới một block (có Anchor ID) trên trang này.
        */
       section?: string | null;
       url?: string | null;
@@ -280,7 +288,7 @@ export interface Page {
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -292,9 +300,13 @@ export interface Page {
                   value: string | Post;
                 } | null);
             /**
-             * Pick a built-in section page (route is hardcoded in the app).
+             * Pick a built-in page (Home, Posts listing, Career, Search).
              */
             route?: ('/' | '/posts' | '/career' | '/search') | null;
+            /**
+             * Cuộn tới một block (có Anchor ID) trên trang này.
+             */
+            section?: string | null;
             url?: string | null;
             label: string;
           };
@@ -507,7 +519,7 @@ export interface CallToActionBlock {
   links?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -519,9 +531,13 @@ export interface CallToActionBlock {
                 value: string | Post;
               } | null);
           /**
-           * Pick a built-in section page (route is hardcoded in the app).
+           * Pick a built-in page (Home, Posts listing, Career, Search).
            */
           route?: ('/' | '/posts' | '/career' | '/search') | null;
+          /**
+           * Cuộn tới một block (có Anchor ID) trên trang này.
+           */
+          section?: string | null;
           url?: string | null;
           label: string;
           /**
@@ -685,7 +701,7 @@ export interface ContentBlock {
         } | null;
         enableLink?: boolean | null;
         link?: {
-          type?: ('reference' | 'route' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -697,9 +713,13 @@ export interface ContentBlock {
                 value: string | Post;
               } | null);
           /**
-           * Pick a built-in section page (route is hardcoded in the app).
+           * Pick a built-in page (Home, Posts listing, Career, Search).
            */
           route?: ('/' | '/posts' | '/career' | '/search') | null;
+          /**
+           * Cuộn tới một block (có Anchor ID) trên trang này.
+           */
+          section?: string | null;
           url?: string | null;
           label: string;
           /**
@@ -1193,7 +1213,7 @@ export interface AboutWithStatsBlock {
   cta?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1205,9 +1225,13 @@ export interface AboutWithStatsBlock {
                 value: string | Post;
               } | null);
           /**
-           * Pick a built-in section page (route is hardcoded in the app).
+           * Pick a built-in page (Home, Posts listing, Career, Search).
            */
           route?: ('/' | '/posts' | '/career' | '/search') | null;
+          /**
+           * Cuộn tới một block (có Anchor ID) trên trang này.
+           */
+          section?: string | null;
           url?: string | null;
           label: string;
         };
@@ -1444,7 +1468,7 @@ export interface CoreValuesShowcaseBlock {
   cta?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1456,9 +1480,13 @@ export interface CoreValuesShowcaseBlock {
                 value: string | Post;
               } | null);
           /**
-           * Pick a built-in section page (route is hardcoded in the app).
+           * Pick a built-in page (Home, Posts listing, Career, Search).
            */
           route?: ('/' | '/posts' | '/career' | '/search') | null;
+          /**
+           * Cuộn tới một block (có Anchor ID) trên trang này.
+           */
+          section?: string | null;
           url?: string | null;
           label: string;
           /**
@@ -1502,7 +1530,7 @@ export interface CareersHighlightBlock {
   limit?: number | null;
   ctaLabel?: string | null;
   ctaLink?: {
-    type?: ('reference' | 'route' | 'custom') | null;
+    type?: ('reference' | 'route' | 'section' | 'custom') | null;
     newTab?: boolean | null;
     reference?:
       | ({
@@ -1514,9 +1542,13 @@ export interface CareersHighlightBlock {
           value: string | Post;
         } | null);
     /**
-     * Pick a built-in section page (route is hardcoded in the app).
+     * Pick a built-in page (Home, Posts listing, Career, Search).
      */
     route?: ('/' | '/posts' | '/career' | '/search') | null;
+    /**
+     * Cuộn tới một block (có Anchor ID) trên trang này.
+     */
+    section?: string | null;
     url?: string | null;
   };
   /**
@@ -2169,6 +2201,7 @@ export interface PagesSelect<T extends boolean = true> {
               type?: T;
               newTab?: T;
               reference?: T;
+              route?: T;
               section?: T;
               url?: T;
             };
@@ -2179,6 +2212,7 @@ export interface PagesSelect<T extends boolean = true> {
               type?: T;
               newTab?: T;
               reference?: T;
+              route?: T;
               section?: T;
               url?: T;
             };
@@ -2205,6 +2239,7 @@ export interface PagesSelect<T extends boolean = true> {
                     newTab?: T;
                     reference?: T;
                     route?: T;
+                    section?: T;
                     url?: T;
                     label?: T;
                   };
@@ -2275,6 +2310,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               route?: T;
+              section?: T;
               url?: T;
               label?: T;
               appearance?: T;
@@ -2303,6 +2339,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               route?: T;
+              section?: T;
               url?: T;
               label?: T;
               appearance?: T;
@@ -2477,6 +2514,7 @@ export interface AboutWithStatsBlockSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               route?: T;
+              section?: T;
               url?: T;
               label?: T;
             };
@@ -2557,6 +2595,7 @@ export interface CoreValuesShowcaseBlockSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               route?: T;
+              section?: T;
               url?: T;
               label?: T;
               appearance?: T;
@@ -2586,6 +2625,7 @@ export interface CareersHighlightBlockSelect<T extends boolean = true> {
         newTab?: T;
         reference?: T;
         route?: T;
+        section?: T;
         url?: T;
       };
   anchor?: T;
@@ -3232,7 +3272,7 @@ export interface Header {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -3244,9 +3284,13 @@ export interface Header {
                 value: string | Post;
               } | null);
           /**
-           * Pick a built-in section page (route is hardcoded in the app).
+           * Pick a built-in page (Home, Posts listing, Career, Search).
            */
           route?: ('/' | '/posts' | '/career' | '/search') | null;
+          /**
+           * Cuộn tới một block (có Anchor ID) trên trang này.
+           */
+          section?: string | null;
           url?: string | null;
           label: string;
         };
@@ -3276,7 +3320,7 @@ export interface Footer {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -3288,9 +3332,13 @@ export interface Footer {
                 value: string | Post;
               } | null);
           /**
-           * Pick a built-in section page (route is hardcoded in the app).
+           * Pick a built-in page (Home, Posts listing, Career, Search).
            */
           route?: ('/' | '/posts' | '/career' | '/search') | null;
+          /**
+           * Cuộn tới một block (có Anchor ID) trên trang này.
+           */
+          section?: string | null;
           url?: string | null;
           label: string;
         };
@@ -3330,7 +3378,7 @@ export interface Home {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3342,14 +3390,18 @@ export interface Home {
             value: string | Post;
           } | null);
       /**
-       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       * Pick a built-in page (Home, Posts listing, Career, Search).
+       */
+      route?: ('/' | '/posts' | '/career' | '/search') | null;
+      /**
+       * Cuộn tới một block (có Anchor ID) trên trang này.
        */
       section?: string | null;
       url?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3361,7 +3413,11 @@ export interface Home {
             value: string | Post;
           } | null);
       /**
-       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       * Pick a built-in page (Home, Posts listing, Career, Search).
+       */
+      route?: ('/' | '/posts' | '/career' | '/search') | null;
+      /**
+       * Cuộn tới một block (có Anchor ID) trên trang này.
        */
       section?: string | null;
       url?: string | null;
@@ -3406,7 +3462,7 @@ export interface Home {
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -3418,9 +3474,13 @@ export interface Home {
                   value: string | Post;
                 } | null);
             /**
-             * Pick a built-in section page (route is hardcoded in the app).
+             * Pick a built-in page (Home, Posts listing, Career, Search).
              */
             route?: ('/' | '/posts' | '/career' | '/search') | null;
+            /**
+             * Cuộn tới một block (có Anchor ID) trên trang này.
+             */
+            section?: string | null;
             url?: string | null;
             label: string;
           };
@@ -3509,7 +3569,7 @@ export interface Career {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3521,14 +3581,18 @@ export interface Career {
             value: string | Post;
           } | null);
       /**
-       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       * Pick a built-in page (Home, Posts listing, Career, Search).
+       */
+      route?: ('/' | '/posts' | '/career' | '/search') | null;
+      /**
+       * Cuộn tới một block (có Anchor ID) trên trang này.
        */
       section?: string | null;
       url?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3540,7 +3604,11 @@ export interface Career {
             value: string | Post;
           } | null);
       /**
-       * Chọn một block (có Anchor ID) trên trang này để cuộn thẳng tới đó.
+       * Pick a built-in page (Home, Posts listing, Career, Search).
+       */
+      route?: ('/' | '/posts' | '/career' | '/search') | null;
+      /**
+       * Cuộn tới một block (có Anchor ID) trên trang này.
        */
       section?: string | null;
       url?: string | null;
@@ -3585,7 +3653,7 @@ export interface Career {
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -3597,9 +3665,13 @@ export interface Career {
                   value: string | Post;
                 } | null);
             /**
-             * Pick a built-in section page (route is hardcoded in the app).
+             * Pick a built-in page (Home, Posts listing, Career, Search).
              */
             route?: ('/' | '/posts' | '/career' | '/search') | null;
+            /**
+             * Cuộn tới một block (có Anchor ID) trên trang này.
+             */
+            section?: string | null;
             url?: string | null;
             label: string;
           };
@@ -3702,6 +3774,7 @@ export interface HeaderSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               route?: T;
+              section?: T;
               url?: T;
               label?: T;
             };
@@ -3734,6 +3807,7 @@ export interface FooterSelect<T extends boolean = true> {
               newTab?: T;
               reference?: T;
               route?: T;
+              section?: T;
               url?: T;
               label?: T;
             };
@@ -3774,6 +3848,7 @@ export interface HomeSelect<T extends boolean = true> {
               type?: T;
               newTab?: T;
               reference?: T;
+              route?: T;
               section?: T;
               url?: T;
             };
@@ -3784,6 +3859,7 @@ export interface HomeSelect<T extends boolean = true> {
               type?: T;
               newTab?: T;
               reference?: T;
+              route?: T;
               section?: T;
               url?: T;
             };
@@ -3810,6 +3886,7 @@ export interface HomeSelect<T extends boolean = true> {
                     newTab?: T;
                     reference?: T;
                     route?: T;
+                    section?: T;
                     url?: T;
                     label?: T;
                   };
@@ -3886,6 +3963,7 @@ export interface CareerSelect<T extends boolean = true> {
               type?: T;
               newTab?: T;
               reference?: T;
+              route?: T;
               section?: T;
               url?: T;
             };
@@ -3896,6 +3974,7 @@ export interface CareerSelect<T extends boolean = true> {
               type?: T;
               newTab?: T;
               reference?: T;
+              route?: T;
               section?: T;
               url?: T;
             };
@@ -3922,6 +4001,7 @@ export interface CareerSelect<T extends boolean = true> {
                     newTab?: T;
                     reference?: T;
                     route?: T;
+                    section?: T;
                     url?: T;
                     label?: T;
                   };

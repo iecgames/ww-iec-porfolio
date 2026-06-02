@@ -6,8 +6,8 @@ import { Code } from '@/blocks/Code/config'
 import { Content } from '@/blocks/Content/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { PolicyTabs } from '@/blocks/PolicyTabs/config'
+import { link } from '@/fields/link'
 import { linkGroup } from '@/fields/linkGroup'
-import { buttonLink } from '@/heros/fields/buttonLink'
 
 export const hero: Field = {
   name: 'hero',
@@ -109,7 +109,18 @@ export const hero: Field = {
         condition: (_, { type } = {}) => type === 'videoHero',
       },
     },
-    buttonLink('primaryButton', 'Primary Button Link'),
+    link({
+      appearances: false,
+      disableLabel: true,
+      overrides: {
+        name: 'primaryButton',
+        label: 'Primary Button Link',
+        admin: {
+          hideGutter: true,
+          condition: (_, { type } = {}) => type === 'videoHero',
+        },
+      },
+    }),
     {
       name: 'secondaryButtonLabel',
       type: 'text',
@@ -119,7 +130,18 @@ export const hero: Field = {
         condition: (_, { type } = {}) => type === 'videoHero',
       },
     },
-    buttonLink('secondaryButton', 'Secondary Button Link'),
+    link({
+      appearances: false,
+      disableLabel: true,
+      overrides: {
+        name: 'secondaryButton',
+        label: 'Secondary Button Link',
+        admin: {
+          hideGutter: true,
+          condition: (_, { type } = {}) => type === 'videoHero',
+        },
+      },
+    }),
     {
       name: 'videoPopupUrl',
       type: 'text',

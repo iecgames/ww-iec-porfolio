@@ -15,7 +15,8 @@
       "Bash(pnpm generate:importmap)",
       "Bash(sed -n '60,80p' \"src/collections/Pages/index.ts\")",
       "Bash(sed -n '25,45p' \"src/Home/config.ts\")",
-      "Bash(sed -n '25,45p' \"src/Career/config.ts\")"
+      "Bash(sed -n '25,45p' \"src/Career/config.ts\")",
+      "Bash(xargs -I{} sed -n '{},+18p' src/payload-types.ts)"
     ]
   }
 }

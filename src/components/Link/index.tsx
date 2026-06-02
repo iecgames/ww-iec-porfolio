@@ -16,8 +16,9 @@ type CMSLinkType = {
     value: Page | Post | string | number
   } | null
   route?: string | null
+  section?: string | null
   size?: ButtonProps['size'] | null
-  type?: 'custom' | 'reference' | 'route' | null
+  type?: 'custom' | 'reference' | 'route' | 'section' | null
   url?: string | null
 }
 
@@ -31,6 +32,7 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
     newTab,
     reference,
     route,
+    section,
     size: sizeFromProps,
     url,
   } = props
@@ -42,6 +44,8 @@ export const CMSLink: React.FC<CMSLinkType> = (props) => {
     }`
   } else if (type === 'route') {
     href = route
+  } else if (type === 'section') {
+    href = section
   } else {
     href = url
   }
