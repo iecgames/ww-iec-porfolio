@@ -4,7 +4,9 @@ import { RippleLink } from '@/components/RippleLink'
 import type { Page } from '@/payload-types'
 import { useTransparentHeader } from '@/providers/TransparentHeader'
 import { resolveLinkHref } from '@/utilities/resolveLinkHref'
+import { IconArrowRight } from '@tabler/icons-react'
 import { motion, type Variants } from 'framer-motion'
+import Link from 'next/link'
 import React, { useEffect, useRef } from 'react'
 import { RenderVideoHeroBlocks } from './RenderVideoHeroBlocks'
 
@@ -268,7 +270,7 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
           {/* ── Buttons row ── */}
           {hasButtons && (
             <motion.div
-              className="flex flex-wrap items-center gap-3 mt-2"
+              className="flex flex-col items-start gap-3 mt-2"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: buttonsDelay, ease: 'easeOut' }}
@@ -284,16 +286,40 @@ export const VideoHero: React.FC<VideoHeroProps> = ({
                 />
               )}
 
-              {secondaryButtonLabel && (
-                <RippleLink
-                  href={secondaryHref?.href ?? '#'}
-                  label={secondaryButtonLabel}
-                  variant="outline"
-                  gradient={HERO_GRADIENT}
-                  external={secondaryHref?.external}
-                  newTab={secondaryButton?.newTab}
-                />
-              )}
+              {secondaryButtonLabel &&
+                (() => {
+                  const secondaryClass =
+                    'ml-3 group inline-flex items-center gap-1.5 text-sm md:text-base font-semibold text-slate-900'
+                  const target = secondaryButton?.newTab ? '_blank' : undefined
+                  const rel = secondaryButton?.newTab ? 'noopener noreferrer' : undefined
+                  const href = secondaryHref?.href ?? '#'
+
+                  const content = (
+                    <>
+                      <span className="bg-[linear-gradient(90deg,#2563EB_0%,#38BDF8_100%)] bg-clip-text transition-colors duration-300 group-hover:text-transparent">
+                        {secondaryButtonLabel}
+                      </span>
+                      <motion.span
+                        aria-hidden
+                        className="inline-flex text-slate-900 transition-colors duration-300 group-hover:text-[#2563EB]"
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ duration: 1.4, repeat: Infinity, ease: 'easeInOut' }}
+                      >
+                        <IconArrowRight className="size-4" stroke={2.4} />
+                      </motion.span>
+                    </>
+                  )
+
+                  return secondaryHref?.external ? (
+                    <a href={href} target={target} rel={rel} className={secondaryClass}>
+                      {content}
+                    </a>
+                  ) : (
+                    <Link href={href} target={target} rel={rel} className={secondaryClass}>
+                      {content}
+                    </Link>
+                  )
+                })()}
             </motion.div>
           )}
         </div>
