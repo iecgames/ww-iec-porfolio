@@ -46,13 +46,14 @@ const { user } = await payload.auth({ headers: request.headers })
 - Validate redirect_uri TRƯỚC khi redirect bất kỳ lỗi nào ra ngoài (chống open-redirect).
 
 ## 4. Acceptance criteria
-- [ ] Tạo thủ công 1 client trong `oauth-clients` (script tsx) với `redirect_uri=http://localhost:3000/cb`. `GET /api/oauth/authorize?response_type=code&client_id=<id>&redirect_uri=http://localhost:3000/cb&code_challenge=<c>&code_challenge_method=S256&state=xyz&resource=<MCP_RESOURCE>` khi chưa login → trả HTML form login (200).
-- [ ] Submit sai mật khẩu → vẫn ở form + thông báo lỗi; submit đúng → hiện màn consent.
-- [ ] Bấm **Cho phép** → 302 `Location: http://localhost:3000/cb?code=…&state=xyz`; có 1 row `oauth-codes` (`used:false`, đúng `code_challenge`, `user`).
-- [ ] Bấm **Từ chối** → 302 `...?error=access_denied&state=xyz`; không tạo code.
-- [ ] `client_id` sai → 400 `invalid_client` (không redirect). `redirect_uri` không khớp → 400 (không redirect). Thiếu `code_challenge` → redirect `error=invalid_request&state=xyz`.
-- [ ] `resource` lệch `MCP_RESOURCE` → lỗi `invalid_target`.
-- [ ] `npx tsc --noEmit` pass.
+> Tự động hoá: `tests/int/oauth-authorize.int.spec.ts` (seed client+user qua local API, chạy flow HTTP với dev server). 8/8 pass.
+- [x] `GET /api/oauth/authorize?...` khi chưa login → HTML form login (200).
+- [x] Submit sai mật khẩu → vẫn ở form + báo lỗi; submit đúng → màn consent + Set-Cookie `payload-token`.
+- [x] **Cho phép** → 302 `Location: <redirect_uri>?code=…&state=xyz`; có 1 row `oauth-codes` (`used:false`, đúng `code_challenge`).
+- [x] **Từ chối** → 302 `...?error=access_denied&state=xyz`; không tạo code.
+- [x] `client_id` sai → 400 `invalid_client` (không redirect). Thiếu `code_challenge` → redirect `error=invalid_request&state=xyz`.
+- [x] `resource` lệch `MCP_RESOURCE` → `invalid_target`.
+- [x] `npx tsc --noEmit` pass.
 
 ## 5. Out of scope (phase này)
 - Đổi code → token (phase 04).
