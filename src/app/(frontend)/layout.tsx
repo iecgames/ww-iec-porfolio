@@ -11,23 +11,14 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 })
 
-import { AdminBar } from '@/components/AdminBar'
-import { PageTransition } from '@/components/PageTransition'
-import { Footer } from '@/Footer/Component'
-import { Header } from '@/Header/Component'
-import { Providers } from '@/providers'
 import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
-import { NextIntlClientProvider } from 'next-intl'
-import { getLocale, getMessages } from 'next-intl/server'
-import { draftMode } from 'next/headers'
+import { getLocale } from 'next-intl/server'
 
 import { getServerSideURL } from '@/utilities/getURL'
 import './globals.css'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { isEnabled } = await draftMode()
   const locale = await getLocale()
-  const messages = await getMessages()
 
   return (
     <html className={cn(spaceGrotesk.variable, GeistMono.variable)} lang={locale}>
@@ -35,21 +26,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
       </head>
-      <body>
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <Providers>
-            <AdminBar
-              adminBarProps={{
-                preview: isEnabled,
-              }}
-            />
-
-            <Header />
-            <PageTransition>{children}</PageTransition>
-            <Footer />
-          </Providers>
-        </NextIntlClientProvider>
-      </body>
+      <body>{children}</body>
     </html>
   )
 }

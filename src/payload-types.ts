@@ -3292,16 +3292,11 @@ export interface Header {
  */
 export interface Footer {
   id: string;
-  companyName?: string | null;
-  address?: string | null;
-  hotline?: string | null;
-  email?: string | null;
+  contactLabel?: string | null;
   /**
-   * Short tagline displayed under the logo in the footer
+   * Choose which contact info the button links to. The value comes from General Settings (Hotline or Email).
    */
-  logoSubtitle?: string | null;
-  phone?: string | null;
-  phoneUrl?: string | null;
+  contactType?: ('phone' | 'email') | null;
   copyright?: string | null;
   navItems?:
     | {
@@ -3719,6 +3714,18 @@ export interface General {
    */
   companyName: string;
   /**
+   * Head office address. Displayed in the footer.
+   */
+  address?: string | null;
+  /**
+   * Hotline number. Displayed in the footer.
+   */
+  hotline?: string | null;
+  /**
+   * Contact email. Displayed in the footer.
+   */
+  email?: string | null;
+  /**
    * Main logo displayed in the header and emails.
    */
   logo?: (string | null) | Media;
@@ -3767,13 +3774,8 @@ export interface HeaderSelect<T extends boolean = true> {
  * via the `definition` "footer_select".
  */
 export interface FooterSelect<T extends boolean = true> {
-  companyName?: T;
-  address?: T;
-  hotline?: T;
-  email?: T;
-  logoSubtitle?: T;
-  phone?: T;
-  phoneUrl?: T;
+  contactLabel?: T;
+  contactType?: T;
   copyright?: T;
   navItems?:
     | T
@@ -4029,6 +4031,9 @@ export interface CareerSelect<T extends boolean = true> {
  */
 export interface GeneralSelect<T extends boolean = true> {
   companyName?: T;
+  address?: T;
+  hotline?: T;
+  email?: T;
   logo?: T;
   favicon?: T;
   tagline?: T;

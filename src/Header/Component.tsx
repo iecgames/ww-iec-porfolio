@@ -1,10 +1,12 @@
 import { getCachedGlobal } from '@/utilities/getGlobals'
+import { getLocale } from 'next-intl/server'
 import { HeaderClient } from './Component.client'
 
 export async function Header() {
+  const locale = (await getLocale()) as 'en' | 'vi'
   const [headerData, generalData] = await Promise.all([
-    getCachedGlobal('header', 1)(),
-    getCachedGlobal('general', 1)(),
+    getCachedGlobal('header', 1, locale)(),
+    getCachedGlobal('general', 1, locale)(),
   ])
 
   const logoMedia =

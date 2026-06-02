@@ -134,5 +134,10 @@
     "successBody": "Cảm ơn bạn đã liên hệ. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.",
     "errorEmail": "Vui lòng nhập địa chỉ email hợp lệ.",
     "errorRequired": "Vui lòng nhập tên và nội dung tin nhắn."
+  },
+  "Footer": {
+    "headOffice": "Trụ sở chính",
+    "hotline": "Hotline",
+    "email": "Email"
   }
 }

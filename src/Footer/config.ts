@@ -10,43 +10,24 @@ export const Footer: GlobalConfig = {
   },
   fields: [
     {
-      name: 'companyName',
+      name: 'contactLabel',
       type: 'text',
-      label: 'Company Name',
-    },
-    {
-      name: 'address',
-      type: 'text',
-      label: 'Address',
-    },
-    {
-      name: 'hotline',
-      type: 'text',
-      label: 'Hotline',
-    },
-    {
-      name: 'email',
-      type: 'email',
-      label: 'Email',
-    },
-    {
-      name: 'logoSubtitle',
-      type: 'textarea',
-      label: 'Logo Subtitle',
+      label: 'Contact Button Label',
       localized: true,
+    },
+    {
+      name: 'contactType',
+      type: 'select',
+      label: 'Contact Button Type',
+      defaultValue: 'phone',
+      options: [
+        { label: 'Phone (Hotline)', value: 'phone' },
+        { label: 'Email', value: 'email' },
+      ],
       admin: {
-        description: 'Short tagline displayed under the logo in the footer',
+        description:
+          'Choose which contact info the button links to. The value comes from General Settings (Hotline or Email).',
       },
-    },
-    {
-      name: 'phone',
-      type: 'text',
-      label: 'Phone Button Label',
-    },
-    {
-      name: 'phoneUrl',
-      type: 'text',
-      label: 'Phone Button URL (e.g. tel:+84283962388)',
     },
     {
       name: 'copyright',
@@ -60,6 +41,7 @@ export const Footer: GlobalConfig = {
       fields: [
         link({
           appearances: false,
+          localizedLabel: true,
         }),
       ],
       maxRows: 6,

@@ -18,9 +18,35 @@ export const General: GlobalConfig = {
       name: 'companyName',
       type: 'text',
       required: true,
+      localized: true,
       label: 'Company Name',
       admin: {
         description: 'Used in emails, browser tab, and meta tags.',
+      },
+    },
+    {
+      name: 'address',
+      type: 'text',
+      localized: true,
+      label: 'Address',
+      admin: {
+        description: 'Head office address. Displayed in the footer.',
+      },
+    },
+    {
+      name: 'hotline',
+      type: 'text',
+      label: 'Hotline',
+      admin: {
+        description: 'Hotline number. Displayed in the footer.',
+      },
+    },
+    {
+      name: 'email',
+      type: 'email',
+      label: 'Email',
+      admin: {
+        description: 'Contact email. Displayed in the footer.',
       },
     },
     {

@@ -1,7 +1,7 @@
 import type { Social } from '@/payload-types'
 import { getCachedGlobal } from '@/utilities/getGlobals'
 import configPromise from '@payload-config'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
 import React from 'react'
 
@@ -16,6 +16,7 @@ import {
   IconBrandTiktok,
   IconBrandTwitter,
   IconBrandYoutube,
+  IconMail,
   IconPhone,
 } from '@tabler/icons-react'
 import Link from 'next/link'
@@ -66,6 +67,7 @@ function getSocialBrandColor(platform: Social['platform']): string {
 
 export async function Footer() {
   const locale = (await getLocale()) as 'en' | 'vi'
+  const t = await getTranslations('Footer')
   const [footerData, generalData, payload] = await Promise.all([
     getCachedGlobal('footer', 1, locale)(),
     getCachedGlobal('general', 1, locale)(),
@@ -82,6 +84,11 @@ export async function Footer() {
   const socials = socialDocs as Social[]
   const navItems = footerData?.navItems || []
 
+  // Contact button — value comes from General Settings (hotline or email)
+  const contactType = footerData?.contactType ?? 'phone'
+  const contactValue = contactType === 'email' ? generalData?.email : generalData?.hotline
+  const contactHref = contactType === 'email' ? `mailto:${contactValue}` : `tel:${contactValue}`
+
   // Resolve logo from General Settings
   const logoMedia =
     generalData?.logo && typeof generalData.logo === 'object'
@@ -96,21 +103,33 @@ export async function Footer() {
       style={{ fontFamily: 'var(--font-space-grotesk, system-ui, sans-serif)' }}
     >
       {/* Top section — company info */}
-      {(footerData?.companyName ||
-        footerData?.address ||
-        footerData?.hotline ||
-        footerData?.email) && (
+      {(generalData?.companyName ||
+        generalData?.address ||
+        generalData?.hotline ||
+        generalData?.email) && (
         <div className="border-t border-white/10" style={{ backgroundColor: '#0a4bb1' }}>
           <div className="container py-10 flex flex-col md:flex-row md:items-center gap-8 md:gap-16">
             {/* Company info + socials */}
             <div className="flex-1">
-              {footerData.companyName && (
-                <p className="font-bold text-sm text-white mb-3">{footerData.companyName}</p>
+              {generalData.companyName && (
+                <p className="font-bold text-sm text-white mb-3">{generalData.companyName}</p>
               )}
               <div className="flex flex-col gap-1 text-sm text-white/80">
-                {footerData.address && <p>Trụ sở chính: {footerData.address}</p>}
-                {footerData.hotline && <p>Hotline: {footerData.hotline}</p>}
-                {footerData.email && <p>Email: {footerData.email}</p>}
+                {generalData.address && (
+                  <p>
+                    {t('headOffice')}: {generalData.address}
+                  </p>
+                )}
+                {generalData.hotline && (
+                  <p>
+                    {t('hotline')}: {generalData.hotline}
+                  </p>
+                )}
+                {generalData.email && (
+                  <p>
+                    {t('email')}: {generalData.email}
+                  </p>
+                )}
               </div>
               {socials.length > 0 && (
                 <div className="flex items-center gap-2 mt-5">
@@ -148,14 +167,17 @@ export async function Footer() {
             <div className="shrink-0 flex flex-col items-start md:items-end gap-3">
               <Link href="/" className="inline-block">
                 <Logo
-                  className="brightness-0 invert w-48 md:w-64 max-w-none h-auto"
+                  loading="eager"
+                  priority="high"
                   src={logoSrc}
                   alt={logoAlt}
+                  size="large"
+                  className="brightness-0 invert h-20"
                 />
               </Link>
-              {footerData.logoSubtitle && (
+              {generalData.description && (
                 <p className="text-xs md:text-sm text-white/75 leading-relaxed max-w-xs whitespace-pre-line md:text-right">
-                  {footerData.logoSubtitle}
+                  {generalData.description}
                 </p>
               )}
             </div>
@@ -182,15 +204,19 @@ export async function Footer() {
             ))}
           </div>
 
-          {/* Right — phone button */}
+          {/* Right — contact button */}
           <div className="flex items-center gap-4">
-            {footerData?.phone && (
+            {footerData?.contactLabel && contactValue && (
               <a
-                href={footerData.phoneUrl ?? `tel:${footerData.phone}`}
+                href={contactHref}
                 className="flex items-center gap-2 px-4 py-2 rounded-full border border-white/40 text-sm text-white hover:bg-white/15 transition-colors whitespace-nowrap"
               >
-                <IconPhone className="w-4 h-4" />
-                {footerData.phone}
+                {contactType === 'email' ? (
+                  <IconMail className="w-4 h-4" />
+                ) : (
+                  <IconPhone className="w-4 h-4" />
+                )}
+                {footerData.contactLabel}
               </a>
             )}
           </div>

@@ -134,5 +134,10 @@
     "successBody": "Thanks for reaching out. We'll get back to you as soon as possible.",
     "errorEmail": "Please enter a valid email address.",
     "errorRequired": "Please fill in your name and message."
+  },
+  "Footer": {
+    "headOffice": "Head office",
+    "hotline": "Hotline",
+    "email": "Email"
   }
 }

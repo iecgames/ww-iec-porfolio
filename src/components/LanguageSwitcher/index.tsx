@@ -9,12 +9,12 @@ const locales = [
   {
     code: 'vi',
     label: 'Tiếng Việt',
-    flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/21/Flag_of_Vietnam.svg/3840px-Flag_of_Vietnam.svg.png',
+    flag: '/flags/vn.svg',
   },
   {
     code: 'en',
     label: 'English',
-    flag: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/83/Flag_of_the_United_Kingdom_%283-5%29.svg/3840px-Flag_of_the_United_Kingdom_%283-5%29.svg.png',
+    flag: '/flags/gb.svg',
   },
 ] as const
 

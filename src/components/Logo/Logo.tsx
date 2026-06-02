@@ -9,10 +9,16 @@ const FALLBACK_ALT = 'IEC Logo'
 const NATURAL_WIDTH = 193
 const NATURAL_HEIGHT = 34
 
+const LOGO_SIZE = {
+  small: 'max-h-12.5 w-auto max-w-37.5',
+  medium: 'max-h-15 w-auto max-w-45',
+  large: 'max-h-20 w-auto max-w-60',
+}
 interface Props {
   className?: string
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
+  size?: 'small' | 'medium' | 'large'
   /** Logo image URL from General Settings. Falls back to default when absent. */
   src?: string | null
   alt?: string | null
@@ -63,8 +69,7 @@ export const Logo = (props: Props) => {
       loading={loading}
       fetchPriority={priority}
       decoding="async"
-      // style={style}
-      className={clsx('max-h-12.5 w-auto max-w-37.5', className)}
+      className={clsx(LOGO_SIZE[props.size || 'small'], className)}
       src={resolvedSrc}
     />
   )
