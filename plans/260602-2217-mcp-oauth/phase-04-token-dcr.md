@@ -46,13 +46,13 @@ Body `application/x-www-form-urlencoded`. Phân nhánh theo `grant_type`:
 - Không log `code_verifier`, `client_secret`, `refresh_token` raw.
 
 ## 5. Acceptance criteria (curl đầu-cuối)
-- [ ] `POST /api/oauth/register` với `{"redirect_uris":["http://localhost:3000/cb"]}` → 201 + `client_id`; có row `oauth-clients`.
-- [ ] Tạo `code_verifier` random, `code_challenge=base64url(sha256(verifier))`; chạy authorize (phase 03) Approve → lấy `code`.
-- [ ] `POST /api/oauth/token` (`grant_type=authorization_code`, code, code_verifier, redirect_uri, client_id) → 200 `{access_token, refresh_token, expires_in:3600}`. `access_token` verify được bằng `verifyAccessToken` (sub = user id, aud = MCP_RESOURCE).
-- [ ] Gọi lại `/token` với cùng `code` → 400 `invalid_grant`; refresh tokens của user/client đó bị `revoked=true`.
-- [ ] `code_verifier` sai → 400 `invalid_grant`. `redirect_uri` sai → 400. `resource` lệch → `invalid_target`.
-- [ ] `POST /api/oauth/token` (`grant_type=refresh_token`) → access token mới + refresh mới; refresh cũ → 400 `invalid_grant` (đã rotate).
-- [ ] `npx tsc --noEmit` pass.
+> Tự động hoá: `tests/int/oauth-token.int.spec.ts` (DCR + token, seed code qua local API). 8/8 pass.
+- [x] `POST /api/oauth/register` với `{"redirect_uris":["http://localhost:3000/cb"]}` → 201 + `client_id` (`mcp_…`); có row `oauth-clients`. redirect_uris không hợp lệ → 400 `invalid_redirect_uri`.
+- [x] `POST /api/oauth/token` (`authorization_code`) → 200 `{access_token, refresh_token, expires_in:3600}`. `access_token` verify được (sub = user id, aud = MCP_RESOURCE, client_id đúng).
+- [x] Gọi lại `/token` cùng `code` → 400 `invalid_grant` (one-time; reuse path revoke refresh).
+- [x] `code_verifier` sai → 400 `invalid_grant`. `redirect_uri` sai → 400 `invalid_grant`. `resource` lệch → `invalid_target`.
+- [x] `POST /api/oauth/token` (`refresh_token`) → access + refresh mới (khác cũ); refresh cũ → 400 `invalid_grant` (đã rotate).
+- [x] `npx tsc --noEmit` pass.
 
 ## 6. Out of scope (phase này)
 - Gắn token vào `/api/mcp` (phase 05).

@@ -54,6 +54,7 @@ export async function findAuthCode(payload: Payload, code: string) {
     collection: 'oauth-codes',
     where: { code: { equals: code } },
     limit: 1,
+    depth: 0, // keep `user` as the raw id, not a populated doc
     overrideAccess: true,
   })
   return res.docs[0] ?? null
@@ -95,6 +96,7 @@ export async function findRefreshTokenByHash(payload: Payload, tokenHash: string
     collection: 'oauth-refresh-tokens',
     where: { token_hash: { equals: tokenHash } },
     limit: 1,
+    depth: 0, // keep `user` as the raw id, not a populated doc
     overrideAccess: true,
   })
   return res.docs[0] ?? null
