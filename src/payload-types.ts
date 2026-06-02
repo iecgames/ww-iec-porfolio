@@ -249,10 +249,6 @@ export interface Page {
       url?: string | null;
     };
     /**
-     * YouTube or direct video URL to open in a popup when the play button is clicked
-     */
-    videoPopupUrl?: string | null;
-    /**
      * Small label above the heading (e.g. "Gaming Studio").
      */
     eyebrow?: string | null;
@@ -2216,7 +2212,6 @@ export interface PagesSelect<T extends boolean = true> {
               section?: T;
               url?: T;
             };
-        videoPopupUrl?: T;
         eyebrow?: T;
         brandHeading?: T;
         tagline?: T;
@@ -3423,10 +3418,6 @@ export interface Home {
       url?: string | null;
     };
     /**
-     * YouTube or direct video URL to open in a popup when the play button is clicked
-     */
-    videoPopupUrl?: string | null;
-    /**
      * Small label above the heading (e.g. "Gaming Studio").
      */
     eyebrow?: string | null;
@@ -3613,10 +3604,6 @@ export interface Career {
       section?: string | null;
       url?: string | null;
     };
-    /**
-     * YouTube or direct video URL to open in a popup when the play button is clicked
-     */
-    videoPopupUrl?: string | null;
     /**
      * Small label above the heading (e.g. "Gaming Studio").
      */
@@ -3863,7 +3850,6 @@ export interface HomeSelect<T extends boolean = true> {
               section?: T;
               url?: T;
             };
-        videoPopupUrl?: T;
         eyebrow?: T;
         brandHeading?: T;
         tagline?: T;
@@ -3978,7 +3964,6 @@ export interface CareerSelect<T extends boolean = true> {
               section?: T;
               url?: T;
             };
-        videoPopupUrl?: T;
         eyebrow?: T;
         brandHeading?: T;
         tagline?: T;

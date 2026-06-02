@@ -142,16 +142,6 @@ export const hero: Field = {
         },
       },
     }),
-    {
-      name: 'videoPopupUrl',
-      type: 'text',
-      label: 'Video Popup URL',
-      admin: {
-        description:
-          'YouTube or direct video URL to open in a popup when the play button is clicked',
-        condition: (_, { type } = {}) => type === 'videoHero',
-      },
-    },
     // --- Brand Hero fields ---
     {
       name: 'eyebrow',
