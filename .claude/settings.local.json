@@ -49,7 +49,9 @@
       "Bash(grep -iE 'oauth|well-known|app[\\\\\\\\/].*mcp|next.config')",
       "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" -X POST http://localhost:3000/api/mcp -H 'Content-Type: application/json' -d '{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":1}')",
       "Bash(node -e \"const n=require\\('net'\\);const s=n.connect\\(3000,'127.0.0.1'\\);s.setTimeout\\(800\\);s.on\\('connect',\\(\\)=>{console.log\\('3000 OPEN'\\);s.destroy\\(\\)}\\);s.on\\('timeout',\\(\\)=>{console.log\\('3000 closed'\\);s.destroy\\(\\)}\\);s.on\\('error',\\(\\)=>console.log\\('3000 closed'\\)\\)\")",
-      "PowerShell($pids = \\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess | Select-Object -Unique; foreach \\($p in $pids\\) { try { Stop-Process -Id $p -Force -ErrorAction Stop; \"killed $p\" } catch {} }; \"done\")"
+      "PowerShell($pids = \\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess | Select-Object -Unique; foreach \\($p in $pids\\) { try { Stop-Process -Id $p -Force -ErrorAction Stop; \"killed $p\" } catch {} }; \"done\")",
+      "Bash(cd \"C:/Users/Admin/.claude/projects/d--WORK-IEC-iec-draft-iec-draft/memory\")",
+      "Bash(ls MEMORY.md)"
     ]
   }
 }
