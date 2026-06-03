@@ -8,8 +8,8 @@ export const homeStatic: RequiredDataFromCollectionSlug<'pages'> = {
     type: 'none',
   },
   meta: {
-    description: 'An open-source website built with Payload and Next.js.',
-    title: 'Payload Website Template',
+    description: 'A mobile game studio',
+    title: 'IEC Games - Winter Wolf',
   },
   title: 'Home',
   layout: [],

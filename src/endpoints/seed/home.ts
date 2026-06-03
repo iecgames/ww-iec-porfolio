@@ -1,5 +1,5 @@
-import type { RequiredDataFromCollectionSlug } from 'payload'
 import type { Media } from '@/payload-types'
+import type { RequiredDataFromCollectionSlug } from 'payload'
 
 type HomeArgs = {
   heroImage: Media
@@ -543,9 +543,9 @@ export const home: (args: HomeArgs) => RequiredDataFromCollectionSlug<'pages'> =
       },
     ],
     meta: {
-      description: 'An open-source website built with Payload and Next.js.',
+      description: 'A mobile game studio',
       image: heroImage.id,
-      title: 'Payload Website Template',
+      title: 'IEC Games - Winter Wolf',
     },
     title: 'Home',
   }
