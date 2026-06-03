@@ -53,7 +53,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   const { locale } = await paramsPromise
   const home = await queryHomeGlobal(locale, false)
   // Re-use the page meta helper; map hero richText -> meta where useful.
-  return generateMeta({ doc: home as any })
+  return generateMeta({ doc: home as any, locale: locale as 'en' | 'vi' })
 }
 
 const queryHomeGlobal = cache(async (locale: string, draft: boolean) => {

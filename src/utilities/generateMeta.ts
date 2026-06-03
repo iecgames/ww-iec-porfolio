@@ -1,49 +1,43 @@
 import type { Metadata } from 'next'
 
-import type { Media, Page, Post, Config } from '../payload-types'
+import type { Media, Page, Post } from '../payload-types'
 
-import { mergeOpenGraph } from './mergeOpenGraph'
+import { buildSEO } from './getDefaultSEO'
 import { getServerSideURL } from './getURL'
 
-const getImageURL = (image?: Media | Config['db']['defaultIDType'] | null) => {
-  const serverUrl = getServerSideURL()
+type Locale = 'en' | 'vi'
 
-  let url = serverUrl + '/website-template-OG.webp'
-
-  if (image && typeof image === 'object' && 'url' in image) {
-    const ogUrl = image.sizes?.og?.url
-
-    url = ogUrl ? serverUrl + ogUrl : serverUrl + image.url
-  }
-
-  return url
+const toAbsolute = (url?: string | null): string | undefined => {
+  if (!url) return undefined
+  return url.startsWith('http') ? url : getServerSideURL() + url
 }
 
+/** Resolves a doc's `meta.image` to an absolute OG image URL (prefers the `og` size). */
+const getImageURL = (image?: Media | number | string | null): string | undefined => {
+  if (image && typeof image === 'object' && 'url' in image) {
+    const media = image as Media
+    return toAbsolute(media.sizes?.og?.url ?? media.url)
+  }
+  return undefined
+}
+
+/**
+ * Builds page/post metadata on top of the site-wide defaults from General Settings.
+ * The doc's own SEO fields take priority; anything missing (notably the OG image)
+ * falls back to the General defaults — companyName, description and the site logo.
+ */
 export const generateMeta = async (args: {
   doc: Partial<Page> | Partial<Post> | null
+  locale?: Locale
 }): Promise<Metadata> => {
-  const { doc } = args
+  const { doc, locale = 'en' } = args
 
   const ogImage = getImageURL(doc?.meta?.image)
 
-  const title = doc?.meta?.title
-    ? doc?.meta?.title + ' | Payload Website Template'
-    : 'Payload Website Template'
-
-  return {
-    description: doc?.meta?.description,
-    openGraph: mergeOpenGraph({
-      description: doc?.meta?.description || '',
-      images: ogImage
-        ? [
-            {
-              url: ogImage,
-            },
-          ]
-        : undefined,
-      title,
-      url: Array.isArray(doc?.slug) ? doc?.slug.join('/') : '/',
-    }),
-    title,
-  }
+  return buildSEO(locale, {
+    title: doc?.meta?.title || undefined,
+    description: doc?.meta?.description || undefined,
+    // No doc image → buildSEO falls back to the site logo from General Settings.
+    images: ogImage ? [{ url: ogImage }] : undefined,
+  })
 }

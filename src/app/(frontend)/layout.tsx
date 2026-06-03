@@ -11,7 +11,7 @@ const spaceGrotesk = Space_Grotesk({
   display: 'swap',
 })
 
-import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
+import { getDefaultSEO } from '@/utilities/getDefaultSEO'
 import { getLocale } from 'next-intl/server'
 
 import { getServerSideURL } from '@/utilities/getURL'
@@ -31,11 +31,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   )
 }
 
-export const metadata: Metadata = {
-  metadataBase: new URL(getServerSideURL()),
-  openGraph: mergeOpenGraph(),
-  twitter: {
-    card: 'summary_large_image',
-    creator: '@payloadcms',
-  },
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = (await getLocale()) as 'en' | 'vi'
+
+  return {
+    metadataBase: new URL(getServerSideURL()),
+    ...(await getDefaultSEO(locale)),
+  }
 }

@@ -17,6 +17,7 @@ import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
+import { buildSEO } from '@/utilities/getDefaultSEO'
 import { SendUsCVBlock } from '@/blocks/SendUsCV/Component'
 import { JobApplyModal } from '@/components/JobApplyModal'
 import { JobCard, type JobCardData } from '@/components/JobCard'
@@ -277,14 +278,11 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   if (!job) return {}
 
   const description = job.description ?? `${job.department} · ${job.location}`
-  return {
+  return buildSEO(locale as 'en' | 'vi', {
     title: job.title,
     description,
-    openGraph: {
-      title: job.title,
-      description,
-    },
-  }
+    url: `/${locale}/career/${jobId}`,
+  })
 }
 
 const queryJobById = cache(

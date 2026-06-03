@@ -43,7 +43,7 @@ export default async function CareerPage({ params: paramsPromise }: Args) {
 export async function generateMetadata({ params: paramsPromise }: Args): Promise<Metadata> {
   const { locale } = await paramsPromise
   const career = await queryCareerGlobal(locale, false)
-  return generateMeta({ doc: career as any })
+  return generateMeta({ doc: career as any, locale: locale as 'en' | 'vi' })
 }
 
 const queryCareerGlobal = cache(async (locale: string, draft: boolean) => {

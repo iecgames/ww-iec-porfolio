@@ -55,7 +55,11 @@
       "Bash(cd d:\\\\\\\\Service\\\\\\\\ww-iec\\\\\\\\iec-web-2)",
       "PowerShell(cd \"d:\\\\Service\\\\ww-iec\\\\iec-web-2\"; Get-ChildItem \"src/app/\\(frontend\\)/[locale]/search\" 2>$null | ForEach-Object { $_.FullName })",
       "PowerShell(cd \"d:\\\\Service\\\\ww-iec\\\\iec-web-2\"; Get-ChildItem \"src/search\" -Recurse -File | ForEach-Object { $_.FullName })",
-      "Bash(cd \"d:/Service/ww-iec/iec-web-2\" && rm -rf \"src/app/\\(frontend\\)/[locale]/search\" && rm -rf \"src/search\" && echo \"deleted:\" && ls \"src/app/\\(frontend\\)/[locale]/\" | head && echo \"---\" && ls src/ | grep -i search || echo \"src/search gone\")"
+      "Bash(cd \"d:/Service/ww-iec/iec-web-2\" && rm -rf \"src/app/\\(frontend\\)/[locale]/search\" && rm -rf \"src/search\" && echo \"deleted:\" && ls \"src/app/\\(frontend\\)/[locale]/\" | head && echo \"---\" && ls src/ | grep -i search || echo \"src/search gone\")",
+      "Bash(sed -n '50,60p' \"src/app/\\(frontend\\)/[locale]/page.tsx\")",
+      "Bash(sed -n '40,48p' \"src/app/\\(frontend\\)/[locale]/career/page.tsx\")",
+      "Bash(sed -n '85,95p' \"src/app/\\(frontend\\)/[locale]/[slug]/page.tsx\")",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('hex'\\)\\)\")"
     ],
     "additionalDirectories": [
       "d:\\Service\\ww-iec\\iec-web-2\\src\\app\\(frontend)\\[locale]\\search"
