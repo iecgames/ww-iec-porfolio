@@ -102,10 +102,11 @@ async function buildPostData(
 
   if (input['heroImage'] !== undefined) data['heroImage'] = input['heroImage']
 
-  // SEO metadata (optional, localized)
+  // SEO metadata (optional). title/description are localized; image is shared.
   const meta: Record<string, unknown> = {}
   if (input['metaTitle'] !== undefined) meta['title'] = input['metaTitle']
   if (input['metaDescription'] !== undefined) meta['description'] = input['metaDescription']
+  if (input['metaImage'] !== undefined) meta['image'] = input['metaImage']
   if (Object.keys(meta).length > 0) data['meta'] = meta
 
   // Non-localized flag — pass through when provided.
@@ -251,6 +252,12 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         heroImage: z.string().optional().describe('Media document ID to use as the hero image'),
         metaTitle: z.string().optional().describe('SEO meta title (defaults to post title)'),
         metaDescription: z.string().optional().describe('SEO meta description'),
+        metaImage: z
+          .string()
+          .optional()
+          .describe(
+            'Media document ID for the SEO/social-share image (meta.image). Use media_list or media_upload to get one.',
+          ),
         notifySubscribers: z
           .boolean()
           .optional()
@@ -315,6 +322,10 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         heroImage: z.string().optional().describe('Replace hero image (Media document ID)'),
         metaTitle: z.string().optional().describe('New SEO meta title'),
         metaDescription: z.string().optional().describe('New SEO meta description'),
+        metaImage: z
+          .string()
+          .optional()
+          .describe('Replace the SEO/social-share image (meta.image) — a Media document ID'),
         notifySubscribers: z
           .boolean()
           .optional()

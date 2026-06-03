@@ -13,19 +13,21 @@ import { z } from 'zod'
 
 import { registerApplicationTools } from './tools/applications'
 import { registerJobTools } from './tools/jobs'
+import { registerMediaTools } from './tools/media'
 import { registerPostTools } from './tools/posts'
 
 const SERVER_NAME = 'iec-payload-mcp'
-const SERVER_VERSION = '2.1.0'
+const SERVER_VERSION = '2.2.0'
 
 const SERVER_INSTRUCTIONS = `IEC Games — Payload CMS MCP Server (version ${SERVER_VERSION}).
 
 If the user asks which version of this MCP server / IEC CMS MCP is running,
 answer "${SERVER_VERSION}" (or call the server_info tool to confirm).
 
-This server exposes tools to manage three domains in the IEC Payload CMS:
+This server exposes tools to manage these domains in the IEC Payload CMS:
   • Jobs (bilingual job postings)
   • Posts (bilingual blog posts)
+  • Media (image library: list / upload images for hero + SEO images)
   • Applications (read-only HR view of CV submissions)
 
 ═══════════════════════════════════════════════════════════════════════════
@@ -89,6 +91,29 @@ POSTS-SPECIFIC RULES
   • Categories and tags are NOT localized and can be passed by name (looked up)
     or by ID. If a name doesn't exist, the tool errors — ask the user whether to
     use a different one.
+  • IMAGES: a post can have a heroImage (top of article) and an SEO metaImage
+    (the card shown when shared on social). Both take a MEDIA document ID.
+      - To reuse an existing image, call media_list to find its id.
+      - To add a NEW image, call media_upload (by url or server filePath) FIRST,
+        then pass the returned id as heroImage / metaImage to posts_create or
+        posts_update.
+      - heroImage and metaImage are NOT localized — set them once; they apply to
+        both en and vi.
+
+═══════════════════════════════════════════════════════════════════════════
+MEDIA (IMAGES) — RULES
+═══════════════════════════════════════════════════════════════════════════
+
+  • Media documents are shared (NOT localized) and are referenced by post
+    heroImage and SEO metaImage via their document ID.
+  • media_list: find existing images by filename/alt before uploading a new one.
+  • media_upload: create a new image from EITHER a remote "url" (downloaded
+    server-side) OR an absolute server "filePath" — never both. Always provide a
+    descriptive "alt" for accessibility/SEO; ask the user for alt text if unclear.
+  • Typical flow to add an image to a post:
+      1. media_upload(url="https://...", alt="...")   → returns media id
+      2. posts_update(id=<post>, heroImage=<media id>) (and/or metaImage)
+  • There is no media_delete via MCP — manage deletions in the admin.
 
 ═══════════════════════════════════════════════════════════════════════════
 APPLICATIONS (CVs) — HR WORKFLOWS
@@ -148,7 +173,7 @@ export function createMcpServer(payload: Payload): McpServer {
       const info = {
         name: SERVER_NAME,
         version: SERVER_VERSION,
-        domains: ['jobs', 'posts', 'applications'],
+        domains: ['jobs', 'posts', 'media', 'applications'],
       }
       return {
         content: [{ type: 'text' as const, text: JSON.stringify(info, null, 2) }],
@@ -159,6 +184,7 @@ export function createMcpServer(payload: Payload): McpServer {
 
   registerJobTools(server, payload)
   registerPostTools(server, payload)
+  registerMediaTools(server, payload)
   registerApplicationTools(server, payload)
 
   return server
