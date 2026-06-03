@@ -1,5 +1,5 @@
 /**
- * Sign and verify OAuth access tokens (RS256 JWT).
+ * Sign and verify OAuth access tokens (ES256 JWT).
  */
 import { jwtVerify, SignJWT, type JWTPayload } from 'jose'
 

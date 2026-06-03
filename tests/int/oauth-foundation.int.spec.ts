@@ -3,8 +3,9 @@
  *
  * Unit tests for the OAuth crypto foundation (Phase 01).
  *
- * Pure crypto — no Payload/Mongo needed. Generates an ephemeral RS256 key pair,
- * injects it via env, then exercises JWT sign/verify and PKCE S256.
+ * Pure crypto — no Payload/Mongo needed. Generates an ephemeral ES256 (EC P-256)
+ * private key, injects it via env, then exercises JWT sign/verify and PKCE S256.
+ * The public key is derived from the private key at runtime (no public env var).
  *
  * Runs in the `node` environment (not the project-default jsdom) because jose's
  * WebCrypto path requires a single Uint8Array realm — which matches the real
@@ -16,17 +17,16 @@ import { beforeAll, describe, expect, it } from 'vitest'
 // Inject key material BEFORE importing the oauth modules (keys are read lazily,
 // but set here so any eager read also sees them).
 beforeAll(() => {
-  const { publicKey, privateKey } = generateKeyPairSync('rsa', {
-    modulusLength: 2048,
+  const { privateKey } = generateKeyPairSync('ec', {
+    namedCurve: 'P-256',
     publicKeyEncoding: { type: 'spki', format: 'pem' },
     privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
   })
   process.env.OAUTH_JWT_PRIVATE_KEY = Buffer.from(privateKey).toString('base64')
-  process.env.OAUTH_JWT_PUBLIC_KEY = Buffer.from(publicKey).toString('base64')
   process.env.OAUTH_ISSUER = 'http://localhost:3000'
 })
 
-describe('OAuth JWT (RS256)', () => {
+describe('OAuth JWT (ES256)', () => {
   it('signs and verifies an access token with correct claims', async () => {
     const { signAccessToken, verifyAccessToken } = await import('@/oauth/jwt')
     const token = await signAccessToken({ sub: 'user-123', client_id: 'mcp_abc' })
