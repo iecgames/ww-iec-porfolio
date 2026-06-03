@@ -6,8 +6,10 @@
  *  2. AI Agent shows the preview URL and ASKS the user before publishing.
  *  3. Only after explicit confirmation does the AI call `posts_publish`.
  *
- * Posts are NOT localized — there is one English version per post. Categories
- * and tags can be resolved by name (case-insensitive) or by ID.
+ * Posts are BILINGUAL (en | vi): title, content, and SEO meta are localized.
+ * Each tool takes a `locale` so the AI can read/write one language without
+ * overwriting the other. Categories and tags (not localized) can be resolved
+ * by name (case-insensitive) or by ID.
  */
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { Payload, Where } from 'payload'
@@ -15,6 +17,10 @@ import { z } from 'zod'
 
 import { buildLinks, formatLinks } from '../utils/links'
 import { textToLexical } from '../utils/lexical'
+
+// ─── Shared schemas ───────────────────────────────────────────────────────────
+
+const localeField = z.enum(['en', 'vi']).default('en').describe('Content locale (en | vi)')
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -96,11 +102,14 @@ async function buildPostData(
 
   if (input['heroImage'] !== undefined) data['heroImage'] = input['heroImage']
 
-  // SEO metadata (optional)
+  // SEO metadata (optional, localized)
   const meta: Record<string, unknown> = {}
   if (input['metaTitle'] !== undefined) meta['title'] = input['metaTitle']
   if (input['metaDescription'] !== undefined) meta['description'] = input['metaDescription']
   if (Object.keys(meta).length > 0) data['meta'] = meta
+
+  // Non-localized flag — pass through when provided.
+  if (input['notifySubscribers'] !== undefined) data['notifySubscribers'] = input['notifySubscribers']
 
   return data
 }
@@ -117,6 +126,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         'List blog posts with optional filters. Returns id, title, slug, status, and metadata. ' +
         'Use this to find a post id before calling posts_get / posts_update.',
       inputSchema: {
+        locale: localeField,
         search: z.string().optional().describe('Case-insensitive substring search across titles'),
         status: z
           .enum(['draft', 'published', 'any'])
@@ -127,7 +137,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         limit: z.number().int().min(1).max(100).default(20).describe('Max results'),
       },
     },
-    async ({ search, status, category, tag, limit }) => {
+    async ({ locale, search, status, category, tag, limit }) => {
       const where: Where = {}
       if (search) where['title'] = { like: search }
       if (status !== 'any') where['_status'] = { equals: status }
@@ -145,6 +155,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         collection: 'posts',
         where,
         limit,
+        locale,
         depth: 1,
         draft: true,
         overrideAccess: true,
@@ -179,12 +190,14 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         'Get a single blog post by ID, including full content. Returns admin URL and preview URL.',
       inputSchema: {
         id: z.string().describe('Post document ID'),
+        locale: localeField,
       },
     },
-    async ({ id }) => {
+    async ({ id, locale }) => {
       const doc = await payload.findByID({
         collection: 'posts',
         id,
+        locale,
         depth: 1,
         draft: true,
         overrideAccess: true,
@@ -194,6 +207,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         collection: 'posts',
         id: doc.id,
         slug: doc.slug,
+        locale,
         status: statusOf(doc),
       })
 
@@ -214,14 +228,17 @@ export function registerPostTools(server: McpServer, payload: Payload) {
     {
       title: 'Create Post (Draft)',
       description:
-        'Create a new blog post as a DRAFT. The slug is auto-generated from the title. ' +
-        'Pass `content` as plain text or simple markdown (## h2, ### h3, **bold**, --- HR). ' +
-        'Categories/tags can be passed as names (looked up) or IDs. Returns the new id, admin ' +
-        'URL, and a draft preview URL.\n\n' +
+        'Create a new blog post as a DRAFT in the requested locale. The slug is auto-generated ' +
+        'from the title. Pass `content` as plain text or simple markdown (## h2, ### h3, **bold**, ' +
+        '--- HR). Categories/tags can be passed as names (looked up) or IDs. Returns the new id, ' +
+        'admin URL, and a draft preview URL.\n\n' +
         'NEXT STEPS the AI Agent MUST follow:\n' +
-        '  1. Show the preview URL to the user and ASK whether to publish.\n' +
-        '  2. Only call `posts_publish` after explicit user confirmation.',
+        '  1. Call `posts_update` with the returned id and the OTHER locale to add the bilingual ' +
+        'translation (title + content).\n' +
+        '  2. Show the preview URL to the user and ASK whether to publish.\n' +
+        '  3. Only call `posts_publish` after explicit user confirmation.',
       inputSchema: {
+        locale: localeField,
         title: z.string().describe('Post title (slug auto-generated from this)'),
         content: z
           .string()
@@ -229,19 +246,25 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         categories: z
           .array(z.string())
           .optional()
-          .describe('List of category names or IDs to attach'),
-        tags: z.array(z.string()).optional().describe('List of tag names or IDs to attach'),
+          .describe('List of category names or IDs to attach (not localized)'),
+        tags: z.array(z.string()).optional().describe('List of tag names or IDs to attach (not localized)'),
         heroImage: z.string().optional().describe('Media document ID to use as the hero image'),
         metaTitle: z.string().optional().describe('SEO meta title (defaults to post title)'),
         metaDescription: z.string().optional().describe('SEO meta description'),
+        notifySubscribers: z
+          .boolean()
+          .optional()
+          .describe('Send a promotional email to all subscribers when first published (default true)'),
       },
     },
     async (input) => {
-      const data = await buildPostData(payload, input as Record<string, unknown>)
+      const { locale, ...rest } = input as { locale: 'en' | 'vi' } & Record<string, unknown>
+      const data = await buildPostData(payload, rest)
 
       const doc = await payload.create({
         collection: 'posts',
         data: { ...data, _status: 'draft' } as never,
+        locale,
         draft: true,
         overrideAccess: true,
       })
@@ -250,6 +273,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         collection: 'posts',
         id: doc.id,
         slug: doc.slug,
+        locale,
         status: 'draft',
       })
 
@@ -258,11 +282,13 @@ export function registerPostTools(server: McpServer, payload: Payload) {
           {
             type: 'text' as const,
             text:
-              `Created DRAFT post "${doc.title}" (id: ${doc.id})\n\n` +
+              `Created DRAFT post "${doc.title}" (id: ${doc.id}, locale: ${locale})\n\n` +
               `${postToText(doc)}\n\n${formatLinks(links)}\n\n` +
               `NEXT STEPS:\n` +
-              `  1. Show the preview URL above to the user and ASK whether to publish.\n` +
-              `  2. Only call posts_publish(id="${doc.id}") after explicit confirmation.`,
+              `  1. Call posts_update(id="${doc.id}", locale="${locale === 'en' ? 'vi' : 'en'}", ...) ` +
+              `to add the ${locale === 'en' ? 'Vietnamese' : 'English'} translation.\n` +
+              `  2. Show the preview URL above to the user and ASK whether to publish.\n` +
+              `  3. Only call posts_publish(id="${doc.id}") after explicit confirmation.`,
           },
         ],
       }
@@ -275,11 +301,13 @@ export function registerPostTools(server: McpServer, payload: Payload) {
     {
       title: 'Update Post',
       description:
-        'Update fields of an existing post. Only provided fields are changed. Does NOT change ' +
+        'Update fields of an existing post. Only provided fields are changed. Specify locale to ' +
+        'update content in that language without overwriting the other locale. Does NOT change ' +
         'publish status — use `posts_publish` / `posts_unpublish` for that. ' +
         'Returns the admin URL and preview URL.',
       inputSchema: {
         id: z.string().describe('Post document ID to update'),
+        locale: localeField,
         title: z.string().optional().describe('New title'),
         content: z.string().optional().describe('New body (plain text or markdown)'),
         categories: z.array(z.string()).optional().describe('Replace categories (names or IDs)'),
@@ -287,10 +315,17 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         heroImage: z.string().optional().describe('Replace hero image (Media document ID)'),
         metaTitle: z.string().optional().describe('New SEO meta title'),
         metaDescription: z.string().optional().describe('New SEO meta description'),
+        notifySubscribers: z
+          .boolean()
+          .optional()
+          .describe('Send a promotional email to all subscribers when first published (default true)'),
       },
     },
     async (input) => {
-      const { id, ...rest } = input as { id: string } & Record<string, unknown>
+      const { id, locale, ...rest } = input as { id: string; locale: 'en' | 'vi' } & Record<
+        string,
+        unknown
+      >
       const data = await buildPostData(payload, rest)
 
       const current = await payload.findByID({
@@ -306,6 +341,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         collection: 'posts',
         id,
         data: { ...data, _status: currentStatus } as never,
+        locale,
         draft: currentStatus === 'draft',
         overrideAccess: true,
       })
@@ -314,6 +350,7 @@ export function registerPostTools(server: McpServer, payload: Payload) {
         collection: 'posts',
         id: doc.id,
         slug: doc.slug,
+        locale,
         status: statusOf(doc),
       })
 

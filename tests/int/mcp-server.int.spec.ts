@@ -37,9 +37,17 @@ function getText(result: Awaited<ReturnType<Client['callTool']>>): string {
   return first.text as string
 }
 
-/** Parse JSON from the first text content of a tool result. */
+/**
+ * Parse JSON from the first text content of a tool result.
+ *
+ * Several tools append a human-readable links block (`Status: … / Admin: … /
+ * Preview URL: …`) after the JSON document, separated by a blank line. Pretty-
+ * printed JSON never contains a blank line, so we parse only the leading block
+ * up to the first `\n\n`.
+ */
 function getJSON<T = unknown>(result: Awaited<ReturnType<Client['callTool']>>): T {
-  return JSON.parse(getText(result)) as T
+  const [jsonBlock] = getText(result).split('\n\n')
+  return JSON.parse(jsonBlock!) as T
 }
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────

@@ -28,6 +28,22 @@ const employmentTypeField = z
   .optional()
   .describe('Employment type: fullTime | partTime | contract | internship')
 
+const isFeaturedField = z
+  .boolean()
+  .optional()
+  .describe('Featured flag — show this job in the CareersHighlight block on the home page')
+
+const notifySubscribersField = z
+  .boolean()
+  .optional()
+  .describe('Send a promotional email to all subscribers when first published (default true)')
+
+const relatedJobsField = z
+  .array(z.string())
+  .max(3)
+  .optional()
+  .describe('Up to 3 related job IDs pinned at the bottom of this posting')
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function buildJobData(input: Record<string, unknown>): Record<string, unknown> {
@@ -46,6 +62,13 @@ function buildJobData(input: Record<string, unknown>): Record<string, unknown> {
   for (const key of strFields) {
     if (input[key] !== undefined) data[key] = input[key]
   }
+
+  // Non-localized scalar/relationship fields — pass through as-is when provided.
+  const boolFields = ['isFeatured', 'notifySubscribers']
+  for (const key of boolFields) {
+    if (input[key] !== undefined) data[key] = input[key]
+  }
+  if (input['relatedJobs'] !== undefined) data['relatedJobs'] = input['relatedJobs']
 
   const jd = textToLexical(input['jobDescription'] as string | undefined)
   if (jd !== undefined) data['jobDescription'] = jd
@@ -83,6 +106,10 @@ export function registerJobTools(server: McpServer, payload: Payload) {
         department: z.string().optional().describe('Filter by exact department name'),
         location: z.string().optional().describe('Filter by location (partial match)'),
         employmentType: employmentTypeField,
+        isFeatured: z
+          .boolean()
+          .optional()
+          .describe('Filter to only featured (true) or non-featured (false) jobs'),
         status: z
           .enum(['draft', 'published', 'any'])
           .default('any')
@@ -96,11 +123,12 @@ export function registerJobTools(server: McpServer, payload: Payload) {
           .describe('Max number of results to return'),
       },
     },
-    async ({ locale, department, location, employmentType, status, limit }) => {
+    async ({ locale, department, location, employmentType, isFeatured, status, limit }) => {
       const where: Where = {}
       if (department) where['department'] = { equals: department }
       if (location) where['location'] = { contains: location }
       if (employmentType) where['employmentType'] = { equals: employmentType }
+      if (isFeatured !== undefined) where['isFeatured'] = { equals: isFeatured }
       if (status !== 'any') where['_status'] = { equals: status }
 
       const result = await payload.find({
@@ -122,6 +150,7 @@ export function registerJobTools(server: McpServer, payload: Payload) {
         workingHours: doc.workingHours,
         salaryLabel: doc.salaryLabel,
         description: doc.description,
+        isFeatured: doc.isFeatured,
         status: statusOf(doc),
         updatedAt: doc.updatedAt,
       }))
@@ -204,7 +233,10 @@ export function registerJobTools(server: McpServer, payload: Payload) {
           .string()
           .optional()
           .describe('Salary label shown publicly (e.g. "Competitive" or "$80k–$120k")'),
-        linkedinUrl: z.string().optional().describe('LinkedIn job posting URL'),
+        linkedinUrl: z
+          .string()
+          .optional()
+          .describe('External job detail URL — link to the posting on an external site (e.g. LinkedIn)'),
         description: z
           .string()
           .optional()
@@ -221,6 +253,9 @@ export function registerJobTools(server: McpServer, payload: Payload) {
           .string()
           .optional()
           .describe('Benefits offered (plain text or simple markdown)'),
+        isFeatured: isFeaturedField,
+        notifySubscribers: notifySubscribersField,
+        relatedJobs: relatedJobsField,
       },
     },
     async (input) => {
@@ -278,7 +313,10 @@ export function registerJobTools(server: McpServer, payload: Payload) {
         employmentType: employmentTypeField,
         workingHours: z.string().optional().describe('New working hours'),
         salaryLabel: z.string().optional().describe('New salary label'),
-        linkedinUrl: z.string().optional().describe('New LinkedIn URL'),
+        linkedinUrl: z
+          .string()
+          .optional()
+          .describe('New external job detail URL (e.g. LinkedIn)'),
         description: z.string().optional().describe('New short summary'),
         jobDescription: z
           .string()
@@ -289,6 +327,9 @@ export function registerJobTools(server: McpServer, payload: Payload) {
           .optional()
           .describe('New qualifications (plain text or markdown)'),
         benefits: z.string().optional().describe('New benefits (plain text or markdown)'),
+        isFeatured: isFeaturedField,
+        notifySubscribers: notifySubscribersField,
+        relatedJobs: relatedJobsField,
       },
     },
     async (input) => {

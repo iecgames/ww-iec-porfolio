@@ -47,6 +47,7 @@ function summarize(doc: Record<string, unknown>) {
         : doc['job'],
     status: doc['status'],
     submittedAt: doc['submittedAt'],
+    additionalLink: doc['additionalLink'],
     cvUrl: cvUrlOf(doc),
   }
 }
@@ -67,11 +68,14 @@ export function registerApplicationTools(server: McpServer, payload: Payload) {
           .enum([...STATUSES, 'any'])
           .default('any')
           .describe('Filter by application status'),
-        jobId: z.string().optional().describe('Filter to applications for a specific job ID'),
+        jobId: z
+          .string()
+          .optional()
+          .describe('Filter to applications for a specific job ID (empty job = general/open application)'),
         position: z
           .string()
           .optional()
-          .describe('Filter by snapshot position title (case-insensitive substring)'),
+          .describe('Filter by position the candidate is interested in (case-insensitive substring)'),
         search: z
           .string()
           .optional()
@@ -141,8 +145,8 @@ export function registerApplicationTools(server: McpServer, payload: Payload) {
     {
       title: 'Get Job Application',
       description:
-        'Get full details of a single application by ID, including experience summary, internal ' +
-        'notes, CV download link, and admin URL.',
+        'Get full details of a single application by ID, including experience summary, additional ' +
+        'link (portfolio/GitHub/etc.), internal notes, CV download link, and admin URL.',
       inputSchema: {
         id: z.string().describe('Application document ID'),
       },
