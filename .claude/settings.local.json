@@ -51,7 +51,14 @@
       "Bash(node -e \"const n=require\\('net'\\);const s=n.connect\\(3000,'127.0.0.1'\\);s.setTimeout\\(800\\);s.on\\('connect',\\(\\)=>{console.log\\('3000 OPEN'\\);s.destroy\\(\\)}\\);s.on\\('timeout',\\(\\)=>{console.log\\('3000 closed'\\);s.destroy\\(\\)}\\);s.on\\('error',\\(\\)=>console.log\\('3000 closed'\\)\\)\")",
       "PowerShell($pids = \\(Get-NetTCPConnection -LocalPort 3000 -State Listen -ErrorAction SilentlyContinue\\).OwningProcess | Select-Object -Unique; foreach \\($p in $pids\\) { try { Stop-Process -Id $p -Force -ErrorAction Stop; \"killed $p\" } catch {} }; \"done\")",
       "Bash(cd \"C:/Users/Admin/.claude/projects/d--WORK-IEC-iec-draft-iec-draft/memory\")",
-      "Bash(ls MEMORY.md)"
+      "Bash(ls MEMORY.md)",
+      "Bash(cd d:\\\\\\\\Service\\\\\\\\ww-iec\\\\\\\\iec-web-2)",
+      "PowerShell(cd \"d:\\\\Service\\\\ww-iec\\\\iec-web-2\"; Get-ChildItem \"src/app/\\(frontend\\)/[locale]/search\" 2>$null | ForEach-Object { $_.FullName })",
+      "PowerShell(cd \"d:\\\\Service\\\\ww-iec\\\\iec-web-2\"; Get-ChildItem \"src/search\" -Recurse -File | ForEach-Object { $_.FullName })",
+      "Bash(cd \"d:/Service/ww-iec/iec-web-2\" && rm -rf \"src/app/\\(frontend\\)/[locale]/search\" && rm -rf \"src/search\" && echo \"deleted:\" && ls \"src/app/\\(frontend\\)/[locale]/\" | head && echo \"---\" && ls src/ | grep -i search || echo \"src/search gone\")"
+    ],
+    "additionalDirectories": [
+      "d:\\Service\\ww-iec\\iec-web-2\\src\\app\\(frontend)\\[locale]\\search"
     ]
   }
 }

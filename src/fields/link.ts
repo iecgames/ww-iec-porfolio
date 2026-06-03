@@ -19,7 +19,6 @@ export const staticRouteOptions: { label: string; value: string }[] = [
   { label: 'Home', value: '/' },
   { label: 'Posts (listing)', value: '/posts' },
   { label: 'Career', value: '/career' },
-  { label: 'Search', value: '/search' },
 ]
 
 type LinkType = (options?: {
