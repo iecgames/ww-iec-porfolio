@@ -1,5 +1,5 @@
 /**
- * JWKS endpoint — publishes the RS256 public key used to sign access tokens.
+ * JWKS endpoint — publishes the ES256 public key used to sign access tokens.
  *
  * GET /api/oauth/jwks
  */

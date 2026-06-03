@@ -50,7 +50,7 @@ async function authenticate(request: Request): Promise<AuthResult> {
   const apiKey = process.env.MCP_API_KEY
   if (apiKey && token === apiKey) return { ok: true, mode: 'apikey' }
 
-  // 2) OAuth 2.1 access token (RS256 JWT) — verifies iss/aud/exp/signature.
+  // 2) OAuth 2.1 access token (ES256 JWT) — verifies iss/aud/exp/signature.
   try {
     const claims = await verifyAccessToken(token)
     const scope = typeof claims.scope === 'string' ? claims.scope : ''

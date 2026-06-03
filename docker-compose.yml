@@ -27,7 +27,6 @@ services:
       OAUTH_ISSUER: ${OAUTH_ISSUER:-}
       OAUTH_JWT_KID: ${OAUTH_JWT_KID:-iec-mcp-1}
       OAUTH_JWT_PRIVATE_KEY: ${OAUTH_JWT_PRIVATE_KEY:-}
-      OAUTH_JWT_PUBLIC_KEY: ${OAUTH_JWT_PUBLIC_KEY:-}
       OAUTH_ACCESS_TOKEN_TTL: ${OAUTH_ACCESS_TOKEN_TTL:-3600}
       OAUTH_REFRESH_TOKEN_TTL: ${OAUTH_REFRESH_TOKEN_TTL:-2592000}
       # Set to "true" to enable full server error logs in Docker (pre-prod debugging)
