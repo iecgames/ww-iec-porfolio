@@ -56,6 +56,20 @@ const nextConfig: NextConfig = {
   output: 'standalone',
   reactStrictMode: true,
   redirects,
+  // Next ignores dot-prefixed app dirs, so the RFC 9728/8414 discovery docs
+  // are served from api/well-known/* and surfaced at their canonical paths.
+  async rewrites() {
+    return [
+      {
+        source: '/.well-known/oauth-protected-resource',
+        destination: '/api/well-known/oauth-protected-resource',
+      },
+      {
+        source: '/.well-known/oauth-authorization-server',
+        destination: '/api/well-known/oauth-authorization-server',
+      },
+    ]
+  },
   turbopack: {
     root: path.resolve(dirname),
   },
