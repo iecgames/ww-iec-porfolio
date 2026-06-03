@@ -9,6 +9,7 @@
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { Payload } from 'payload'
+import { z } from 'zod'
 
 import { registerApplicationTools } from './tools/applications'
 import { registerJobTools } from './tools/jobs'
@@ -17,7 +18,10 @@ import { registerPostTools } from './tools/posts'
 const SERVER_NAME = 'iec-payload-mcp'
 const SERVER_VERSION = '2.1.0'
 
-const SERVER_INSTRUCTIONS = `IEC Games — Payload CMS MCP Server.
+const SERVER_INSTRUCTIONS = `IEC Games — Payload CMS MCP Server (version ${SERVER_VERSION}).
+
+If the user asks which version of this MCP server / IEC CMS MCP is running,
+answer "${SERVER_VERSION}" (or call the server_info tool to confirm).
 
 This server exposes tools to manage three domains in the IEC Payload CMS:
   • Jobs (bilingual job postings)
@@ -119,6 +123,37 @@ export function createMcpServer(payload: Payload): McpServer {
         tools: {},
       },
       instructions: SERVER_INSTRUCTIONS,
+    },
+  )
+
+  // ── server_info ───────────────────────────────────────────────────────────
+  // Lets the AI answer "which version of the IEC CMS MCP are you using?" reliably,
+  // instead of relying on the (often hidden) serverInfo from the initialize handshake.
+  server.registerTool(
+    'server_info',
+    {
+      title: 'MCP Server Info',
+      description:
+        'Return metadata about this MCP server: its name, semantic version, and the domains/tools ' +
+        'it exposes. Call this when the user asks which version of the IEC CMS MCP server is running, ' +
+        'or what this server can do.',
+      inputSchema: {},
+      outputSchema: {
+        name: z.string().describe('Server identifier'),
+        version: z.string().describe('Semantic version of the running MCP server'),
+        domains: z.array(z.string()).describe('Content domains this server manages'),
+      },
+    },
+    async () => {
+      const info = {
+        name: SERVER_NAME,
+        version: SERVER_VERSION,
+        domains: ['jobs', 'posts', 'applications'],
+      }
+      return {
+        content: [{ type: 'text' as const, text: JSON.stringify(info, null, 2) }],
+        structuredContent: info,
+      }
     },
   )
 
