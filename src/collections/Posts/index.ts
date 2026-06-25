@@ -161,6 +161,8 @@ export const Posts: CollectionConfig<'posts'> = {
             }),
             MetaImageField({
               relationTo: 'media',
+              // The SEO plugin defaults meta image to localized; share one image across locales.
+              overrides: { localized: false },
             }),
 
             MetaDescriptionField({ overrides: { localized: true } }),
