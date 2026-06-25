@@ -11,7 +11,7 @@ import { Media } from '@/components/Media'
 
 export type CardPostData = Pick<
   Post,
-  'slug' | 'categories' | 'tags' | 'meta' | 'title' | 'publishedAt'
+  'slug' | 'categories' | 'tags' | 'meta' | 'title' | 'publishedAt' | 'heroImage'
 >
 
 function formatCardDate(timestamp: string): string {
@@ -43,8 +43,16 @@ export const Card: React.FC<{
     title: titleFromProps,
   } = props
 
-  const { slug, categories, tags, meta, title, publishedAt } = doc || {}
+  const { slug, categories, tags, meta, title, publishedAt, heroImage } = doc || {}
   const { image: metaImage, description } = meta || {}
+
+  // Prefer the SEO meta image; fall back to the post's hero image when none is set.
+  const cardImage =
+    metaImage && typeof metaImage !== 'string'
+      ? metaImage
+      : heroImage && typeof heroImage !== 'string'
+        ? heroImage
+        : null
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
   const hasTags = tags && Array.isArray(tags) && tags.length > 0
@@ -65,10 +73,10 @@ export const Card: React.FC<{
     >
       {/* Image */}
       <div className="relative w-full aspect-video overflow-hidden bg-muted">
-        {metaImage && typeof metaImage !== 'string' ? (
+        {cardImage ? (
           <>
             <Media
-              resource={metaImage}
+              resource={cardImage}
               fill
               imgClassName="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
             />
