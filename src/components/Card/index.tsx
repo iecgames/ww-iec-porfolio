@@ -46,13 +46,15 @@ export const Card: React.FC<{
   const { slug, categories, tags, meta, title, publishedAt, heroImage } = doc || {}
   const { image: metaImage, description } = meta || {}
 
+  // A usable image must be a populated media object WITH a url. An unset relationship
+  // can come back as a string/number id, or — when populated against an empty value —
+  // as an object with no url (e.g. `{ id: undefined, url: undefined }`). Checking only
+  // `typeof !== 'string'` would treat that empty object as valid and skip the fallback.
+  const usableImage = (img: typeof metaImage | typeof heroImage) =>
+    img && typeof img === 'object' && 'url' in img && img.url ? img : null
+
   // Prefer the SEO meta image; fall back to the post's hero image when none is set.
-  const cardImage =
-    metaImage && typeof metaImage !== 'string'
-      ? metaImage
-      : heroImage && typeof heroImage !== 'string'
-        ? heroImage
-        : null
+  const cardImage = usableImage(metaImage) ?? usableImage(heroImage)
 
   const hasCategories = categories && Array.isArray(categories) && categories.length > 0
   const hasTags = tags && Array.isArray(tags) && tags.length > 0
