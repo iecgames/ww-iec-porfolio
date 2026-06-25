@@ -27,10 +27,18 @@ type NodeTypes =
   | SerializedBlockNode<CTABlockProps | MediaBlockProps | BannerBlockProps | CodeBlockProps>
 
 const internalDocToHref = ({ linkNode }: { linkNode: SerializedLinkNode }) => {
-  const { value, relationTo } = linkNode.fields.doc!
-  if (typeof value !== 'object') {
-    throw new Error('Expected value to be an object')
+  const doc = linkNode.fields?.doc
+  const value = doc?.value
+  const relationTo = doc?.relationTo
+
+  // The referenced doc may not be populated to an object (e.g. an anonymous/published
+  // read where the target is an unpublished draft, or it's simply unresolved). In that
+  // case `value` is just the ID — return a no-op href instead of throwing, which would
+  // crash the whole page render with a 500.
+  if (!value || typeof value !== 'object' || !value.slug) {
+    return '#'
   }
+
   const slug = value.slug
   return relationTo === 'posts' ? `/posts/${slug}` : `/${slug}`
 }

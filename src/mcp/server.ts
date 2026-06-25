@@ -110,6 +110,9 @@ MEDIA (IMAGES) — RULES
   • media_upload: create a new image from EITHER a remote "url" (downloaded
     server-side) OR an absolute server "filePath" — never both. Always provide a
     descriptive "alt" for accessibility/SEO; ask the user for alt text if unclear.
+  • If a "url" upload fails (error mentions an HTML page / login / blocked), the
+    link needs a browser session or has hotlink protection. Ask the user to
+    download the image and re-run media_upload with "filePath".
   • Typical flow to add an image to a post:
       1. media_upload(url="https://...", alt="...")   → returns media id
       2. posts_update(id=<post>, heroImage=<media id>) (and/or metaImage)

@@ -22,6 +22,19 @@ const SERVER_URL = (process.env.NEXT_PUBLIC_SERVER_URL ?? 'http://localhost:3000
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
+/**
+ * Browser-like headers for fetching remote images. Many CDNs / image hosts
+ * reject "bare" server requests (no User-Agent) or apply hotlink protection
+ * (require a Referer). Sending these mirrors what a real browser does, which is
+ * why "download then upload" succeeds where pasting the link fails. The Referer
+ * is set per-request to the image's own origin.
+ */
+const BROWSER_HEADERS: Record<string, string> = {
+  'User-Agent':
+    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36',
+  Accept: 'image/avif,image/webp,image/apng,image/*,*/*;q=0.8',
+}
+
 /** Map a MIME type to a sensible file extension when the URL lacks one. */
 const MIME_EXT: Record<string, string> = {
   'image/jpeg': 'jpg',
@@ -78,6 +91,71 @@ function deriveFilename(url: string, mimeType: string | null): string {
   const ext = mimeType ? (MIME_EXT[mimeType.split(';')[0]!.trim().toLowerCase()] ?? 'jpg') : 'jpg'
   const stem = base || `upload-${url.length}`
   return `${stem}.${ext}`
+}
+
+/** Heuristic: does this buffer look like an HTML page rather than an image? */
+function looksLikeHtml(buffer: Buffer): boolean {
+  const head = buffer.subarray(0, 64).toString('utf8').trim().toLowerCase()
+  return head.startsWith('<!doctype html') || head.startsWith('<html') || head.startsWith('<?xml')
+}
+
+/**
+ * Fetch a remote image with browser-like headers and validate that the response
+ * is actually an image. Throws clear, actionable errors (suggesting the filePath
+ * fallback) for the common "paste-link fails" cases: hotlink protection, login
+ * walls, and URLs that return an HTML page instead of a file.
+ */
+async function fetchImage(
+  url: string,
+): Promise<{ buffer: Buffer; mimeType: string; name: string }> {
+  const FALLBACK =
+    ' If this image needs a login or blocks server access, download it and re-run media_upload with `filePath`.'
+
+  let origin = ''
+  try {
+    origin = new URL(url).origin
+  } catch {
+    throw new Error(`Invalid URL: ${url}`)
+  }
+
+  let res: Response
+  try {
+    res = await fetch(url, {
+      redirect: 'follow',
+      headers: { ...BROWSER_HEADERS, Referer: `${origin}/` },
+    })
+  } catch (err) {
+    throw new Error(
+      `Could not reach the URL (network/DNS/TLS error: ${err instanceof Error ? err.message : String(err)}).` +
+        FALLBACK,
+    )
+  }
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch image (HTTP ${res.status} ${res.statusText}).` + FALLBACK)
+  }
+
+  const rawType = res.headers.get('content-type')
+  const mimeType = rawType?.split(';')[0]!.trim().toLowerCase() ?? ''
+
+  if (mimeType && !mimeType.startsWith('image/')) {
+    throw new Error(
+      `URL returned "${mimeType}", not an image — it is likely a web/login page, not the file itself.` +
+        FALLBACK,
+    )
+  }
+
+  const buffer = Buffer.from(await res.arrayBuffer())
+  if (buffer.length === 0) {
+    throw new Error('URL returned an empty response.' + FALLBACK)
+  }
+  if (looksLikeHtml(buffer)) {
+    throw new Error(
+      'URL returned an HTML page, not an image file (common with share/preview links).' + FALLBACK,
+    )
+  }
+
+  return { buffer, mimeType: mimeType || 'application/octet-stream', name: deriveFilename(url, mimeType) }
 }
 
 // ─── Tool registrations ───────────────────────────────────────────────────────
@@ -163,9 +241,12 @@ export function registerMediaTools(server: McpServer, payload: Payload) {
       title: 'Upload Media',
       description:
         'Create a NEW media document from an image. Provide EITHER `url` (a remote image URL fetched ' +
-        'server-side) OR `filePath` (an absolute path to an image already on the server disk) — not ' +
-        'both. Always pass a descriptive `alt` for accessibility and SEO. Returns the new media id and ' +
-        'file URL; use that id as a post heroImage or SEO metaImage.',
+        'server-side with browser-like headers) OR `filePath` (an absolute path to an image already on ' +
+        'the server disk) — not both. Always pass a descriptive `alt` for accessibility and SEO. ' +
+        'Returns the new media id and file URL; use that id as a post heroImage or SEO metaImage.\n\n' +
+        'If a `url` upload fails because the image needs a login or blocks server access (the error will ' +
+        'say it returned an HTML page or was rejected), ask the user to download the image, then re-run ' +
+        'with `filePath`.',
       inputSchema: {
         url: z
           .string()
@@ -198,23 +279,14 @@ export function registerMediaTools(server: McpServer, payload: Payload) {
 
       let doc
       if (url) {
-        const res = await fetch(url)
-        if (!res.ok) {
-          throw new Error(`Failed to fetch image from URL (HTTP ${res.status} ${res.statusText}).`)
-        }
-        const mimeType = res.headers.get('content-type')
-        if (mimeType && !mimeType.toLowerCase().startsWith('image/')) {
-          throw new Error(`URL did not return an image (content-type: ${mimeType}).`)
-        }
-        const buffer = Buffer.from(await res.arrayBuffer())
-        const name = deriveFilename(url, mimeType)
+        const { buffer, mimeType, name } = await fetchImage(url)
 
         doc = await payload.create({
           collection: 'media',
           data: data as never,
           file: {
             data: buffer,
-            mimetype: mimeType ?? 'application/octet-stream',
+            mimetype: mimeType,
             name,
             size: buffer.length,
           },
