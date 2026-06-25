@@ -111,7 +111,20 @@ const buildGcs = (): Plugin => {
     throw new Error('[storage] STORAGE_PROVIDER=gcs but missing env: GCS_BUCKET')
   }
   return gcsStorage({
-    collections: COLLECTIONS,
+    // `disablePayloadAccessControl` makes Payload return the public GCS URL
+    // (https://storage.googleapis.com/<bucket>/<key>) as the media `url`
+    // instead of proxying every request through the /api/media/file
+    // serverless route. This removes a serverless hop + Netlify↔GCS roundtrip
+    // so Next.js Image fetches straight from Google's edge.
+    collections: {
+      media: {
+        disablePayloadAccessControl: true,
+      },
+    },
+    // No `acl` on purpose: the bucket grants public read at the bucket level
+    // (uniform bucket-level access + allUsers IAM). Setting acl: 'Public' here
+    // would call makePublic() (object ACL API), which FAILS on uniform-access
+    // buckets and would break every upload. Objects inherit bucket-level access.
     bucket: process.env.GCS_BUCKET,
     options: loadGcsCredentials(),
   })
