@@ -32,8 +32,15 @@ const nextConfig: NextConfig = {
         pathname: '/page_404/**',
       },
     ],
-    qualities: [100],
+    qualities: [80],
     remotePatterns: [
+      // Media served directly from the public Google Cloud Storage CDN when
+      // STORAGE_PROVIDER=gcs (see src/plugins/storage.ts). Next.js Image
+      // optimizes straight from Google's edge — no proxy through Payload.
+      {
+        hostname: 'storage.googleapis.com',
+        protocol: 'https',
+      },
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
         const url = new URL(item)
 
