@@ -22,6 +22,7 @@
     "all": "All",
     "noPostsInCategory": "No posts in this category.",
     "loadMore": "View more news",
+    "loading": "Loading…",
     "postsInCategory": "{count, plural, =0 {No posts} one {# post} other {# posts}}"
   },
   "RelatedPosts": {

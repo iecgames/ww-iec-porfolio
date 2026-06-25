@@ -22,6 +22,7 @@
     "all": "Tất cả",
     "noPostsInCategory": "Không có bài viết nào trong danh mục này.",
     "loadMore": "Xem thêm tin tức",
+    "loading": "Đang tải…",
     "postsInCategory": "{count, plural, other {# bài viết}}"
   },
   "RelatedPosts": {
