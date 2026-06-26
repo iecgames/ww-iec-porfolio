@@ -59,12 +59,12 @@ export const General: GlobalConfig = {
       },
     },
     {
-      name: 'favicon',
+      name: 'logoMono',
       type: 'upload',
       relationTo: 'media',
-      label: 'Favicon',
+      label: 'Site Logo Mono',
       admin: {
-        description: 'Browser tab icon. Recommended: 32×32 or 64×64 PNG/ICO.',
+        description: 'Monochrome logo used in the footer (on the dark background).',
       },
     },
     {

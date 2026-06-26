@@ -3785,9 +3785,9 @@ export interface General {
    */
   logo?: (string | null) | Media;
   /**
-   * Browser tab icon. Recommended: 32×32 or 64×64 PNG/ICO.
+   * Monochrome logo used in the footer (on the dark background).
    */
-  favicon?: (string | null) | Media;
+  logoMono?: (string | null) | Media;
   /**
    * Short slogan displayed under the logo or in meta tags.
    */
@@ -4090,7 +4090,7 @@ export interface GeneralSelect<T extends boolean = true> {
   hotline?: T;
   email?: T;
   logo?: T;
-  favicon?: T;
+  logoMono?: T;
   tagline?: T;
   description?: T;
   updatedAt?: T;
