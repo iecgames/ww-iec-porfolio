@@ -89,13 +89,20 @@ export async function Footer() {
   const contactValue = contactType === 'email' ? generalData?.email : generalData?.hotline
   const contactHref = contactType === 'email' ? `mailto:${contactValue}` : `tel:${contactValue}`
 
-  // Resolve logo from General Settings
-  const logoMedia =
-    generalData?.logo && typeof generalData.logo === 'object'
-      ? (generalData.logo as { url?: string; alt?: string; width?: number; height?: number })
+  // Resolve logo from General Settings. The footer prefers the dedicated mono
+  // logo (designed for the dark background, shown as-is); only when it's absent
+  // do we fall back to the regular logo and force it white via a CSS filter.
+  const resolveMedia = (value: unknown) =>
+    value && typeof value === 'object'
+      ? (value as { url?: string; alt?: string; width?: number; height?: number })
       : null
-  const logoSrc = logoMedia?.url ?? null
-  const logoAlt = logoMedia?.alt || (generalData?.companyName as string | undefined) || 'IEC Logo'
+  const monoMedia = resolveMedia(generalData?.logoMono)
+  const logoMedia = resolveMedia(generalData?.logo)
+  const activeMedia = monoMedia ?? logoMedia
+  const logoSrc = activeMedia?.url ?? null
+  const logoAlt = activeMedia?.alt || (generalData?.companyName as string | undefined) || 'IEC Logo'
+  // Mono logo renders untouched; the fallback colored logo gets inverted to white.
+  const logoClassName = monoMedia ? 'h-20' : 'brightness-0 invert h-20'
 
   return (
     <footer
@@ -172,7 +179,7 @@ export async function Footer() {
                   src={logoSrc}
                   alt={logoAlt}
                   size="large"
-                  className="brightness-0 invert h-20"
+                  className={logoClassName}
                 />
               </Link>
               {generalData.description && (

@@ -67,7 +67,7 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, logoSrc, logoA
               <Logo loading="eager" priority="high" src={logoSrc} alt={logoAlt} />
             </Link>
           </div>
-          <HeaderNav data={data} centered={centered} />
+          <HeaderNav data={data} centered={centered} solid={solid} />
         </div>
       </div>
     </header>
