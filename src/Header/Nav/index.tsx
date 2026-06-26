@@ -80,7 +80,7 @@ export const HeaderNav: React.FC<{
           transition: 'flex-grow 500ms cubic-bezier(0.22, 1, 0.36, 1)',
         }}
       >
-        <SearchBarButton />
+        <SearchBarButton solid={solid} />
         <LanguageSwitcher />
       </div>
 
