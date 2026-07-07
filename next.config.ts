@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
     loadPaths: ['./node_modules/@payloadcms/ui/dist/scss/'],
   },
   images: {
+    // Serve ảnh trực tiếp từ origin (GCS/local), không qua Next/Netlify image optimizer.
+    // Đánh đổi: không resize/convert WebP, không sinh srcset nhiều kích thước.
+    unoptimized: true,
     localPatterns: [
       {
         pathname: '/api/media/file/**',

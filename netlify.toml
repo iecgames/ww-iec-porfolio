@@ -10,7 +10,9 @@
   NODE_OPTIONS = "--max-old-space-size=4096 --no-deprecation"
   # NEXT_PUBLIC_* là biến public theo thiết kế (nhúng vào client) -> bỏ qua secret scan
   # OAUTH_JWT_PRIVATE_KEY là base64 PEM (EC P-256) nên secret-scan dễ báo nhầm -> omit có chủ đích.
-  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,OAUTH_JWT_PRIVATE_KEY"
+  # GCS_BUCKET chỉ là tên bucket public, luôn xuất hiện trong URL media (storage.googleapis.com/<bucket>/...)
+  # được render vào page -> không phải secret thật.
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SERVER_URL,OAUTH_JWT_PRIVATE_KEY,GCS_BUCKET"
   # File template/test chỉ chứa placeholder, không phải secret thật -> không scan
   SECRETS_SCAN_OMIT_PATHS = ".env.example,test.env"
 
