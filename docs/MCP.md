@@ -90,13 +90,13 @@ The MCP server exposes **15 tools** across 3 domains:
 AI Agent (Claude / GPT / custom)
          │
          │  POST https://your-site.com/api/mcp
-         │  Authorization: Bearer <MCP_API_KEY>
+         │  Authorization: Bearer <OAuth 2.1 access token>
          ▼
 ┌─────────────────────────────────────────────────────────┐
 │  Next.js App Router                                     │
 │  src/app/(payload)/api/mcp/route.ts                     │
 │                                                         │
-│  1. Validate Bearer token (MCP_API_KEY)                 │
+│  1. Verify OAuth JWT (iss/aud/exp/scope/signature)      │
 │  2. Create McpServer + WebStandardStreamableHTTP        │
 │     Transport (per-request, stateless)                  │
 │  3. server.connect(transport)                           │
@@ -134,14 +134,18 @@ src/
 
 ### Environment Variables
 
-Add to `.env`:
+The endpoint is authenticated via the embedded OAuth 2.1 Authorization Server.
+Add its variables to `.env` (see `.env.example` for the full list):
 
 ```env
-# MCP Server — API key for AI Agent access
-MCP_API_KEY=your-strong-random-secret-here
+# MCP OAuth 2.1 (embedded Authorization Server)
+OAUTH_ISSUER=http://localhost:3000
+OAUTH_JWT_PRIVATE_KEY=   # base64-encoded EC P-256 private key PEM
+OAUTH_JWT_KID=iec-mcp-1
 ```
 
-> Generate with: `openssl rand -base64 32`
+> Generate the signing key with:
+> `openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out priv.pem && base64 -w0 priv.pem`
 
 ### No Additional Dependencies
 
@@ -151,21 +155,39 @@ The only new package is `@modelcontextprotocol/sdk@1.29.0` (installed) and `zod@
 
 ## 4. Authentication
 
-Every request to `/api/mcp` must include a valid Bearer token:
+`/api/mcp` is an **OAuth 2.1 protected resource**. Every request must carry a
+valid access token (ES256 JWT) issued by this app's embedded Authorization
+Server:
 
 ```
-Authorization: Bearer <MCP_API_KEY>
+Authorization: Bearer <OAuth 2.1 access token>
 ```
 
-Requests without the header or with an incorrect key receive:
+The route verifies the token's signature, issuer, audience, expiry, and the
+`mcp` scope. MCP clients that support OAuth (ChatGPT, Claude, VS Code, …) obtain
+the token automatically:
+
+1. Client calls `/api/mcp` with no token → gets `401` + a
+   `WWW-Authenticate: Bearer resource_metadata="…"` header (RFC 9728).
+2. Client follows the protected-resource metadata to the Authorization Server,
+   performs Dynamic Client Registration + PKCE, and the user logs in with their
+   Payload account and consents.
+3. Client retries `/api/mcp` with the issued access token.
+
+Failure responses:
 
 ```json
+// Missing / invalid / expired token
 HTTP/1.1 401 Unauthorized
-
 { "jsonrpc": "2.0", "error": { "code": -32001, "message": "Unauthorized" }, "id": null }
+
+// Valid token but missing the `mcp` scope
+HTTP/1.1 403 Forbidden
+{ "jsonrpc": "2.0", "error": { "code": -32001, "message": "Insufficient scope" }, "id": null }
 ```
 
-If `MCP_API_KEY` is not set in the environment, **all requests are denied** (fail-safe).
+See `.env.example` (`OAUTH_*` variables) and `src/oauth/` for the Authorization
+Server implementation.
 
 ---
 
@@ -437,13 +459,19 @@ Access-Control-Allow-Headers: Content-Type, Authorization, mcp-session-id, Last-
 Access-Control-Expose-Headers: mcp-session-id, mcp-protocol-version
 ```
 
-CORS is open (`*`) because the endpoint is protected by the `MCP_API_KEY` Bearer token. Only callers with the key can perform operations.
+CORS is open (`*`) because the endpoint is protected by the OAuth 2.1 Bearer token. Only callers with a valid access token can perform operations.
 
 ---
 
 ## 10. Testing with MCP Inspector
 
 The [MCP Inspector](https://modelcontextprotocol.io/docs/tools/inspector) is the fastest way to manually test tools.
+
+> **Access token needed.** The Inspector and `curl` do not run the OAuth flow, so
+> you must supply an access token yourself. Either use the Inspector's built-in
+> OAuth support (point it at the server and let it authorize), or mint a token
+> directly with the app's signing key — see `src/oauth/jwt.ts` (`signAccessToken`),
+> which the integration tests in `tests/int/oauth-mcp-guard.int.spec.ts` use.
 
 ```bash
 pnpm run test:mcp
@@ -458,7 +486,7 @@ npx @modelcontextprotocol/inspector
 Then in the UI:
 1. **Transport:** `Streamable HTTP` ← must select this, not "STDIO"
 2. **URL:** `http://localhost:3000/api/mcp`
-3. **Headers:** Add `Authorization: Bearer your-key-here`
+3. **Headers:** Add `Authorization: Bearer <access-token>`
 4. Click **Connect**
 5. Navigate to **Tools** tab → select any tool → fill inputs → **Call Tool**
 
@@ -466,7 +494,7 @@ Then in the UI:
 ```bash
 curl -X POST http://localhost:3000/api/mcp \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer your-key-here" \
+  -H "Authorization: Bearer <access-token>" \
   -H "Accept: application/json, text/event-stream" \
   -d '{
     "jsonrpc": "2.0",
@@ -494,7 +522,7 @@ Expected response includes `"result": { "serverInfo": { "name": "iec-payload-mcp
     "iec-web": {
       "url": "https://your-domain.com/api/mcp",
       "headers": {
-        "Authorization": "Bearer your-key-here"
+        "Authorization": "Bearer <access-token>"
       }
     }
   }
@@ -511,7 +539,7 @@ const transport = new StreamableHTTPClientTransport(
   new URL('https://your-domain.com/api/mcp'),
   {
     requestInit: {
-      headers: { Authorization: 'Bearer your-key-here' },
+      headers: { Authorization: 'Bearer <access-token>' },
     },
   },
 )
@@ -539,7 +567,7 @@ import httpx, json
 
 MCP_URL = "https://your-domain.com/api/mcp"
 HEADERS = {
-    "Authorization": "Bearer your-key-here",
+    "Authorization": "Bearer <access-token>",
     "Content-Type": "application/json",
     "Accept": "application/json, text/event-stream",
 }
@@ -575,21 +603,21 @@ print(result)
 ## 12. Security Considerations
 
 ### What is protected
-- Every request validates the `Authorization: Bearer <MCP_API_KEY>` header before any MCP processing occurs.
-- An empty or missing `MCP_API_KEY` env var rejects all requests (no key = no access).
+- Every request must present a valid OAuth 2.1 access token; the route verifies its signature, issuer, audience, expiry, and `mcp` scope before any MCP processing occurs.
+- Missing / invalid / expired tokens are rejected (`401`); valid tokens lacking the `mcp` scope are rejected (`403`).
 
 ### What is NOT protected
 - The `jobs` collection read access (`read: anyone` in Payload config) — the public REST API `/api/jobs` remains open for frontend use. MCP is only needed for write operations.
 
 ### Recommendations
-- Use a strong random key (≥ 32 bytes): `openssl rand -base64 32`
-- Rotate `MCP_API_KEY` if compromised — update `.env` and redeploy.
-- Do not commit `MCP_API_KEY` to version control.
+- Keep `OAUTH_JWT_PRIVATE_KEY` secret — anyone holding it can mint valid tokens. Do not commit it to version control.
+- Rotate the signing key (and `OAUTH_JWT_KID`) if compromised — update `.env` and redeploy; outstanding tokens stop verifying.
+- Use short access-token TTLs (`OAUTH_ACCESS_TOKEN_TTL`) so leaked tokens expire quickly.
 - In production, restrict access at the CDN/proxy level if possible (e.g., only allow requests from known AI agent IP ranges or VPN).
 - The `jobs_delete` tool is permanent — consider removing it from registration in `server.ts` if you only want read/write access from agents.
 
 ### DNS Rebinding
-The `WebStandardStreamableHTTPServerTransport` is configured without built-in origin restriction (`allowedOrigins` is not set). The Bearer token auth provides equivalent protection for a server deployment (DNS rebinding attacks require browser context).
+The `WebStandardStreamableHTTPServerTransport` is configured without built-in origin restriction (`allowedOrigins` is not set). The OAuth Bearer token auth provides equivalent protection for a server deployment (DNS rebinding attacks require browser context).
 
 ---
 
@@ -617,7 +645,11 @@ src/
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `MCP_API_KEY` | **yes** | Bearer token for MCP endpoint authentication |
+| `OAUTH_ISSUER` | no | Public base URL acting as the OAuth issuer (defaults to `NEXT_PUBLIC_SERVER_URL`) |
+| `OAUTH_JWT_PRIVATE_KEY` | **yes** | Base64-encoded EC P-256 private key PEM used to sign access tokens |
+| `OAUTH_JWT_KID` | no | Key ID published in the JWKS (defaults to `iec-mcp-1`) |
+| `OAUTH_ACCESS_TOKEN_TTL` | no | Access token lifetime in seconds (defaults to `3600`) |
+| `OAUTH_REFRESH_TOKEN_TTL` | no | Refresh token lifetime in seconds (defaults to `2592000`) |
 
 ### Dependencies Added
 

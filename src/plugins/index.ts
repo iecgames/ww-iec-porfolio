@@ -84,5 +84,5 @@ export const plugins: Plugin[] = [
       },
     },
   }),
-  ...([storagePlugin()].filter(Boolean) as Plugin[]),
+  storagePlugin(),
 ]

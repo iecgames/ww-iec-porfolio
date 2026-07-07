@@ -3,8 +3,7 @@
  *
  * Endpoint: POST|GET|DELETE /api/mcp
  *
- * Authentication (either one):
- *   • Authorization: Bearer <MCP_API_KEY>          (legacy static key)
+ * Authentication:
  *   • Authorization: Bearer <OAuth 2.1 access JWT>  (issued by this app's AS)
  *
  * Unauthenticated requests get 401 + a WWW-Authenticate header pointing at the
@@ -37,7 +36,6 @@ function corsResponse(status: number, body?: BodyInit | null): Response {
 
 // ─── Auth guard ───────────────────────────────────────────────────────────────
 type AuthResult =
-  | { ok: true; mode: 'apikey' }
   | { ok: true; mode: 'oauth'; sub: string; client_id?: string }
   | { ok: false; error: 'invalid_token' | 'insufficient_scope' | 'missing_token' }
 
@@ -46,11 +44,7 @@ async function authenticate(request: Request): Promise<AuthResult> {
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : ''
   if (!token) return { ok: false, error: 'missing_token' }
 
-  // 1) Legacy static API key.
-  const apiKey = process.env.MCP_API_KEY
-  if (apiKey && token === apiKey) return { ok: true, mode: 'apikey' }
-
-  // 2) OAuth 2.1 access token (ES256 JWT) — verifies iss/aud/exp/signature.
+  // OAuth 2.1 access token (ES256 JWT) — verifies iss/aud/exp/signature.
   try {
     const claims = await verifyAccessToken(token)
     const scope = typeof claims.scope === 'string' ? claims.scope : ''

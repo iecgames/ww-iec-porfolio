@@ -1,15 +1,14 @@
 import type { Instrumentation } from 'next'
 
 /**
- * onRequestError — logs full server error details when VERBOSE_ERRORS=true.
+ * onRequestError — logs full server error details (message, stack, request
+ * context) to the server logs.
  *
- * Next.js production builds strip error messages to avoid leaking sensitive info.
- * Set VERBOSE_ERRORS=true in your .env (or docker-compose.yml) to get the full
- * stack trace and context in Docker logs for pre-production debugging.
+ * Next.js production builds strip error messages from responses to avoid leaking
+ * sensitive info; this hook restores full stack traces in the server/Docker logs
+ * for debugging.
  */
 export const onRequestError: Instrumentation.onRequestError = (err, request, context) => {
-  if (process.env.VERBOSE_ERRORS !== 'true') return
-
   const error = err as Error & { digest?: string }
 
   console.error('[Server Error]', {

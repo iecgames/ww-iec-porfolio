@@ -1,7 +1,7 @@
 /**
  * @vitest-environment node
  *
- * Phase 05 acceptance — /api/mcp dual auth (OAuth JWT or legacy key) and the
+ * Phase 05 acceptance — /api/mcp OAuth JWT auth and the
  * 401 WWW-Authenticate challenge. Tokens are minted directly with the same
  * key material the dev server verifies with. Requires a running dev server
  * (default http://localhost:3000).
@@ -61,17 +61,5 @@ describe('/api/mcp — accepted credentials', () => {
     const text = await res.text()
     expect(text).toContain('serverInfo')
     expect(text).not.toContain('Unauthorized')
-  })
-
-  it('still accepts the legacy MCP_API_KEY when configured', async () => {
-    const key = process.env.MCP_API_KEY
-    if (!key) {
-      // Key not set in this environment — nothing to assert.
-      expect(true).toBe(true)
-      return
-    }
-    const res = await mcp(key)
-    expect(res.status).toBe(200)
-    expect(await res.text()).toContain('serverInfo')
   })
 })

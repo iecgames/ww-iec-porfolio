@@ -20,8 +20,6 @@ services:
       NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?Set NEXT_PUBLIC_SERVER_URL in your .env file}
       CRON_SECRET: ${CRON_SECRET:?Set CRON_SECRET in your .env file}
       PREVIEW_SECRET: ${PREVIEW_SECRET:?Set PREVIEW_SECRET in your .env file}
-      # MCP — legacy static key (still accepted alongside OAuth)
-      MCP_API_KEY: ${MCP_API_KEY:-}
       # MCP OAuth 2.1 (embedded authorization server). Must equal the public
       # https URL clients reach (e.g. the Cloudflare Tunnel hostname).
       OAUTH_ISSUER: ${OAUTH_ISSUER:-}
@@ -29,8 +27,6 @@ services:
       OAUTH_JWT_PRIVATE_KEY: ${OAUTH_JWT_PRIVATE_KEY:-}
       OAUTH_ACCESS_TOKEN_TTL: ${OAUTH_ACCESS_TOKEN_TTL:-3600}
       OAUTH_REFRESH_TOKEN_TTL: ${OAUTH_REFRESH_TOKEN_TTL:-2592000}
-      # Set to "true" to enable full server error logs in Docker (pre-prod debugging)
-      VERBOSE_ERRORS: ${VERBOSE_ERRORS:-false}
     volumes:
       # Persist uploaded media files across container restarts
       - media_data:/app/public/media
