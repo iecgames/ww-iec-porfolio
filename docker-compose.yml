@@ -11,6 +11,9 @@ services:
         # Needed by generateStaticParams during next build
         DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL in your .env file}
         PAYLOAD_SECRET: ${PAYLOAD_SECRET:?Set PAYLOAD_SECRET in your .env file}
+        # storagePlugin() loads at build time and throws without a bucket, so the
+        # prerender step (media URLs) needs GCS_BUCKET even though it doesn't upload.
+        GCS_BUCKET: ${GCS_BUCKET:?Set GCS_BUCKET in your .env file}
     restart: unless-stopped
     ports:
       - "${PORT:-3000}:3000"
@@ -27,22 +30,15 @@ services:
       OAUTH_JWT_PRIVATE_KEY: ${OAUTH_JWT_PRIVATE_KEY:-}
       OAUTH_ACCESS_TOKEN_TTL: ${OAUTH_ACCESS_TOKEN_TTL:-3600}
       OAUTH_REFRESH_TOKEN_TTL: ${OAUTH_REFRESH_TOKEN_TTL:-2592000}
+      # Google Cloud Storage — bucket for uploaded media (public bucket-level read).
+      GCS_BUCKET: ${GCS_BUCKET:?Set GCS_BUCKET in your .env file}
+      # Auth: prefer GCS_CREDENTIALS (base64 service-account JSON) in Docker — raw
+      # JSON gets mangled by env layers. GCS_KEY_FILE (path) or ADC also work.
+      GCS_CREDENTIALS: ${GCS_CREDENTIALS:-}
+      GCS_KEY_FILE: ${GCS_KEY_FILE:-}
     volumes:
       # Persist uploaded media files across container restarts
       - media_data:/app/public/media
-
-  # ─────────────────────────────────────────────
-  # Cloudflare Tunnel — gives the app a public HTTPS hostname (required for
-  # ChatGPT MCP OAuth). Create the tunnel + token in the Cloudflare Zero Trust
-  # dashboard, add a Public Hostname routing to service http://app:3000, then
-  # put the token in CLOUDFLARE_TUNNEL_TOKEN. No inbound ports to open.
-  # ─────────────────────────────────────────────
-  cloudflared:
-    image: cloudflare/cloudflared:latest
-    restart: unless-stopped
-    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN:?Set CLOUDFLARE_TUNNEL_TOKEN in your .env file}
-    depends_on:
-      - app
 
 volumes:
   media_data:
