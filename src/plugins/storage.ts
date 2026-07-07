@@ -11,7 +11,6 @@ import type { Plugin } from 'payload'
 const loadGcsCredentials = (): StorageOptions => {
   const inline = process.env.GCS_CREDENTIALS
   const keyFile = process.env.GCS_KEY_FILE
-  const projectId = process.env.GCS_PROJECT_ID
 
   if (inline) {
     const trimmed = inline.trim()
@@ -36,7 +35,6 @@ const loadGcsCredentials = (): StorageOptions => {
       )
     }
     return {
-      ...(projectId ? { projectId } : {}),
       credentials: parsed as StorageOptions['credentials'],
     }
   }
@@ -53,14 +51,13 @@ const loadGcsCredentials = (): StorageOptions => {
       )
     }
     return {
-      ...(projectId ? { projectId } : {}),
       credentials: parsed as StorageOptions['credentials'],
     }
   }
 
   // Fall through to Application Default Credentials (GOOGLE_APPLICATION_CREDENTIALS
-  // or workload identity). projectId stays optional — GCS infers it from ADC.
-  return projectId ? { projectId } : {}
+  // or workload identity). GCS infers the project ID from the credentials.
+  return {}
 }
 
 export const storagePlugin = (): Plugin => {
