@@ -22,7 +22,8 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
     "test:mcp": "npx @modelcontextprotocol/inspector",
     "migrate:media:gcs": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migrate-media-to-gcs.ts",
-    "backfill:search": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/backfill-search-text.ts"
+    "backfill:search": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/backfill-search-text.ts",
+    "purge:forms": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/purge-forms.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",

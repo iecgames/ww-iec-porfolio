@@ -32,9 +32,21 @@ Xóa submission trước là có chủ ý, cùng lý do như vụ CV: xóa phía
 - Chỉ đụng đúng hai collection này. Không đụng `contactSubmissions`, `subscribers`.
 - Rủi ro thấp hơn vụ CV nhiều: đây là collection riêng, không lẫn dữ liệu khác như CV lẫn trong `media`.
 
+## 3b. Kết quả chạy thật trên DB hiện tại
+
+```
+form-submissions   : 0
+forms              : 0
+contactSubmissions : 0  (must not change)
+subscribers        : 0  (must not change)
+→ Nothing to purge.
+```
+
+DB mà `.env` trỏ tới rỗng nên **không có gì để xóa ở đây**. Con số 0 không chứng minh production cũng rỗng — script phải chạy lại trên DB thật, **trước khi** phase 03 lên production.
+
 ## 4. Acceptance criteria
 
-- [ ] Dry-run in đúng số doc của cả hai collection.
+- [x] Dry-run chạy được, in đúng số doc của cả hai collection (0/0 trên DB này).
 - [ ] Chạy `--confirm` xong không lỗi.
 - [ ] Đếm lại: `forms` = 0, `form-submissions` = 0.
 - [ ] `contactSubmissions` và `subscribers` **không đổi số lượng** — kiểm trước/sau.
