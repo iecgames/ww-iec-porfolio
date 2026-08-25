@@ -41,6 +41,7 @@ export const syncFormSubscriber: CollectionAfterChangeHook = async ({ doc, opera
         email: emailValue,
         name: nameValue,
         source: 'form_submission',
+        payload: req.payload,
         req,
       })
     }

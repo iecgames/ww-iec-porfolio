@@ -37,6 +37,8 @@ export const Subscribers: CollectionConfig = {
       name: 'source',
       type: 'select',
       options: [
+        { label: 'Contact Form', value: 'contact' },
+        // Kept for historical rows — these paths no longer create subscribers.
         { label: 'Job Application', value: 'job_application' },
         { label: 'Form Submission', value: 'form_submission' },
         { label: 'Newsletter Signup', value: 'newsletter' },

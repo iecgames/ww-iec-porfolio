@@ -1762,7 +1762,7 @@ export interface Subscriber {
   id: string;
   email: string;
   name?: string | null;
-  source?: ('job_application' | 'form_submission' | 'newsletter') | null;
+  source?: ('contact' | 'job_application' | 'form_submission' | 'newsletter') | null;
   subscribed?: boolean | null;
   unsubscribeToken?: string | null;
   subscribedAt?: string | null;
