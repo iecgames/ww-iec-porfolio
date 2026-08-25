@@ -74,7 +74,6 @@ export interface Config {
     tags: Tag;
     users: User;
     jobs: Job;
-    'job-applications': JobApplication;
     social: Social;
     games: Game;
     subscribers: Subscriber;
@@ -106,7 +105,6 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
-    'job-applications': JobApplicationsSelect<false> | JobApplicationsSelect<true>;
     social: SocialSelect<false> | SocialSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
@@ -1738,38 +1736,6 @@ export interface Job {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "job-applications".
- */
-export interface JobApplication {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  /**
-   * The job this application was submitted for. Empty means a general/open application.
-   */
-  job?: (string | null) | Job;
-  /**
-   * Position the candidate is interested in. Auto-filled from the job title for job-specific applications.
-   */
-  position?: string | null;
-  experience?: string | null;
-  /**
-   * Portfolio, product showcase, GitHub, Behance, or other relevant link.
-   */
-  additionalLink?: string | null;
-  cv: string | Media;
-  status?: ('new' | 'reviewing' | 'contacted' | 'rejected' | 'hired') | null;
-  submittedAt?: string | null;
-  /**
-   * HR-only notes about this candidate.
-   */
-  internalNotes?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "social".
  */
 export interface Social {
@@ -2104,10 +2070,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'jobs';
         value: string | Job;
-      } | null)
-    | ({
-        relationTo: 'job-applications';
-        value: string | JobApplication;
       } | null)
     | ({
         relationTo: 'social';
@@ -2902,25 +2864,6 @@ export interface JobsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "job-applications_select".
- */
-export interface JobApplicationsSelect<T extends boolean = true> {
-  fullName?: T;
-  email?: T;
-  phone?: T;
-  job?: T;
-  position?: T;
-  experience?: T;
-  additionalLink?: T;
-  cv?: T;
-  status?: T;
-  submittedAt?: T;
-  internalNotes?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

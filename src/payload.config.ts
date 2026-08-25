@@ -11,7 +11,6 @@ import { Categories } from './collections/Categories'
 import { ContactSubmissions } from './collections/ContactSubmissions'
 import { EmailCampaigns } from './collections/EmailCampaigns'
 import { Games } from './collections/Games'
-import { JobApplications } from './collections/JobApplications'
 import { Jobs } from './collections/Jobs'
 import { Media } from './collections/Media'
 import { OAuthClients } from './collections/OAuthClients'
@@ -86,7 +85,6 @@ export default buildConfig({
     Tags,
     Users,
     Jobs,
-    JobApplications,
     Social,
     Games,
     Subscribers,

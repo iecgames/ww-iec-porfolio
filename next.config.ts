@@ -80,13 +80,6 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: path.resolve(dirname),
   },
-  experimental: {
-    serverActions: {
-      // CV uploads (PDF/DOC/DOCX) — cap matches client-side 5MB validation,
-      // with a small overhead for multipart envelope.
-      bodySizeLimit: '6mb',
-    },
-  },
 }
 
 export default withPayload(withNextIntl(nextConfig), { devBundleServerPackages: false })

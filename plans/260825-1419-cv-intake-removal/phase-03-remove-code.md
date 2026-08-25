@@ -17,9 +17,27 @@
 | `next.config.ts` | MODIFY — bỏ `experimental.serverActions.bodySizeLimit` |
 | `src/payload-types.ts` | REGENERATE |
 | `src/app/(payload)/admin/importMap.js` | REGENERATE |
-| `scripts/purge-job-applications.ts` | DELETE (đã dùng xong ở phase 02) |
+| `scripts/purge-job-applications.ts` | ~~DELETE~~ → **GIỮ LẠI** (xem §2b) |
 
 > Đường dẫn file đăng ký MCP tool phải xác nhận khi vào phase — bảng này cập nhật theo thực tế trước khi code.
+
+## 2b. Ghi chú thực thi — script purge và DB chưa xác nhận
+
+Phase 02 chạy dry-run trên DB mà `.env` trỏ tới (host `34.126.134.11`, db `iec-web`) và **không tìm thấy application nào** — DB đó chỉ có 1 job, 0 post, 0 page, 4 media. Chưa xác nhận được đây có phải DB chứa dữ liệu thật hay không.
+
+Ban đầu định giữ script lại trong repo phòng khi cần chạy trên DB khác. Nhưng sau khi gỡ collection khỏi `payload.config.ts`, `payload-types.ts` không còn slug `'job-applications'` nên script **không compile được nữa** (`TS2322`). Giữ một file hỏng trong repo là sai, nên script vẫn bị xóa như kế hoạch gốc.
+
+**Cách lấy lại khi cần purge một DB khác** — script còn nguyên ở commit `23eb935`:
+
+```bash
+git show 23eb935:scripts/purge-job-applications.ts > scripts/purge-job-applications.ts
+git show 23eb935:package.json | grep purge:applications   # thêm lại dòng script
+# đặt DATABASE_URL trỏ đúng DB, rồi:
+pnpm purge:applications -- --out ../backup.json            # dry-run
+pnpm purge:applications -- --out ../backup.json --confirm  # xóa thật
+```
+
+Phải chạy trên một checkout **trước** commit của phase này (khi collection còn trong config), rồi mới deploy code mới.
 
 ## 2. Ghi chú
 
