@@ -22,8 +22,7 @@
     "test:int": "cross-env NODE_OPTIONS=--no-deprecation vitest run --config ./vitest.config.mts",
     "test:mcp": "npx @modelcontextprotocol/inspector",
     "migrate:media:gcs": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/migrate-media-to-gcs.ts",
-    "backfill:search": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/backfill-search-text.ts",
-    "purge:forms": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/purge-forms.ts"
+    "backfill:search": "cross-env NODE_OPTIONS=--no-deprecation tsx scripts/backfill-search-text.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.19.0",
@@ -36,7 +35,6 @@
     "@payloadcms/email-resend": "^3.84.1",
     "@payloadcms/live-preview-react": "3.84.1",
     "@payloadcms/next": "3.84.1",
-    "@payloadcms/plugin-form-builder": "3.84.1",
     "@payloadcms/plugin-nested-docs": "3.84.1",
     "@payloadcms/plugin-redirects": "3.84.1",
     "@payloadcms/plugin-seo": "3.84.1",

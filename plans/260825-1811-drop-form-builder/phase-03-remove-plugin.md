@@ -26,9 +26,11 @@ Sửa `plugins/index.ts` **sau cùng** trong phase này. Gỡ plugin trước kh
 
 `seed/contact-page.ts` dựng một trang chỉ chứa đúng một `formBlock`. Bỏ form-builder thì trang này không còn nội dung gì.
 
-**Quyết định khi vào code:** xóa hẳn cả trang contact khỏi seed. Lý do: khối thay thế hợp lý là `newsletterSignup` (Get In Touch), nhưng nó có `heading` bắt buộc và một panel thông tin liên hệ cần dữ liệu thật — dựng bừa một bản seed nửa vời còn khó hiểu hơn là không seed. Nếu người dùng muốn giữ trang contact mẫu thì làm ở task riêng.
+**Đã thực hiện:** xóa hẳn `contact-form.ts` và `contact-page.ts`, bỏ khỏi `seed/index.ts`. Lý do giữ nguyên như dự tính — khối thay thế hợp lý là `newsletterSignup`, nhưng nó cần `heading` bắt buộc và panel thông tin liên hệ có dữ liệu thật; seed bừa còn khó hiểu hơn không seed.
 
-Ghi lại quyết định thực tế vào đây sau khi thực thi.
+Kéo theo một chỗ ngoài dự tính: header nav trong seed có mục **"Contact"** trỏ `reference` tới trang contact vừa xóa (`seed/index.ts:237`). Đã gỡ mục nav đó, nếu không seed sẽ tham chiếu một trang không tồn tại.
+
+Cũng gỡ `'forms'` và `'form-submissions'` khỏi mảng `collections` mà seed dùng để xóa sạch trước khi ghi.
 
 ## 4. Kiểm tra trước khi gỡ dependency
 
@@ -36,16 +38,31 @@ Ghi lại quyết định thực tế vào đây sau khi thực thi.
 
 **Lưu ý về lockfile:** gỡ dependency khỏi `package.json` mà không cập nhật `pnpm-lock.yaml` sẽ làm `pnpm install --frozen-lockfile` trong `Dockerfile` **fail**, tức là hỏng deploy VPS. Phải chạy `pnpm remove @payloadcms/plugin-form-builder` chứ không sửa tay. Nếu không chạy được `pnpm` thì để nguyên `package.json` và ghi lại thành việc còn treo — đúng bài học từ phase 07 của plan tối ưu hiệu năng.
 
+## 4b. Script purge phải xóa theo — cách lấy lại
+
+Sau khi gỡ plugin, `scripts/purge-forms.ts` không còn compile được (`TS2322`: slug `forms`/`form-submissions` không còn trong `CollectionSlug`). Đúng như đã lường ở §4 và giống hệt vụ script purge CV. Giữ file hỏng trong repo là sai nên script bị xóa.
+
+**Lấy lại khi cần chạy trên DB thật** — script còn nguyên ở commit `bd9f582`:
+
+```bash
+git show bd9f582:scripts/purge-forms.ts > scripts/purge-forms.ts
+git show bd9f582:package.json | grep purge:forms   # thêm lại dòng script
+pnpm purge:forms                                    # dry-run
+pnpm purge:forms -- --confirm                       # xóa thật
+```
+
+Phải chạy trên checkout **trước** commit của phase này, khi plugin còn trong config.
+
 ## 5. Acceptance criteria
 
-- [ ] `grep -rni "form-builder\|formBlock\|FormBlock\|form-submissions\|syncFormSubscriber" src/` → 0 kết quả.
-- [ ] `pnpm generate:types` + `pnpm generate:importmap` chạy xong.
-- [ ] `pnpm exec tsc --noEmit` pass, `pnpm build` sạch.
-- [ ] Admin: nhóm **Forms** không còn Forms / Form Submissions.
-- [ ] Trong trình soạn layout của Pages/Home/Career, danh sách khối **không còn "Form"**, vẫn còn "Get In Touch".
-- [ ] Nút Seed trong admin chạy xong không lỗi.
-- [ ] Gửi form Get In Touch → vẫn tạo `contactSubmissions` + `subscribers` (xác nhận phase 01 không bị phá).
-- [ ] `pnpm install` xong, lockfile khớp `package.json`.
+- [x] `grep -rni "form-builder\|formBlock\|FormBlock\|form-submissions\|syncFormSubscriber" src/` → 0 kết quả.
+- [x] `pnpm generate:types` + `pnpm generate:importmap` chạy xong.
+- [x] `pnpm exec tsc --noEmit` pass (chỉ còn lỗi có sẵn ở `tests/int/mcp-server.int.spec.ts`), `pnpm build` sạch.
+- [x] `pnpm remove @payloadcms/plugin-form-builder` chạy xong — cả `package.json` lẫn `pnpm-lock.yaml` đều sạch, build lại vẫn OK.
+- [ ] Admin: nhóm **Forms** không còn Forms / Form Submissions (cần dựng server).
+- [ ] Trình soạn layout không còn khối "Form", vẫn còn "Get In Touch" (cần dựng server).
+- [ ] ~~Nút Seed chạy không lỗi~~ → **KHÔNG CHẠY, CÓ CHỦ Ý.** `seed/index.ts:52` gọi `payload.db.deleteMany` trên `categories`, `media`, `pages`, `posts` và wipe nav header/footer. Chạy nó sẽ xóa nội dung thật đang có trong DB. Seed đã qua `tsc` và `build`; muốn kiểm chạy thì phải làm trên DB dùng một lần.
+- [ ] Gửi form Get In Touch → vẫn tạo `contactSubmissions` + `subscribers` (phase 01 đã kiểm ở tầng dữ liệu).
 
 ## 6. Out of scope
 

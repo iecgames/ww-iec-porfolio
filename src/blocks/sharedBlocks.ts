@@ -3,7 +3,6 @@ import { anchorField } from '@/blocks/anchorField'
 import { Archive } from '@/blocks/ArchiveBlock/config'
 import { CallToAction } from '@/blocks/CallToAction/config'
 import { Content } from '@/blocks/Content/config'
-import { FormBlock } from '@/blocks/Form/config'
 import { JobBoard } from '@/blocks/JobBoard/config'
 import { MediaBlock } from '@/blocks/MediaBlock/config'
 import { NewsletterSignup } from '@/blocks/NewsletterSignup/config'
@@ -33,7 +32,6 @@ export const sharedLayoutBlocks: Block[] = [
   Content,
   MediaBlock,
   Archive,
-  FormBlock,
   JobBoard,
   SendUsCV,
   NewsletterSignup,
