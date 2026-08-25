@@ -1,6 +1,7 @@
 import { convertLexicalToHTML } from '@payloadcms/richtext-lexical/html'
 import type { PayloadRequest } from 'payload'
 
+import { getEmailSiteUrl } from './getEmailSiteUrl'
 import { getUnsubscribeUrl } from './getUnsubscribeUrl'
 import { baseTemplate } from './templates/base'
 import { manualTemplate } from './templates/manual'
@@ -49,7 +50,7 @@ export async function sendCampaign({
     overrideAccess: true,
   })
 
-  const siteUrl = (process.env.SITE_URL ?? 'http://localhost:3000').replace(/\/$/, '')
+  const siteUrl = getEmailSiteUrl()
 
   // 4. Resolve subject tokens
   let resolvedSubject = campaign.subject ?? ''
