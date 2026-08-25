@@ -41,11 +41,26 @@ volumes:
 
 Thư mục phải thuộc user `nextjs` (uid 1001) — kiểm tra quyền ghi, nếu không thì thêm `mkdir -p` + `chown` vào Dockerfile giống cách `public/media` đang làm.
 
-**b) `sharp` ở stage `runner`.** Stage này chỉ copy `.next/standalone`. `sharp` được kỳ vọng đi theo file-tracing vì `payload.config.ts` import trực tiếp. **Phải xác minh bằng chạy thật**, không suy đoán — đây là điểm rủi ro số một của phase. Nếu optimizer báo lỗi thiếu sharp thì thêm:
+**b) `sharp` ở stage `runner`.** — ĐÃ KIỂM CHỨNG, VÀ ĐÚNG LÀ CÓ VẤN ĐỀ.
+
+Kiểm tra `.next/standalone/node_modules` sau khi build:
+
+```
+.next/standalone/node_modules/sharp          ← CÓ (package JS)
+.next/standalone/node_modules/@img           ← KHÔNG CÓ (binding native)
+.next/standalone/node_modules/sharp/node_modules  ← rỗng
+```
+
+sharp 0.34 nạp binding native từ package rời `@img/sharp-<platform>` qua `require()` lúc chạy, và file-tracing của Next **không** kéo nó theo. Chỉ copy `node_modules/sharp` như dự tính ban đầu vẫn thiếu binding — mà với pnpm thì `@img` nằm trong `.pnpm`, symlink copy sang sẽ đứt.
+
+Giải pháp đã áp dụng: cài lại sharp ngay trong stage `runner`, để npm tự lấy đúng bản musl của base image:
 
 ```dockerfile
-COPY --from=deps --chown=nextjs:nodejs /app/node_modules/sharp ./node_modules/sharp
+RUN npm install --no-save --omit=dev sharp@0.34.2 \
+    && chown -R nextjs:nodejs /app/node_modules/sharp /app/node_modules/@img
 ```
+
+**c) Thiếu `ARG GCS_BUCKET` — bug có sẵn, sửa luôn.** `docker-compose.yml` truyền `GCS_BUCKET` làm build arg, nhưng Dockerfile không khai báo `ARG GCS_BUCKET` nên Docker bỏ qua. `storagePlugin()` ném lỗi khi thiếu biến này và nó chạy trong `next build` → build trong Docker sẽ fail. Đã thêm `ARG`/`ENV` tương ứng.
 
 ## 4. Đánh đổi đã chấp nhận
 
@@ -55,7 +70,12 @@ VPS phải tải ảnh từ GCS về, transform bằng sharp, ghi cache ra đĩa
 
 ## 5. Acceptance criteria
 
-- [ ] `pnpm build` sạch.
+> ⚠ **Các mục Docker CHƯA chạy được.** Docker CLI có (v29.4.0) nhưng daemon không
+> chạy trong phiên làm việc — `docker build` báo *cannot connect to the Docker API*.
+> Phần `next.config.ts` đã verify bằng `pnpm build`; phần Dockerfile/compose mới chỉ
+> được suy luận từ bằng chứng ở §3b. **Bạn cần chạy lại các mục dưới trên máy có Docker.**
+
+- [x] `pnpm build` sạch.
 - [ ] `docker compose build && docker compose up -d` → container khởi động, log không lỗi.
 - [ ] Mở trang chủ → DevTools Network: ảnh đi qua `/_next/image?url=...&w=...&q=80`, **không** phải URL GCS trực tiếp.
 - [ ] Response header ảnh có `content-type: image/webp` (hoặc avif).

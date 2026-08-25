@@ -21,9 +21,13 @@ const nextConfig: NextConfig = {
     loadPaths: ['./node_modules/@payloadcms/ui/dist/scss/'],
   },
   images: {
-    // Serve ảnh trực tiếp từ origin (GCS/local), không qua Next/Netlify image optimizer.
-    // Đánh đổi: không resize/convert WebP, không sinh srcset nhiều kích thước.
-    unoptimized: true,
+    // Ảnh đi qua Next image optimizer: resize theo viewport + convert WebP/AVIF.
+    // Đổi lại VPS tốn CPU (sharp) và đĩa cho cache — cache được gắn volume
+    // `image_cache` trong docker-compose để sống sót qua mỗi lần deploy.
+    //
+    // `getMediaUrl` gắn `?<updatedAt>` vào URL nên ảnh đổi là URL đổi; nhờ đó
+    // TTL dài không làm editor thấy ảnh cũ.
+    minimumCacheTTL: 2592000, // 30 ngày
     localPatterns: [
       {
         pathname: '/api/media/file/**',

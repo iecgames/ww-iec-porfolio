@@ -39,7 +39,12 @@ services:
     volumes:
       # Persist uploaded media files across container restarts
       - media_data:/app/public/media
+      # Persist optimized images. Without this, every redeploy starts with an
+      # empty cache and the first visitor pays for re-fetching each image from
+      # GCS and re-running sharp on it.
+      - image_cache:/app/.next/cache/images
 
 volumes:
   media_data:
+  image_cache:
 

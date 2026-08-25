@@ -1,5 +1,21 @@
 # Phase 07 — Dọn dependency chết và importMap cũ
 
+> ## ⏸ TRẠNG THÁI: CHƯA ÁP DỤNG — cần chạy 1 lệnh
+>
+> Sửa `package.json` mà không cập nhật `pnpm-lock.yaml` sẽ làm
+> `pnpm install --frozen-lockfile` trong `Dockerfile` **fail**, tức là hỏng deploy VPS.
+> Lệnh `pnpm install` không chạy được trong phiên làm việc này, nên phase để nguyên
+> `package.json` ở trạng thái nhất quán với lockfile.
+>
+> **Để hoàn tất, chạy:**
+> ```bash
+> pnpm remove @aws-sdk/client-s3 @payloadcms/plugin-search
+> pnpm generate:importmap
+> pnpm build          # xác nhận sạch
+> ```
+> Hai package này đã được xác minh là không ai dùng (§2). `importMap.js` thì đã
+> sạch sẵn rồi — nó được regenerate ở phase 03 của plan gỡ CV.
+
 **Goal:** `package.json` không còn dependency không ai dùng; `importMap.js` không còn trỏ tới plugin đã gỡ.
 
 ## 1. Files chạm vào
