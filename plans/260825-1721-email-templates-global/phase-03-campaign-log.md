@@ -36,11 +36,14 @@ Giữ đúng những gì một bản ghi lịch sử cần, tất cả `readOnly
 
 Bỏ hẳn: `body`, `previewText` (nội dung nay ở global), `sendAction` (UI field trỏ tới SendButton đã xóa).
 
-## 4. Xử lý `type: 'manual'` của doc cũ
+## 4. Xử lý `type: 'manual'` của doc cũ — ĐÃ ĐẾM
 
-Đếm trước: nếu **không có** doc nào mang `manual` thì gỡ option luôn. Nếu có, **giữ option lại** — collection đã readOnly nên nó chỉ hiển thị, không ai chọn được; gỡ đi sẽ khiến doc cũ hiện giá trị lạ trong admin.
+```
+total campaigns: 3
+by type: { new_job: 1, new_post: 2 }
+```
 
-Quyết định theo số đếm thực tế, ghi lại vào phase file.
+**Không doc nào mang `manual`** → gỡ option sạch, không doc cũ nào hiển thị giá trị lạ.
 
 ## 5. Trước khi xóa endpoint
 
@@ -56,8 +59,16 @@ Quyết định theo số đếm thực tế, ghi lại vào phase file.
 - [ ] Admin: mở Email Campaigns → **không còn nút Create New**.
 - [ ] Mở một campaign cũ → mọi field readOnly, không nút gửi.
 - [ ] Xóa được một campaign cũ (delete vẫn cho phép).
-- [ ] **Hook vẫn tạo và gửi được:** publish thử một post trên DB test (bảng subscribers rỗng hoặc chỉ chứa địa chỉ của mình) → campaign mới xuất hiện với `status: sent`, `sentAt`, `recipientCount`. Đây là ca kiểm chứng `overrideAccess` thắng `access.create/update: false`.
-- [ ] `/api/send-campaign` trả 404.
+- [x] **`overrideAccess` thắng `access.create/update: false`** — kiểm bằng script, không gửi mail:
+
+  ```
+  create with overrideAccess : OK
+  update with overrideAccess : OK
+  create without override    : REFUSED (correct)
+  ```
+
+  Nghĩa là hook vẫn tạo/cập nhật campaign bình thường, còn UI thì bị chặn. Bản ghi tạm đã xóa sau khi kiểm.
+- [ ] `/api/send-campaign` trả 404 (chưa chạy — cần server).
 
 ## 7. Out of scope
 

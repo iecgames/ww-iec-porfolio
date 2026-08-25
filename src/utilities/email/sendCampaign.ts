@@ -5,7 +5,6 @@ import { getCachedEmailTemplates } from './getEmailTemplates'
 import { getEmailSiteUrl } from './getEmailSiteUrl'
 import { getUnsubscribeUrl } from './getUnsubscribeUrl'
 import { baseTemplate } from './templates/base'
-import { manualTemplate } from './templates/manual'
 import { newJobTemplate } from './templates/newJob'
 import { newPostTemplate } from './templates/newPost'
 
@@ -78,14 +77,9 @@ export async function sendCampaign({
   const general = await payload.findGlobal({ slug: 'general', depth: 1 })
   const logoUrl = resolveLogoUrl(general?.logo, siteUrl)
 
-  const template =
-    campaign.type === 'new_post'
-      ? templates?.newPost
-      : campaign.type === 'new_job'
-        ? templates?.newJob
-        : undefined
+  const template = campaign.type === 'new_post' ? templates?.newPost : templates?.newJob
 
-  const previewText = template?.previewText || campaign.previewText || undefined
+  const previewText = template?.previewText || undefined
 
   // 5. Resolve the related document and its tokens
   const docTokens: Record<string, string> = {}
@@ -110,9 +104,9 @@ export async function sendCampaign({
   // Subject priority: global template → campaign → the built-in layout's default
   let resolvedSubject = resolveTokens(template?.subject || campaign.subject || '', docTokens)
 
-  // 6. Body priority: global template → campaign body → built-in layout.
+  // 6. Body: the global template, falling back to the built-in layout.
   // The fallback matters: an unconfigured global must not mail empty bodies.
-  const configuredBodyHtml = lexicalToHtml(template?.body) || lexicalToHtml(campaign.body)
+  const configuredBodyHtml = lexicalToHtml(template?.body)
   const prerenderedBodyHtml = configuredBodyHtml
     ? resolveTokens(configuredBodyHtml, docTokens)
     : ''
@@ -164,7 +158,7 @@ export async function sendCampaign({
         let html = ''
         let subject = resolvedSubject
 
-        if (prerenderedBodyHtml && campaign.type !== 'manual') {
+        if (prerenderedBodyHtml) {
           const subscriberBody = resolveTokens(prerenderedBodyHtml, {
             'subscriber.name': subscriber.name ?? '',
           })
@@ -205,15 +199,6 @@ export async function sendCampaign({
           })
           html = result.html
           if (!subject) subject = result.subject
-        } else {
-          const result = manualTemplate({
-            subject,
-            bodyHtml: lexicalToHtml(campaign.body),
-            subscriber,
-            unsubscribeUrl,
-            siteUrl,
-          })
-          html = result.html
         }
 
         await req.payload.sendEmail({

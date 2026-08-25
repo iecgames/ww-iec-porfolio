@@ -1,15 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import {
-  FixedToolbarFeature,
-  HeadingFeature,
-  HorizontalRuleFeature,
-  InlineToolbarFeature,
-  lexicalEditor,
-} from '@payloadcms/richtext-lexical'
-
 import { authenticated } from '../../access/authenticated'
 
+/**
+ * A record of one notification that went out — not something an editor writes.
+ *
+ * Content for these emails is configured once in the Email Templates global;
+ * the Posts/Jobs hooks create a campaign and send it in the same step. Nothing
+ * here is authored by hand, so creation and updates are closed to the UI and
+ * happen only through the hooks' overrideAccess writes. Deletes stay open so
+ * old rows can be cleared.
+ */
 export const EmailCampaigns: CollectionConfig = {
   slug: 'email-campaigns',
   labels: {
@@ -17,15 +18,17 @@ export const EmailCampaigns: CollectionConfig = {
     plural: 'Email Campaigns',
   },
   access: {
-    create: authenticated,
+    create: () => false,
     read: authenticated,
-    update: authenticated,
+    update: () => false,
     delete: authenticated,
   },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'type', 'status', 'sentAt', 'recipientCount'],
     group: 'Newsletter',
+    description:
+      'Nhật ký các thư đã gửi. Nội dung thư cấu hình tại Newsletter → Email Templates.',
   },
   fields: [
     {
@@ -33,53 +36,27 @@ export const EmailCampaigns: CollectionConfig = {
       type: 'text',
       required: true,
       label: 'Campaign Name',
+      admin: { readOnly: true },
     },
     {
       name: 'subject',
       type: 'text',
-      required: true,
       label: 'Email Subject',
       admin: {
-        description: 'Supports tokens: {{job.title}}, {{post.title}}',
-      },
-    },
-    {
-      name: 'previewText',
-      type: 'text',
-      label: 'Preview Text',
-      admin: {
-        description: 'Short preview text shown in email clients',
+        readOnly: true,
+        description: 'Tiêu đề đã gửi đi, sau khi thay token.',
       },
     },
     {
       name: 'type',
       type: 'select',
       required: true,
-      defaultValue: 'manual',
       label: 'Campaign Type',
       options: [
-        { label: 'Manual', value: 'manual' },
         { label: 'New Job', value: 'new_job' },
         { label: 'New Post', value: 'new_post' },
       ],
-    },
-    {
-      name: 'body',
-      type: 'richText',
-      label: 'Email Body',
-      editor: lexicalEditor({
-        features: ({ rootFeatures }) => [
-          ...rootFeatures,
-          HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
-          FixedToolbarFeature(),
-          InlineToolbarFeature(),
-          HorizontalRuleFeature(),
-        ],
-      }),
-      admin: {
-        description:
-          'Optional override. Nội dung mặc định cấu hình ở Newsletter → Email Templates. Tokens: {{post.title}}, {{post.url}}, {{job.title}}, {{job.url}}, {{subscriber.name}}',
-      },
+      admin: { readOnly: true },
     },
     {
       name: 'relatedJob',
@@ -87,6 +64,7 @@ export const EmailCampaigns: CollectionConfig = {
       relationTo: 'jobs',
       label: 'Related Job',
       admin: {
+        readOnly: true,
         condition: (data) => data.type === 'new_job',
       },
     },
@@ -96,6 +74,7 @@ export const EmailCampaigns: CollectionConfig = {
       relationTo: 'posts',
       label: 'Related Post',
       admin: {
+        readOnly: true,
         condition: (data) => data.type === 'new_post',
       },
     },
@@ -133,15 +112,6 @@ export const EmailCampaigns: CollectionConfig = {
       admin: {
         position: 'sidebar',
         readOnly: true,
-      },
-    },
-    {
-      name: 'sendAction',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: '@/collections/EmailCampaigns/ui/SendButton#SendButton',
-        },
       },
     },
   ],

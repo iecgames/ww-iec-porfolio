@@ -1771,6 +1771,8 @@ export interface Subscriber {
   createdAt: string;
 }
 /**
+ * Nhật ký các thư đã gửi. Nội dung thư cấu hình tại Newsletter → Email Templates.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-campaigns".
  */
@@ -1778,32 +1780,10 @@ export interface EmailCampaign {
   id: string;
   name: string;
   /**
-   * Supports tokens: {{job.title}}, {{post.title}}
+   * Tiêu đề đã gửi đi, sau khi thay token.
    */
-  subject: string;
-  /**
-   * Short preview text shown in email clients
-   */
-  previewText?: string | null;
-  type: 'manual' | 'new_job' | 'new_post';
-  /**
-   * Optional override. Nội dung mặc định cấu hình ở Newsletter → Email Templates. Tokens: {{post.title}}, {{post.url}}, {{job.title}}, {{job.url}}, {{subscriber.name}}
-   */
-  body?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  subject?: string | null;
+  type: 'new_job' | 'new_post';
   relatedJob?: (string | null) | Job;
   relatedPost?: (string | null) | Post;
   status?: ('draft' | 'sending' | 'sent') | null;
@@ -2931,9 +2911,7 @@ export interface SubscribersSelect<T extends boolean = true> {
 export interface EmailCampaignsSelect<T extends boolean = true> {
   name?: T;
   subject?: T;
-  previewText?: T;
   type?: T;
-  body?: T;
   relatedJob?: T;
   relatedPost?: T;
   status?: T;

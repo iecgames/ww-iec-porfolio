@@ -22,7 +22,6 @@ import { Social } from './collections/Social'
 import { Subscribers } from './collections/Subscribers'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
-import { sendCampaignEndpoint } from './endpoints/sendCampaign'
 import { unsubscribeEndpoint } from './endpoints/unsubscribe'
 import { Footer } from './Footer/config'
 import { EmailTemplates } from './EmailTemplates/config'
@@ -96,7 +95,7 @@ export default buildConfig({
     OAuthRefreshTokens,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  endpoints: [unsubscribeEndpoint, sendCampaignEndpoint],
+  endpoints: [unsubscribeEndpoint],
   globals: [Header, Footer, Home, Career, General, EmailTemplates],
   localization: {
     locales: [
