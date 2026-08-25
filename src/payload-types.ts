@@ -133,6 +133,7 @@ export interface Config {
     home: Home;
     career: Career;
     general: General;
+    'email-templates': EmailTemplate;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -140,6 +141,7 @@ export interface Config {
     home: HomeSelect<false> | HomeSelect<true>;
     career: CareerSelect<false> | CareerSelect<true>;
     general: GeneralSelect<false> | GeneralSelect<true>;
+    'email-templates': EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
   };
   locale: 'en' | 'vi';
   widgets: {
@@ -1785,7 +1787,7 @@ export interface EmailCampaign {
   previewText?: string | null;
   type: 'manual' | 'new_job' | 'new_post';
   /**
-   * Required for Manual campaigns. Optional for New Job / New Post — leave empty to use the default template. Available tokens: {{post.title}}, {{post.url}}, {{post.excerpt}}, {{job.title}}, {{job.url}}, {{subscriber.name}}
+   * Optional override. Nội dung mặc định cấu hình ở Newsletter → Email Templates. Tokens: {{post.title}}, {{post.url}}, {{job.title}}, {{job.url}}, {{subscriber.name}}
    */
   body?: {
     root: {
@@ -3754,6 +3756,71 @@ export interface General {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates".
+ */
+export interface EmailTemplate {
+  id: string;
+  newPost?: {
+    /**
+     * Token: {{post.title}}. Để trống để dùng tiêu đề mặc định.
+     */
+    subject?: string | null;
+    /**
+     * Đoạn ngắn hiển thị cạnh tiêu đề trong hộp thư.
+     */
+    previewText?: string | null;
+    /**
+     * Token: {{post.title}}, {{post.url}}, {{subscriber.name}}. Để trống để dùng mẫu mặc định.
+     */
+    body?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  newJob?: {
+    /**
+     * Token: {{job.title}}. Để trống để dùng tiêu đề mặc định.
+     */
+    subject?: string | null;
+    /**
+     * Đoạn ngắn hiển thị cạnh tiêu đề trong hộp thư.
+     */
+    previewText?: string | null;
+    /**
+     * Token: {{job.title}}, {{job.url}}, {{subscriber.name}}. Để trống để dùng mẫu mặc định.
+     */
+    body?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -4047,6 +4114,29 @@ export interface GeneralSelect<T extends boolean = true> {
   logoMono?: T;
   tagline?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates_select".
+ */
+export interface EmailTemplatesSelect<T extends boolean = true> {
+  newPost?:
+    | T
+    | {
+        subject?: T;
+        previewText?: T;
+        body?: T;
+      };
+  newJob?:
+    | T
+    | {
+        subject?: T;
+        previewText?: T;
+        body?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

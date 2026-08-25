@@ -78,7 +78,7 @@ export const EmailCampaigns: CollectionConfig = {
       }),
       admin: {
         description:
-          'Required for Manual campaigns. Optional for New Job / New Post — leave empty to use the default template. Available tokens: {{post.title}}, {{post.url}}, {{post.excerpt}}, {{job.title}}, {{job.url}}, {{subscriber.name}}',
+          'Optional override. Nội dung mặc định cấu hình ở Newsletter → Email Templates. Tokens: {{post.title}}, {{post.url}}, {{job.title}}, {{job.url}}, {{subscriber.name}}',
       },
     },
     {

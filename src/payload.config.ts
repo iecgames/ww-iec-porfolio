@@ -25,6 +25,7 @@ import { Users } from './collections/Users'
 import { sendCampaignEndpoint } from './endpoints/sendCampaign'
 import { unsubscribeEndpoint } from './endpoints/unsubscribe'
 import { Footer } from './Footer/config'
+import { EmailTemplates } from './EmailTemplates/config'
 import { General } from './General/config'
 import { Header } from './Header/config'
 import { Home } from './Home/config'
@@ -96,7 +97,7 @@ export default buildConfig({
   ],
   cors: [getServerSideURL()].filter(Boolean),
   endpoints: [unsubscribeEndpoint, sendCampaignEndpoint],
-  globals: [Header, Footer, Home, Career, General],
+  globals: [Header, Footer, Home, Career, General, EmailTemplates],
   localization: {
     locales: [
       { label: 'English', code: 'en' },
