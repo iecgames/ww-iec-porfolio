@@ -10,6 +10,13 @@ export const revalidatePost: CollectionAfterChangeHook<Post> = ({
   req: { payload, context },
 }) => {
   if (!context.disableRevalidate) {
+    // Blocks that list posts (archive, category showcase, IEC life) read through
+    // caches tagged `posts`. Any change can reorder or drop a listing entry, so
+    // this fires regardless of publish status.
+    setImmediate(() => {
+      revalidateTag('posts', 'max')
+    })
+
     if (doc._status === 'published') {
       const path = `/posts/${doc.slug}`
 
@@ -43,6 +50,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Post> = ({ doc, req: { 
     setImmediate(() => {
       revalidatePath(path)
       revalidateTag('posts-sitemap', 'max')
+      revalidateTag('posts', 'max')
     })
   }
 

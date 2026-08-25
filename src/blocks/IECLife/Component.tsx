@@ -1,11 +1,9 @@
 import React from 'react'
 
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
-
-import type { IECLifeBlock as Props, Post } from '@/payload-types'
+import type { IECLifeBlock as Props } from '@/payload-types'
 
 import { IECLifeView } from './IECLifeView'
+import { getCachedIECLifePosts } from './query'
 
 export const IECLifeBlock: React.FC<Props & { id?: string }> = async ({
   eyebrow,
@@ -14,16 +12,8 @@ export const IECLifeBlock: React.FC<Props & { id?: string }> = async ({
   limit: limitFromProps,
 }) => {
   const limit = limitFromProps || 4
-  const payload = await getPayload({ config: configPromise })
 
-  const { docs } = await payload.find({
-    collection: 'posts',
-    sort: '-publishedAt',
-    limit,
-    depth: 1,
-  })
-
-  const posts = docs as Post[]
+  const posts = await getCachedIECLifePosts(limit)()
   if (posts.length === 0) return null
 
   return (

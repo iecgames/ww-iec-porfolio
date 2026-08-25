@@ -4,6 +4,7 @@ import { slugField } from 'payload'
 
 import { anyone } from '../../access/anyone'
 import { authenticated } from '../../access/authenticated'
+import { revalidateGame, revalidateGameDelete } from './hooks/revalidateGame'
 
 export const Games: CollectionConfig = {
   slug: 'games',
@@ -35,6 +36,10 @@ export const Games: CollectionConfig = {
       },
     },
     maxPerDoc: 25,
+  },
+  hooks: {
+    afterChange: [revalidateGame],
+    afterDelete: [revalidateGameDelete],
   },
   fields: [
     {

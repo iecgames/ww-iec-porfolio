@@ -1,20 +1,13 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 import React from 'react'
 import type { JobBoardBlock as JobBoardBlockProps } from '@/payload-types'
 import { JobBoardClient, type JobItem } from './JobBoardClient'
+import { getCachedJobBoardJobs } from './query'
 
 export const JobBoardBlock: React.FC<JobBoardBlockProps & { id?: string }> = async ({
   heading,
   subtitle,
 }) => {
-  const payload = await getPayload({ config: configPromise })
-
-  const { docs: jobDocs } = await payload.find({
-    collection: 'jobs',
-    limit: 200,
-    depth: 0,
-  })
+  const jobDocs = await getCachedJobBoardJobs()()
 
   const jobs: JobItem[] = jobDocs.map((doc) => ({
     id: String(doc.id),

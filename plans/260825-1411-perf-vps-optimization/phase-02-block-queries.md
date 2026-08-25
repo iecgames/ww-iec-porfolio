@@ -19,29 +19,43 @@
 | `src/blocks/JobBoard/query.ts` | CREATE |
 | `src/blocks/JobBoard/Component.tsx` | MODIFY |
 | `src/collections/Games/hooks/revalidateGame.ts` | CREATE |
-| `src/collections/Categories/hooks/revalidateCategory.ts` | CREATE |
-| `src/collections/Games.ts` (hoặc thư mục tương ứng) | MODIFY — gắn hook |
-| `src/collections/Categories.ts` (hoặc thư mục tương ứng) | MODIFY — gắn hook |
-| `src/collections/Jobs/hooks/revalidateJob.ts` | MODIFY — thêm `revalidateTag('jobs')` |
+| `src/collections/Games/index.ts` | MODIFY — gắn hook |
+| `src/collections/Jobs/hooks/revalidateJob.ts` | MODIFY — thêm `revalidateTag('jobs', 'max')` |
+| `src/collections/Posts/hooks/revalidatePost.ts` | MODIFY — thêm `revalidateTag('posts', 'max')` |
+| ~~`src/collections/Categories/hooks/revalidateCategory.ts`~~ | **KHÔNG CẦN** — xem §1b |
 
-> Đường dẫn chính xác của `Games`/`Categories` (file phẳng hay thư mục) phải xác nhận lại khi vào phase; bảng này cập nhật theo thực tế trước khi code.
+### 1b. Sai lệch so với kế hoạch
+
+**Không tạo hook cho `categories`.** Kế hoạch dự trù tag `categories`, nhưng khi viết xong thì không cache nào dùng tag đó: `CategoryShowcase` trả về **posts** lọc theo category, nên nó tag `posts`. Đổi tên một category không làm đổi tập post trả về. Tạo hook cho tag không ai đọc là code chết.
+
+**Thêm `revalidatePost.ts` vào bảng.** Kế hoạch bỏ sót. Ba block (`ArchiveBlock`, `CategoryShowcase`, `IECLife`) đều tag `posts`, mà hook sẵn có chỉ bắn `posts-sitemap`. Không thêm thì sửa bài viết xong trang chủ vẫn hiện danh sách cũ.
+
+`revalidateTag('posts', 'max')` được đặt **ngoài** nhánh `_status === 'published'`: một bài bị gỡ xuất bản cũng làm đổi danh sách, nên mọi thay đổi đều phải xóa cache.
 
 ## 2. Cache key — điểm dễ sai nhất của phase
 
 `unstable_cache` chỉ phân biệt entry qua mảng `keyParts`. Mọi tham số ảnh hưởng kết quả query **phải** nằm trong keyParts, nếu không hai block cùng loại với `limit` khác nhau sẽ ăn nhầm cache của nhau.
 
-Bắt buộc đưa vào keyParts của từng block: tên block, `locale`, `limit`, và mọi filter đến từ props (vd `categories` của ArchiveBlock, `selectedDocs`). Ví dụ shape:
+Bắt buộc đưa vào keyParts của từng block: tên block, `limit`, và mọi filter đến từ props (vd `categories` của ArchiveBlock, `selectedDocs`). Ví dụ shape:
 
 ```ts
-export const getCachedIECLifePosts = (limit: number, locale: 'en' | 'vi') =>
+export const getCachedIECLifePosts = (limit: number) =>
   unstable_cache(
     async () => { /* payload.find(...) */ },
-    ['iec-life', String(limit), locale],
+    ['iec-life', String(limit)],
     { tags: ['posts'] },
   )
 ```
 
 Với `ArchiveBlock` — `categories` là mảng → serialize ổn định (`sort().join(',')`) trước khi đưa vào keyParts.
+
+### 2b. Vì sao `locale` KHÔNG nằm trong cache key
+
+Kế hoạch ban đầu định đưa `locale` vào keyParts. Khi đọc code thì thấy **không block nào truyền `locale` vào `payload.find()`** — kể cả với `posts`/`jobs` là collection có localization. Payload vì vậy luôn trả về locale mặc định của config, và `/en` với `/vi` hiện cùng một nội dung.
+
+Cache key phải phản ánh đúng thứ làm kết quả query thay đổi. Vì query không phụ thuộc locale, thêm locale vào key chỉ tạo hai entry giống hệt nhau. Nên bỏ.
+
+Đây là hành vi **có sẵn từ trước**, task này giữ nguyên chứ không sửa — đổi nó là thay đổi ngữ nghĩa, không phải tối ưu. Nhưng nó đáng là một task riêng: **các block đang hiển thị nội dung sai ngôn ngữ ở trang `/en`**. Nếu sau này sửa, phải thêm `locale` vào cả query lẫn keyParts cùng lúc.
 
 ## 3. Ghi chú theo từng block
 
