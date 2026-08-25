@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+import { revalidateDelete, revalidateSocial } from './Social/hooks/revalidateSocial'
 
 export const Social: CollectionConfig = {
   slug: 'social',
@@ -15,6 +16,10 @@ export const Social: CollectionConfig = {
     delete: authenticated,
     read: anyone,
     update: authenticated,
+  },
+  hooks: {
+    afterChange: [revalidateSocial],
+    afterDelete: [revalidateDelete],
   },
   fields: [
     {

@@ -1,8 +1,7 @@
-import type { SendUsCVBlock as SendUsCVBlockProps, Social } from '@/payload-types'
+import type { SendUsCVBlock as SendUsCVBlockProps } from '@/payload-types'
 import { getCachedGlobal } from '@/utilities/getGlobals'
-import configPromise from '@payload-config'
+import { getCachedSocials } from '@/utilities/getSocials'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { getPayload } from 'payload'
 import React from 'react'
 import { SendUsCVClient, type ApplyLabels, type SocialItem } from './SendUsCVClient'
 
@@ -12,20 +11,15 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
   cvUrl,
   innovatorLabel,
 }) => {
-  const payload = await getPayload({ config: configPromise })
   const locale = (await getLocale()) as 'en' | 'vi'
   const t = await getTranslations('JobDetail')
-  const general = await getCachedGlobal('general', 0, locale)()
+  const [general, socialDocs] = await Promise.all([
+    getCachedGlobal('general', 0, locale)(),
+    getCachedSocials()(),
+  ])
   const recruitmentEmail = general?.recruitmentEmail ?? null
 
-  const { docs: socialDocs } = await payload.find({
-    collection: 'social',
-    limit: 20,
-    depth: 0,
-    sort: 'order',
-  })
-
-  const socials: SocialItem[] = (socialDocs as Social[]).map((doc) => ({
+  const socials: SocialItem[] = socialDocs.map((doc) => ({
     id: String(doc.id),
     platform: doc.platform,
     url: doc.url,

@@ -16,18 +16,9 @@
 - **`@payloadcms/plugin-search`**: không được đăng ký trong `src/plugins/index.ts`, chỉ còn xuất hiện ở `importMap.js:25-26` — dấu vết của lần bật rồi gỡ. Đã chốt không bật lại trong task này (plan §6).
 - **`graphql`**: `grep` cũng không ra kết quả trong `src/`, **nhưng KHÔNG gỡ** — nó là peer dependency của Payload cho route `/api/graphql`. Gỡ sẽ làm gãy runtime mà `tsc` không phát hiện.
 
-## 3. Việc cần kiểm tra thêm khi vào phase
+## 3. ~~Kiểm tra `revalidateTag`~~ — KHÔNG CÒN CẦN
 
-Kiểm chứng kết luận của phase 01 §5 về `revalidateTag`. Nếu phase 01 xác định dạng 2 tham số `revalidateTag(tag, 'max')` **không** invalidate `unstable_cache`, thì đổi toàn bộ hook cũ về dạng 1 tham số:
-
-- `src/Header/hooks/revalidateHeader.ts`
-- `src/Footer/hooks/revalidateFooter.ts`
-- `src/Home/hooks/revalidateHome.ts`
-- `src/Career/hooks/revalidateCareer.ts`
-- `src/collections/Pages/hooks/revalidatePage.ts`
-- `src/collections/Posts/hooks/revalidatePost.ts`
-
-Nếu phase 01 xác định dạng 2 tham số vẫn hoạt động → **không đụng gì**, ghi kết luận vào plan.md §7.
+Phase 01 §5 đã chốt: dạng 2 tham số `revalidateTag(tag, 'max')` là **bắt buộc** theo signature của Next 16, gọi 1 tham số không biên dịch được. Các hook sẵn có đang dùng đúng, không hook nào cần sửa.
 
 ## 4. Acceptance criteria
 

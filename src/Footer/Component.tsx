@@ -1,8 +1,7 @@
 import type { Social } from '@/payload-types'
 import { getCachedGlobal } from '@/utilities/getGlobals'
-import configPromise from '@payload-config'
+import { getCachedSocials } from '@/utilities/getSocials'
 import { getLocale, getTranslations } from 'next-intl/server'
-import { getPayload } from 'payload'
 import React from 'react'
 
 import { CMSLink } from '@/components/Link'
@@ -68,20 +67,11 @@ function getSocialBrandColor(platform: Social['platform']): string {
 export async function Footer() {
   const locale = (await getLocale()) as 'en' | 'vi'
   const t = await getTranslations('Footer')
-  const [footerData, generalData, payload] = await Promise.all([
+  const [footerData, generalData, socials] = await Promise.all([
     getCachedGlobal('footer', 1, locale)(),
     getCachedGlobal('general', 1, locale)(),
-    getPayload({ config: configPromise }),
+    getCachedSocials()(),
   ])
-
-  const { docs: socialDocs } = await payload.find({
-    collection: 'social',
-    limit: 20,
-    depth: 0,
-    sort: 'order',
-  })
-
-  const socials = socialDocs as Social[]
   const navItems = footerData?.navItems || []
 
   // Contact button — value comes from General Settings (hotline or email)

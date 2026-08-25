@@ -81,7 +81,7 @@ export const revalidateDelete: CollectionAfterDeleteHook = ({
 }
 ```
 
-> Cố ý dùng `revalidateTag('social')` **1 tham số** ở đây, khác với `revalidateTag('global_footer', 'max')` đang có trong repo. Lý do ở §5.
+> Dùng `revalidateTag('social', 'max')` — 2 tham số, giống các hook sẵn có. Xem §5 để biết vì sao đây là dạng bắt buộc.
 
 ## 4. `src/collections/Social.ts` (MODIFY)
 
@@ -98,15 +98,21 @@ import { revalidateDelete, revalidateSocial } from './Social/hooks/revalidateSoc
   },
 ```
 
-## 5. Kiểm chứng `revalidateTag` — điểm quyết định của phase
+## 5. Kiểm chứng `revalidateTag` — ĐÃ CHỐT
 
-Repo đang dùng dạng 2 tham số `revalidateTag('global_footer', 'max')`. Trong Next 16 tham số thứ hai là cacheLife profile, thiết kế cho `'use cache'`; chưa xác nhận nó có invalidate entry của `unstable_cache` hay không. Vì phase 02 sẽ nhân pattern này ra 6 block nữa, phải chốt ở đây:
+Câu hỏi ban đầu: repo dùng dạng 2 tham số `revalidateTag('global_footer', 'max')`, chưa rõ có đúng không.
 
-1. Chạy `pnpm dev`, mở trang có footer.
-2. Sửa 1 link social trong admin, lưu.
-3. Reload trang → link phải đổi ngay.
-4. Nếu **không** đổi: giữ nguyên dạng 1 tham số (đã viết ở §3) và ghi chú vào plan.md §7 rằng các hook cũ dùng dạng 2 tham số cần được kiểm tra riêng ở phase 07.
-5. Nếu đổi bình thường ở cả hai dạng: vẫn giữ dạng 1 tham số cho code mới để nhất quán.
+**Kết luận: dạng 2 tham số là bắt buộc trong Next 16.** Signature thực tế tại `node_modules/next/dist/server/web/spec-extension/revalidate.d.ts:9`:
+
+```ts
+export declare function revalidateTag(tag: string, profile: string | CacheLifeConfig): undefined
+```
+
+Gọi 1 tham số là lỗi biên dịch (`TS2554: Expected 2 arguments, but got 1`) — phát hiện khi `tsc` chạy trên bản nháp đầu của hook này. `'max'` là profile cacheLife hợp lệ.
+
+Hệ quả:
+- Code mới dùng `revalidateTag(tag, 'max')`, thống nhất với các hook sẵn có (§3 đã sửa theo).
+- Các hook cũ **không cần đụng tới** — mục kiểm tra điều kiện ở phase 07 §3 vì vậy không còn cần thiết.
 
 ## 6. Wiring notes
 
