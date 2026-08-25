@@ -9,7 +9,11 @@ import { unstable_cache } from 'next/cache'
  * Tagged on `posts` — the rows themselves are posts; a category rename does not
  * change which posts come back.
  */
-export const getCachedShowcasePosts = (categoryId: string, limit: number) =>
+export const getCachedShowcasePosts = (
+  categoryId: string,
+  limit: number,
+  locale: 'en' | 'vi',
+) =>
   unstable_cache(
     async (): Promise<Post[]> => {
       const payload = await getPayload({ config: configPromise })
@@ -20,10 +24,11 @@ export const getCachedShowcasePosts = (categoryId: string, limit: number) =>
         sort: '-publishedAt',
         limit,
         depth: 1,
+        locale,
       })
 
       return docs
     },
-    ['category-showcase', categoryId, String(limit)],
+    ['category-showcase', categoryId, String(limit), locale],
     { tags: ['posts'] },
   )

@@ -1,3 +1,4 @@
+import { getLocale } from 'next-intl/server'
 import React from 'react'
 
 import type { Game, GamesPortfolioBlock as Props } from '@/payload-types'
@@ -10,9 +11,10 @@ export const GamesPortfolioBlock: React.FC<Props & { id?: string }> = async (pro
   const { eyebrow, heading, populateBy, selectedGames } = props
 
   let games: Game[] = []
+  const locale = (await getLocale()) as 'en' | 'vi'
 
   if (populateBy === 'collection') {
-    games = await getCachedAllGames()()
+    games = await getCachedAllGames(locale)()
   } else if (Array.isArray(selectedGames) && selectedGames.length > 0) {
     // Payload may return resolved objects or bare IDs depending on fetch depth.
     // Handle both cases: use objects directly, fetch any unresolved IDs.
@@ -20,7 +22,7 @@ export const GamesPortfolioBlock: React.FC<Props & { id?: string }> = async (pro
     const unresolvedIds = selectedGames.filter((g): g is string => typeof g === 'string')
 
     if (unresolvedIds.length > 0) {
-      const fetchedDocs = await getCachedGamesByIds(unresolvedIds)()
+      const fetchedDocs = await getCachedGamesByIds(unresolvedIds, locale)()
       // Merge while preserving the original selection order
       const byId = new Map(fetchedDocs.map((g) => [String(g.id), g]))
       const merged = new Map(resolvedGames.map((g) => [String(g.id), g]))

@@ -5,7 +5,7 @@ import { getPayload } from 'payload'
 import { unstable_cache } from 'next/cache'
 
 /** Most recent posts for the "life at IEC" strip. */
-export const getCachedIECLifePosts = (limit: number) =>
+export const getCachedIECLifePosts = (limit: number, locale: 'en' | 'vi') =>
   unstable_cache(
     async (): Promise<Post[]> => {
       const payload = await getPayload({ config: configPromise })
@@ -15,10 +15,11 @@ export const getCachedIECLifePosts = (limit: number) =>
         sort: '-publishedAt',
         limit,
         depth: 1,
+        locale,
       })
 
       return docs
     },
-    ['iec-life', String(limit)],
+    ['iec-life', String(limit), locale],
     { tags: ['posts'] },
   )

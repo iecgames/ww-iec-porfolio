@@ -12,7 +12,7 @@ import { unstable_cache } from 'next/cache'
  * when the first returns nothing, and caching the pair keeps that decision from
  * being re-made on every render.
  */
-export const getCachedHighlightJobs = (limit: number) =>
+export const getCachedHighlightJobs = (limit: number, locale: 'en' | 'vi') =>
   unstable_cache(
     async (): Promise<Job[]> => {
       const payload = await getPayload({ config: configPromise })
@@ -23,6 +23,7 @@ export const getCachedHighlightJobs = (limit: number) =>
         sort: '-createdAt',
         limit,
         depth: 0,
+        locale,
       })
 
       if (featuredDocs.length > 0) return featuredDocs as Job[]
@@ -32,10 +33,11 @@ export const getCachedHighlightJobs = (limit: number) =>
         sort: '-createdAt',
         limit,
         depth: 0,
+        locale,
       })
 
       return recentDocs as Job[]
     },
-    ['careers-highlight', String(limit)],
+    ['careers-highlight', String(limit), locale],
     { tags: ['jobs'] },
   )

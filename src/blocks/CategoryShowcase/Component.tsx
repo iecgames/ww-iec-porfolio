@@ -1,3 +1,4 @@
+import { getLocale } from 'next-intl/server'
 import React from 'react'
 
 import type { Category, CategoryShowcaseBlock as Props } from '@/payload-types'
@@ -19,7 +20,8 @@ export const CategoryShowcaseBlock: React.FC<Props & { id?: string }> = async ({
 
   if (!categoryId) return null
 
-  const posts = await getCachedShowcasePosts(String(categoryId), COLLAGE_COUNT)()
+  const locale = (await getLocale()) as 'en' | 'vi'
+  const posts = await getCachedShowcasePosts(String(categoryId), COLLAGE_COUNT, locale)()
   if (posts.length === 0) return null
 
   const categoryResolved =

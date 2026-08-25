@@ -1,5 +1,6 @@
 import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
+import { getLocale } from 'next-intl/server'
 import React from 'react'
 import RichText from '@/components/RichText'
 
@@ -23,7 +24,8 @@ export const ArchiveBlock: React.FC<
         typeof category === 'object' ? String(category.id) : String(category),
       ) ?? []
 
-    posts = await getCachedArchivePosts(limit, flattenedCategories)()
+    const locale = (await getLocale()) as 'en' | 'vi'
+    posts = await getCachedArchivePosts(limit, flattenedCategories, locale)()
   } else {
     if (selectedDocs?.length) {
       const filteredSelectedPosts = selectedDocs.map((post) => {

@@ -1,3 +1,4 @@
+import { getLocale } from 'next-intl/server'
 import React from 'react'
 
 import type { CareersHighlightBlock as Props, Media } from '@/payload-types'
@@ -16,9 +17,10 @@ export const CareersHighlightBlock: React.FC<Props & { id?: string }> = async ({
   ctaLink,
 }) => {
   const limit = limitFromProps || 3
+  const locale = (await getLocale()) as 'en' | 'vi'
 
   // Featured jobs, falling back to the most recent ones — see ./query.ts
-  const jobs = await getCachedHighlightJobs(limit)()
+  const jobs = await getCachedHighlightJobs(limit, locale)()
 
   const resolvedHeroImage =
     heroImage && typeof heroImage === 'object' ? (heroImage as Media) : null

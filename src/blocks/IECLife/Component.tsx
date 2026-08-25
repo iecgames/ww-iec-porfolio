@@ -1,5 +1,7 @@
 import React from 'react'
 
+import { getLocale } from 'next-intl/server'
+
 import type { IECLifeBlock as Props } from '@/payload-types'
 
 import { IECLifeView } from './IECLifeView'
@@ -12,8 +14,9 @@ export const IECLifeBlock: React.FC<Props & { id?: string }> = async ({
   limit: limitFromProps,
 }) => {
   const limit = limitFromProps || 4
+  const locale = (await getLocale()) as 'en' | 'vi'
 
-  const posts = await getCachedIECLifePosts(limit)()
+  const posts = await getCachedIECLifePosts(limit, locale)()
   if (posts.length === 0) return null
 
   return (

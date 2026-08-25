@@ -11,7 +11,7 @@ import { unstable_cache } from 'next/cache'
 const GAMES_LIMIT = 100
 
 /** All games, newest first — the block's `collection` mode. */
-export const getCachedAllGames = () =>
+export const getCachedAllGames = (locale: 'en' | 'vi') =>
   unstable_cache(
     async (): Promise<Game[]> => {
       const payload = await getPayload({ config: configPromise })
@@ -21,11 +21,12 @@ export const getCachedAllGames = () =>
         depth: 1,
         limit: GAMES_LIMIT,
         sort: '-publishedAt',
+        locale,
       })
 
       return docs
     },
-    ['games-portfolio-all', String(GAMES_LIMIT)],
+    ['games-portfolio-all', String(GAMES_LIMIT), locale],
     { tags: ['games'] },
   )
 
@@ -34,7 +35,7 @@ export const getCachedAllGames = () =>
  * back bare ids instead of populated objects. Ids are sorted for a stable key;
  * the caller restores the editor's chosen order.
  */
-export const getCachedGamesByIds = (ids: string[]) => {
+export const getCachedGamesByIds = (ids: string[], locale: 'en' | 'vi') => {
   const sortedIds = [...ids].sort()
 
   return unstable_cache(
@@ -46,11 +47,12 @@ export const getCachedGamesByIds = (ids: string[]) => {
         where: { id: { in: sortedIds } },
         depth: 1,
         limit: sortedIds.length,
+        locale,
       })
 
       return docs
     },
-    ['games-portfolio-by-ids', sortedIds.join(',')],
+    ['games-portfolio-by-ids', sortedIds.join(','), locale],
     { tags: ['games'] },
   )
 }

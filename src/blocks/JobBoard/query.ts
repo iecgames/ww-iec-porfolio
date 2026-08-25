@@ -7,7 +7,7 @@ import { unstable_cache } from 'next/cache'
 const JOB_BOARD_LIMIT = 200
 
 /** Every open position, for the filterable job board. */
-export const getCachedJobBoardJobs = () =>
+export const getCachedJobBoardJobs = (locale: 'en' | 'vi') =>
   unstable_cache(
     async (): Promise<Job[]> => {
       const payload = await getPayload({ config: configPromise })
@@ -16,10 +16,11 @@ export const getCachedJobBoardJobs = () =>
         collection: 'jobs',
         limit: JOB_BOARD_LIMIT,
         depth: 0,
+        locale,
       })
 
       return docs as Job[]
     },
-    ['job-board', String(JOB_BOARD_LIMIT)],
+    ['job-board', String(JOB_BOARD_LIMIT), locale],
     { tags: ['jobs'] },
   )
