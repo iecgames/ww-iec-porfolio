@@ -9,6 +9,10 @@ export const notifyPostSubscribers: CollectionAfterChangeHook<Post> = async ({
   req,
   operation,
 }) => {
+  // Maintenance scripts (backfills, migrations) rewrite documents wholesale and
+  // must never mail subscribers as a side effect.
+  if (req.context?.skipNotifications) return doc
+
   // Only fire when transitioning to published for the first time
   const isNowPublished = doc._status === 'published'
   const wasAlreadyPublished = previousDoc?._status === 'published'

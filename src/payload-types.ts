@@ -605,6 +605,7 @@ export interface Post {
    */
   generateSlug?: boolean | null;
   slug: string;
+  searchText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -621,6 +622,7 @@ export interface Category {
    */
   generateSlug?: boolean | null;
   slug: string;
+  searchText?: string | null;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -1730,6 +1732,7 @@ export interface Job {
     };
     [k: string]: unknown;
   } | null;
+  searchText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -2690,6 +2693,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   generateSlug?: T;
   slug?: T;
+  searchText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2796,6 +2800,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   generateSlug?: T;
   slug?: T;
+  searchText?: T;
   parent?: T;
   breadcrumbs?:
     | T
@@ -2861,6 +2866,7 @@ export interface JobsSelect<T extends boolean = true> {
   jobDescription?: T;
   qualifications?: T;
   benefits?: T;
+  searchText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

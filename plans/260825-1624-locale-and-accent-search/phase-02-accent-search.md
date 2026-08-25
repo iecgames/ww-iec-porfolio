@@ -72,7 +72,38 @@ Vì `like` tách theo khoảng trắng và `$and` từng từ, `hoa si` sẽ kh�
 
 Giữ `MAX_QUERY_LENGTH`. Fold trước rồi mới kiểm tra rỗng — chuỗi toàn dấu có thể fold ra rỗng.
 
-## 6. Acceptance criteria
+## 5b. Chốt chặn thêm — hook thông báo subscriber
+
+Backfill ở phase 03 gọi `payload.update` trên post/job đã publish. `Posts` và `Jobs` đều có `afterChange: [notify*Subscribers]` **gửi email campaign thật**. Guard sẵn có (`operation === 'update' && wasAlreadyPublished` → return) đã che các ca thực tế, nhưng không đủ chắc khi hậu quả là gửi mail cho subscriber thật.
+
+Đã thêm chốt tường minh vào cả hai hook:
+
+```ts
+if (req.context?.skipNotifications) return doc
+```
+
+Script backfill truyền `context: { disableRevalidate: true, skipNotifications: true }`.
+
+## 6. Acceptance criteria — ĐÃ CHẠY, TẤT CẢ PASS
+
+Kết quả thật từ `GET /api/site-search?locale=vi`:
+
+| Truy vấn | Ý nghĩa | Hits |
+|---|---|---|
+| `hoa si` | không dấu — **mục tiêu chính** | 1 → "Họa sĩ Game 2D" |
+| `Họa` NFC | có dấu, dạng NFC | 1 |
+| `Họa` NFD | **ca hồi quy bug gốc** | 1 |
+| `game` | ASCII — không hồi quy | 1 |
+| `HOA SI` | không dấu, viết hoa | 1 |
+| `hoa si game 2d` | cả cụm | 1 |
+| `bai test` | post tiếng Việt | 1 → "bài test" |
+| `tuyen` | từ không tồn tại | 0 |
+| `` (rỗng) | | 0 |
+| 150 ký tự | quá dài | 0 |
+
+`foldVietnamese` unit-check: `"Họa sĩ Game 2D"→"hoa si game 2d"`, `"Đông"→"dong"`, `"ĐẠI HỌC"→"dai hoc"`, `"Việt Nam"→"viet nam"`, và NFC/NFD fold ra kết quả giống hệt nhau.
+
+### Danh sách gốc
 
 - [ ] `pnpm generate:types` chạy xong, `searchText` có trong `payload-types.ts`.
 - [ ] `pnpm exec tsc --noEmit` pass, `pnpm build` sạch.

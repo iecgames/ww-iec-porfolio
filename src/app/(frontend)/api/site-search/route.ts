@@ -1,6 +1,8 @@
 import configPromise from '@payload-config'
-import { type CollectionSlug, getPayload, type Where } from 'payload'
+import { type CollectionSlug, getPayload } from 'payload'
 import { NextResponse } from 'next/server'
+
+import { foldVietnamese } from '@/utilities/foldVietnamese'
 
 /**
  * Site-wide search for the header search modal.
@@ -10,7 +12,10 @@ import { NextResponse } from 'next/server'
  * browser. This runs the same queries through the Local API in one process and
  * returns them already grouped and de-duplicated.
  *
- * Still uses the `like` operator, so this trades request count, not query cost.
+ * Matching runs against each collection's `searchText` — a folded,
+ * diacritic-free copy maintained by the syncSearchText hook — so "hoa si" finds
+ * "Họa sĩ" and an NFD query still matches NFC storage. The incoming query is
+ * folded the same way before it is compared.
  */
 
 const LOCALES = ['en', 'vi'] as const
@@ -19,23 +24,17 @@ type Locale = (typeof LOCALES)[number]
 const PER_COLLECTION_LIMIT = 5
 const MAX_QUERY_LENGTH = 100
 
-type SearchTarget = { collection: CollectionSlug; fields: string[] }
+type SearchTarget = { collection: CollectionSlug }
 
 const TARGETS = {
-  posts: { collection: 'posts', fields: ['title', 'meta.description'] },
-  jobs: { collection: 'jobs', fields: ['title', 'description'] },
-  categories: { collection: 'categories', fields: ['title'] },
+  posts: { collection: 'posts' },
+  jobs: { collection: 'jobs' },
+  categories: { collection: 'categories' },
 } satisfies Record<string, SearchTarget>
 
 type GroupKey = keyof typeof TARGETS
 
 type ResultDoc = { id: string; title: string | null; slug: string | null }
-
-/** `like` across the given fields — one field is a plain clause, several an `or`. */
-function buildWhere(fields: string[], q: string): Where {
-  if (fields.length === 1) return { [fields[0]]: { like: q } }
-  return { or: fields.map((field) => ({ [field]: { like: q } })) }
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -45,7 +44,11 @@ export async function GET(request: Request) {
     ? (requestedLocale as Locale)
     : 'en'
 
-  if (!q || q.length > MAX_QUERY_LENGTH) {
+  // Fold before the emptiness check: a string of nothing but combining marks
+  // folds away to nothing and must not reach the database as a match-all.
+  const folded = foldVietnamese(q)
+
+  if (!folded || q.length > MAX_QUERY_LENGTH) {
     return NextResponse.json({ posts: [], jobs: [], categories: [] })
   }
 
@@ -55,7 +58,7 @@ export async function GET(request: Request) {
 
   const groups = await Promise.all(
     groupKeys.map(async (key) => {
-      const { collection, fields } = TARGETS[key]
+      const { collection } = TARGETS[key]
 
       // Search every locale so a keyword matches regardless of the language it
       // was typed in; the display locale is applied last so its values win.
@@ -63,7 +66,7 @@ export async function GET(request: Request) {
         LOCALES.map(async (locale) => {
           const { docs } = await payload.find({
             collection,
-            where: buildWhere(fields, q),
+            where: { searchText: { like: folded } },
             limit: PER_COLLECTION_LIMIT,
             depth: 0,
             locale,

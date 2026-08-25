@@ -51,9 +51,15 @@ export const getCachedIECLifePosts = (limit: number, locale: 'en' | 'vi') =>
 
 ## 4. Acceptance criteria
 
-- [ ] `pnpm exec tsc --noEmit` pass, `pnpm build` sạch.
-- [ ] `grep -rn "locale" src/blocks/*/query.ts` — mỗi hàm cached đều có `locale` trong cả `payload.find` lẫn mảng keyParts.
-- [ ] Mở `/vi` và `/en` cạnh nhau: block hiển thị nội dung khác ngôn ngữ nhau (với doc đã dịch).
+> ⚠ **Không kiểm chứng được hành vi render trên DB hiện tại.** Cả global `home`
+> lẫn `career` đều có `layout` **rỗng** — không block nào được cấu hình, nên
+> không có block nào render để so sánh hai locale. Các mục dưới cần chạy lại
+> trên môi trường có nội dung thật.
+
+- [x] `pnpm exec tsc --noEmit` pass, `pnpm build` sạch.
+- [x] `grep` xác nhận cả 7 hàm cached có `locale` trong **cả** `payload.find` lẫn mảng keyParts.
+- [x] Dữ liệu localized thật sự khác nhau — `/api/jobs?locale=en` → `"2D Game Artist"`, `locale=vi` → `"Họa sĩ Game 2D"`. Xác nhận tham số `locale` có tác dụng ở tầng dữ liệu.
+- [ ] Mở `/vi` và `/en` cạnh nhau: block hiển thị nội dung khác ngôn ngữ nhau.
 - [ ] **Test cache không lẫn:** mở `/vi` trước, rồi `/en` — `/en` phải ra tiếng Anh, không phải bản tiếng Việt vừa cache. Rồi đảo thứ tự, làm lại.
 - [ ] Doc chỉ có bản `en` vẫn hiển thị (fallback) ở `/vi`, không mất block.
 - [ ] Sửa 1 post → reload cả hai locale → cả hai đều cập nhật (tag `posts` xóa mọi entry).

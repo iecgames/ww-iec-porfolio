@@ -28,6 +28,8 @@ import {
 } from '@payloadcms/plugin-seo/fields'
 import { slugField } from 'payload'
 
+import { syncSearchText } from '../hooks/syncSearchText'
+
 export const Posts: CollectionConfig<'posts'> = {
   slug: 'posts',
   access: {
@@ -243,8 +245,16 @@ export const Posts: CollectionConfig<'posts'> = {
       ],
     },
     slugField(),
+    {
+      name: 'searchText',
+      type: 'text',
+      localized: true,
+      index: true,
+      admin: { hidden: true, readOnly: true },
+    },
   ],
   hooks: {
+    beforeChange: [syncSearchText(['title', 'meta.description'])],
     afterChange: [revalidatePost, notifyPostSubscribers],
     afterRead: [populateAuthors],
     afterDelete: [revalidateDelete],
