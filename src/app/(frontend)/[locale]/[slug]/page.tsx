@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import { homeStatic } from '@/endpoints/seed/home-static'
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { getPayload, type RequiredDataFromCollectionSlug } from 'payload'
 import { cache } from 'react'
@@ -94,9 +95,15 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   return generateMeta({ doc: page, locale: locale as 'en' | 'vi' })
 }
 
-const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale: string }) => {
-  const { isEnabled: draft } = await draftMode()
-
+const queryPageUncached = async ({
+  slug,
+  locale,
+  draft,
+}: {
+  slug: string
+  locale: string
+  draft: boolean
+}) => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
@@ -114,4 +121,24 @@ const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale: s
   })
 
   return result.docs?.[0] || null
+}
+
+/**
+ * Published pages only. Tagged `pages` rather than per-slug: the collection is
+ * small, and a coarse tag means renaming a slug cannot strand a stale entry
+ * under the old key.
+ */
+const queryPageCached = (slug: string, locale: string) =>
+  unstable_cache(
+    async () => queryPageUncached({ slug, locale, draft: false }),
+    ['page-by-slug', slug, locale],
+    { tags: ['pages'] },
+  )
+
+const queryPageBySlug = cache(async ({ slug, locale }: { slug: string; locale: string }) => {
+  const { isEnabled: draft } = await draftMode()
+
+  return draft
+    ? queryPageUncached({ slug, locale, draft: true })
+    : queryPageCached(slug, locale)()
 })

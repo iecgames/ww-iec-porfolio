@@ -10,6 +10,12 @@ export const revalidatePage: CollectionAfterChangeHook<Page> = ({
   req: { payload, context },
 }) => {
   if (!context.disableRevalidate) {
+    // The [slug] route caches published pages under the `pages` tag. Fired on
+    // every change, not just publishes: unpublishing must drop the cache too.
+    setImmediate(() => {
+      revalidateTag('pages', 'max')
+    })
+
     if (doc._status === 'published') {
       const path = doc.slug === 'home' ? '/' : `/${doc.slug}`
 
@@ -42,6 +48,7 @@ export const revalidateDelete: CollectionAfterDeleteHook<Page> = ({ doc, req: { 
     setImmediate(() => {
       revalidatePath(path)
       revalidateTag('pages-sitemap', 'max')
+      revalidateTag('pages', 'max')
     })
   }
 

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 
 import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
 import { getPayload } from 'payload'
 import { cache } from 'react'
@@ -46,7 +47,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   return generateMeta({ doc: career as any, locale: locale as 'en' | 'vi' })
 }
 
-const queryCareerGlobal = cache(async (locale: string, draft: boolean) => {
+const queryCareerUncached = async (locale: string, draft: boolean) => {
   const payload = await getPayload({ config: configPromise })
 
   const career = await payload.findGlobal({
@@ -58,4 +59,14 @@ const queryCareerGlobal = cache(async (locale: string, draft: boolean) => {
   })
 
   return career || null
-})
+}
+
+/** Published content only — see the note on the home page's equivalent. */
+const queryCareerCached = (locale: string) =>
+  unstable_cache(async () => queryCareerUncached(locale, false), ['career-global', locale], {
+    tags: ['global_career'],
+  })
+
+const queryCareerGlobal = cache(async (locale: string, draft: boolean) =>
+  draft ? queryCareerUncached(locale, true) : queryCareerCached(locale)(),
+)
