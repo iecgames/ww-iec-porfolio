@@ -119,7 +119,12 @@
       "required": "bắt buộc",
       "additionalLink": "Link bổ sung",
       "additionalLinkPlaceholder": "VD: Portfolio, Behance, GitHub, showcase sản phẩm...",
-      "additionalLinkHint": "Tùy chọn — portfolio, showcase sản phẩm, hoặc link liên quan khác"
+      "additionalLinkHint": "Tùy chọn — portfolio, showcase sản phẩm, hoặc link liên quan khác",
+      "disabledNotice": {
+        "title": "Hệ thống tiếp nhận hồ sơ đang được nâng cấp",
+        "body": "Vui lòng gửi CV cùng thông tin ứng tuyển về địa chỉ {email}. Chúng tôi sẽ phản hồi trong thời gian sớm nhất.",
+        "mailButton": "Gửi CV qua email"
+      }
     },
     "sendCV": {
       "trigger": "Gửi CV cho chúng tôi",

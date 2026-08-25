@@ -50,6 +50,16 @@ export const General: GlobalConfig = {
       },
     },
     {
+      name: 'recruitmentEmail',
+      type: 'email',
+      defaultValue: 'hr@iecorp.vn',
+      label: 'Recruitment Email',
+      admin: {
+        description:
+          'Địa chỉ ứng viên gửi CV tới. Hiển thị trong thông báo ở form ứng tuyển.',
+      },
+    },
+    {
       name: 'logo',
       type: 'upload',
       relationTo: 'media',

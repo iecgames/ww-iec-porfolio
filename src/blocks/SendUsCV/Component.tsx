@@ -1,6 +1,7 @@
 import type { SendUsCVBlock as SendUsCVBlockProps, Social } from '@/payload-types'
+import { getCachedGlobal } from '@/utilities/getGlobals'
 import configPromise from '@payload-config'
-import { getTranslations } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
 import React from 'react'
 import { SendUsCVClient, type ApplyLabels, type SocialItem } from './SendUsCVClient'
@@ -12,7 +13,10 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
   innovatorLabel,
 }) => {
   const payload = await getPayload({ config: configPromise })
+  const locale = (await getLocale()) as 'en' | 'vi'
   const t = await getTranslations('JobDetail')
+  const general = await getCachedGlobal('general', 0, locale)()
+  const recruitmentEmail = general?.recruitmentEmail ?? null
 
   const { docs: socialDocs } = await payload.find({
     collection: 'social',
@@ -42,14 +46,13 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
     additionalLinkHint: t('apply.additionalLinkHint'),
     cv: t('apply.cv'),
     cvHint: t('apply.cvHint'),
-    cvAttached: t('apply.cvAttached'),
-    cvChange: t('apply.cvChange'),
-    submit: t('apply.submit'),
-    submitting: t('apply.submitting'),
-    successTitle: t('apply.successTitle'),
-    successBody: t('apply.successBody'),
     close: t('apply.close'),
     required: t('apply.required'),
+    disabledTitle: t('apply.disabledNotice.title'),
+    disabledBody: t('apply.disabledNotice.body', {
+      email: recruitmentEmail ?? 'hr@iecorp.vn',
+    }),
+    disabledMailButton: t('apply.disabledNotice.mailButton'),
   }
 
   return (
@@ -61,6 +64,7 @@ export const SendUsCVBlock: React.FC<SendUsCVBlockProps & { id?: string }> = asy
         innovatorLabel={innovatorLabel ?? undefined}
         socials={socials}
         applyLabels={applyLabels}
+        recruitmentEmail={recruitmentEmail}
       />
     </div>
   )

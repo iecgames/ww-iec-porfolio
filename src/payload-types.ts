@@ -3781,6 +3781,10 @@ export interface General {
    */
   email?: string | null;
   /**
+   * Địa chỉ ứng viên gửi CV tới. Hiển thị trong thông báo ở form ứng tuyển.
+   */
+  recruitmentEmail?: string | null;
+  /**
    * Main logo displayed in the header and emails.
    */
   logo?: (string | null) | Media;
@@ -4089,6 +4093,7 @@ export interface GeneralSelect<T extends boolean = true> {
   address?: T;
   hotline?: T;
   email?: T;
+  recruitmentEmail?: T;
   logo?: T;
   logoMono?: T;
   tagline?: T;
