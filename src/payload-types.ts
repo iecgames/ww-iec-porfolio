@@ -82,7 +82,6 @@ export interface Config {
     'oauth-clients': OauthClient;
     'oauth-codes': OauthCode;
     'oauth-refresh-tokens': OauthRefreshToken;
-    redirects: Redirect;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -111,7 +110,6 @@ export interface Config {
     'oauth-clients': OauthClientsSelect<false> | OauthClientsSelect<true>;
     'oauth-codes': OauthCodesSelect<false> | OauthCodesSelect<true>;
     'oauth-refresh-tokens': OauthRefreshTokensSelect<false> | OauthRefreshTokensSelect<true>;
-    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -1662,32 +1660,6 @@ export interface OauthRefreshToken {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
- */
-export interface Redirect {
-  id: string;
-  /**
-   * You will need to rebuild the website when changing this field.
-   */
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: string | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: string | Post;
-        } | null);
-    url?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1861,10 +1833,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'oauth-refresh-tokens';
         value: string | OauthRefreshToken;
-      } | null)
-    | ({
-        relationTo: 'redirects';
-        value: string | Redirect;
       } | null)
     | ({
         relationTo: 'payload-folders';
@@ -2735,22 +2703,6 @@ export interface OauthRefreshTokensSelect<T extends boolean = true> {
   resource?: T;
   expires_at?: T;
   revoked?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects_select".
- */
-export interface RedirectsSelect<T extends boolean = true> {
-  from?: T;
-  to?:
-    | T
-    | {
-        type?: T;
-        reference?: T;
-        url?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }

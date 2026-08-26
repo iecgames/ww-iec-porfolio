@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
-import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
@@ -20,12 +20,11 @@ type Args = {
 export default async function CareerPage({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { locale } = await paramsPromise
-  const url = '/career'
 
   const career = await queryCareerGlobal(locale, draft)
 
   if (!career) {
-    return <PayloadRedirects url={url} />
+    notFound()
   }
 
   const { hero, layout } = career
@@ -33,7 +32,6 @@ export default async function CareerPage({ params: paramsPromise }: Args) {
   return (
     <article className="pt-16 pb-24">
       <PageClient />
-      <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
       {hero && <RenderHero {...hero} />}
       {Array.isArray(layout) && <RenderBlocks blocks={layout} />}

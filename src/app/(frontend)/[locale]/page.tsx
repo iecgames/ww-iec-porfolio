@@ -1,9 +1,9 @@
 import type { Metadata } from 'next'
 
-import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
 import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
@@ -21,12 +21,11 @@ type Args = {
 export default async function HomePage({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { locale } = await paramsPromise
-  const url = '/'
 
   const home = await queryHomeGlobal(locale, draft)
 
   if (!home) {
-    return <PayloadRedirects url={url} />
+    notFound()
   }
 
   const { hero, layout } = home
@@ -35,7 +34,6 @@ export default async function HomePage({ params: paramsPromise }: Args) {
     <article className="pt-16 pb-24">
       <PageClient />
       <LandingClient />
-      <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
       {hero && <RenderHero {...hero} />}
       {Array.isArray(layout) && <RenderBlocks blocks={layout} />}
