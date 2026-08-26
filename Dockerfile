@@ -79,8 +79,30 @@ COPY --from=builder --chown=nextjs:nodejs /app/public        ./public
 # inspecting .next/standalone/node_modules after a build. Installing it here
 # fetches the musl build matching this base image.
 # Keep the version in step with package.json.
-RUN npm install --no-save --omit=dev sharp@0.34.2 \
-    && chown -R nextjs:nodejs /app/node_modules/sharp /app/node_modules/@img
+#
+# CÀI Ở THƯ MỤC TẠM RỒI COPY, tuyệt đối không `npm install` thẳng trong /app.
+# Chạy npm trong /app là bắt nó resolve lại TOÀN BỘ cây phụ thuộc của bản
+# standalone — cây đã bị Next cắt tỉa nên npm không dựng lại nổi. Hai kiểu chết
+# đã gặp thật, cùng một gốc:
+#   - ERESOLVE: `@payloadcms/email-resend` khai "^3.84.1" (chỉ mình nó có dấu ^,
+#     các @payloadcms khác ghim chính xác) → npm nhấc lên 3.88.0, đòi peer
+#     payload@3.88.0 trong khi payload ghim cứng 3.84.1
+#   - "Cannot read properties of null (reading 'isDescendantOf')": npm tự crash
+#     khi đối chiếu cây tỉa. `--legacy-peer-deps` KHÔNG cứu được, nó chỉ tắt
+#     kiểm tra peer chứ vẫn đụng vào cây.
+#
+# Chỉ `@img/sharp-<platform>` là thiếu thật. File tracing của Next đã kéo sẵn
+# gói JS `sharp` và các dependency của nó vào standalone, nhưng binding native
+# là optionalDependency resolve lúc require() nên bị bỏ lại. Cài sharp cùng
+# phiên bản ở /tmp để lấy đúng bản musl của @img, copy sang, xong.
+# Giữ phiên bản khớp với package.json.
+RUN mkdir -p /tmp/sharp-src && cd /tmp/sharp-src \
+    && echo '{"name":"sharp-src","private":true}' > package.json \
+    && npm install --omit=dev --no-audit --no-fund --no-package-lock sharp@0.34.2 \
+    && cp -R /tmp/sharp-src/node_modules/@img /app/node_modules/ \
+    && rm -rf /tmp/sharp-src /root/.npm \
+    && chown -R nextjs:nodejs /app/node_modules/@img \
+    && [ -d /app/node_modules/sharp ] && chown -R nextjs:nodejs /app/node_modules/sharp
 
 # Ensure the media directory exists before the volume is mounted
 RUN mkdir -p /app/public/media \
