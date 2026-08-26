@@ -30,7 +30,7 @@ import {
   useTransform,
   type MotionValue,
 } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 
 import type { Media as MediaType, CoreValuesShowcaseBlock as Props } from '@/payload-types'

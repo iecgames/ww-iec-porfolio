@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React from 'react'
 import { useTranslations } from 'next-intl'
 import { IconArrowRight } from '@tabler/icons-react'

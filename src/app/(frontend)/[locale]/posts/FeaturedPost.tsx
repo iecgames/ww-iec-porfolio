@@ -5,7 +5,7 @@ import type { Post } from '@/payload-types'
 import { Card, CardBody, Chip } from '@heroui/react'
 import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React from 'react'
 
 export type FeaturedPostData = Pick<

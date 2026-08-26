@@ -18,7 +18,7 @@ import {
   IconMail,
   IconPhone,
 } from '@tabler/icons-react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 const ICON_CLS = 'w-6 h-6'
 

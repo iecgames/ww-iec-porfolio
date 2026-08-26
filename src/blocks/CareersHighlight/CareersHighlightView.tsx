@@ -14,7 +14,7 @@ import {
   IconStarFilled,
 } from '@tabler/icons-react'
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type { CareersHighlightBlock, Job, Media as MediaType } from '@/payload-types'

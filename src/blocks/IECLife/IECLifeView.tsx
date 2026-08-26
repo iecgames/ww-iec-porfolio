@@ -2,7 +2,7 @@
 
 import { IconConfetti, IconHeartFilled, IconSparkles, IconStarFilled } from '@tabler/icons-react'
 import { motion, useReducedMotion, type Variants } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React from 'react'
 
 import type { Category, Post, Tag } from '@/payload-types'

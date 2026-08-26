@@ -7,7 +7,7 @@ import { resolveLinkHref } from '@/utilities/resolveLinkHref'
 import { cn } from '@/utilities/ui'
 import { IconArrowRight } from '@tabler/icons-react'
 import { motion, type Variants } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React, { useEffect, useRef, useState } from 'react'
 import { RenderVideoHeroBlocks } from './RenderVideoHeroBlocks'
 

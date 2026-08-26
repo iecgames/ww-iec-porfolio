@@ -7,7 +7,7 @@ import {
   IconMapPin,
   IconStack2,
 } from '@tabler/icons-react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 
 import { cn } from '@/utilities/ui'
 
