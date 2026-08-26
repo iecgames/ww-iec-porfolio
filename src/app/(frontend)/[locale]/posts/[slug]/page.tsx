@@ -1,10 +1,11 @@
 import type { Metadata } from 'next'
 
 import { RelatedPosts } from '@/blocks/RelatedPosts/Component'
-import { PayloadRedirects } from '@/components/PayloadRedirects'
 import RichText from '@/components/RichText'
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
@@ -46,17 +47,13 @@ export default async function Post({ params: paramsPromise }: Args) {
   const { slug = '', locale } = await paramsPromise
   // Decode to support slugs with special characters
   const decodedSlug = decodeURIComponent(slug)
-  const url = '/posts/' + decodedSlug
   const post = await queryPostBySlug({ slug: decodedSlug, locale })
 
-  if (!post) return <PayloadRedirects url={url} />
+  if (!post) notFound()
 
   return (
     <article className="pt-16 pb-16">
       <PageClient />
-
-      {/* Allows redirects for valid pages too */}
-      <PayloadRedirects disableNotFound url={url} />
 
       {draft && <LivePreviewListener />}
 
@@ -87,9 +84,15 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   return generateMeta({ doc: post, locale: locale as 'en' | 'vi' })
 }
 
-const queryPostBySlug = cache(async ({ slug, locale }: { slug: string; locale?: string }) => {
-  const { isEnabled: draft } = await draftMode()
-
+const queryPostUncached = async ({
+  slug,
+  locale,
+  draft,
+}: {
+  slug: string
+  locale?: string
+  draft: boolean
+}) => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
@@ -107,4 +110,20 @@ const queryPostBySlug = cache(async ({ slug, locale }: { slug: string; locale?: 
   })
 
   return result.docs?.[0] || null
+}
+
+/** Published posts only. Shares the `posts` tag with the listing blocks. */
+const queryPostCached = (slug: string, locale?: string) =>
+  unstable_cache(
+    async () => queryPostUncached({ slug, locale, draft: false }),
+    ['post-by-slug', slug, locale ?? 'default'],
+    { tags: ['posts'] },
+  )
+
+const queryPostBySlug = cache(async ({ slug, locale }: { slug: string; locale?: string }) => {
+  const { isEnabled: draft } = await draftMode()
+
+  return draft
+    ? queryPostUncached({ slug, locale, draft: true })
+    : queryPostCached(slug, locale)()
 })

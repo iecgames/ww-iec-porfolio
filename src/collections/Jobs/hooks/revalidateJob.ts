@@ -1,6 +1,6 @@
 import type { CollectionAfterChangeHook, CollectionAfterDeleteHook } from 'payload'
 
-import { revalidatePath } from 'next/cache'
+import { revalidatePath, revalidateTag } from 'next/cache'
 
 import type { Job } from '../../../payload-types'
 
@@ -15,6 +15,8 @@ export const revalidateJob: CollectionAfterChangeHook<Job> = ({
       try {
         revalidatePath(detailPath)
         revalidatePath('/career')
+        // JobBoard and CareersHighlight read through caches tagged `jobs`
+        revalidateTag('jobs', 'max')
       } catch {
         // revalidatePath requires a Next.js request context; ignore when called outside it
       }
@@ -29,6 +31,7 @@ export const revalidateJobDelete: CollectionAfterDeleteHook<Job> = ({ doc, req: 
       try {
         revalidatePath(`/career/${doc?.id}`)
         revalidatePath('/career')
+        revalidateTag('jobs', 'max')
       } catch {
         // revalidatePath requires a Next.js request context; ignore when called outside it
       }

@@ -1,20 +1,15 @@
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { getLocale } from 'next-intl/server'
 import React from 'react'
 import type { JobBoardBlock as JobBoardBlockProps } from '@/payload-types'
 import { JobBoardClient, type JobItem } from './JobBoardClient'
+import { getCachedJobBoardJobs } from './query'
 
 export const JobBoardBlock: React.FC<JobBoardBlockProps & { id?: string }> = async ({
   heading,
   subtitle,
 }) => {
-  const payload = await getPayload({ config: configPromise })
-
-  const { docs: jobDocs } = await payload.find({
-    collection: 'jobs',
-    limit: 200,
-    depth: 0,
-  })
+  const locale = (await getLocale()) as 'en' | 'vi'
+  const jobDocs = await getCachedJobBoardJobs(locale)()
 
   const jobs: JobItem[] = jobDocs.map((doc) => ({
     id: String(doc.id),

@@ -1,7 +1,7 @@
 ﻿import configPromise from '@payload-config'
 import { getTranslations } from 'next-intl/server'
 import { getPayload } from 'payload'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import type { Metadata } from 'next'
 
 type Props = {

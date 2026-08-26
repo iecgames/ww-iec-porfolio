@@ -1,11 +1,11 @@
 import type { Post, ArchiveBlock as ArchiveBlockProps } from '@/payload-types'
 
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
+import { getLocale } from 'next-intl/server'
 import React from 'react'
 import RichText from '@/components/RichText'
 
 import { CollectionArchive } from '@/components/CollectionArchive'
+import { getCachedArchivePosts } from './query'
 
 export const ArchiveBlock: React.FC<
   ArchiveBlockProps & {
@@ -19,29 +19,13 @@ export const ArchiveBlock: React.FC<
   let posts: Post[] = []
 
   if (populateBy === 'collection') {
-    const payload = await getPayload({ config: configPromise })
+    const flattenedCategories =
+      categories?.map((category) =>
+        typeof category === 'object' ? String(category.id) : String(category),
+      ) ?? []
 
-    const flattenedCategories = categories?.map((category) => {
-      if (typeof category === 'object') return category.id
-      else return category
-    })
-
-    const fetchedPosts = await payload.find({
-      collection: 'posts',
-      depth: 1,
-      limit,
-      ...(flattenedCategories && flattenedCategories.length > 0
-        ? {
-            where: {
-              categories: {
-                in: flattenedCategories,
-              },
-            },
-          }
-        : {}),
-    })
-
-    posts = fetchedPosts.docs
+    const locale = (await getLocale()) as 'en' | 'vi'
+    posts = await getCachedArchivePosts(limit, flattenedCategories, locale)()
   } else {
     if (selectedDocs?.length) {
       const filteredSelectedPosts = selectedDocs.map((post) => {

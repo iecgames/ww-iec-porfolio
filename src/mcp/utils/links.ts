@@ -24,7 +24,6 @@ type Locale = 'en' | 'vi'
 type LinkArgs =
   | { collection: 'posts'; id: string | number; slug?: string | null; locale?: Locale; status?: string | null }
   | { collection: 'jobs'; id: string | number; locale?: Locale; status?: string | null }
-  | { collection: 'job-applications'; id: string | number }
 
 export type DocLinks = {
   adminUrl: string
@@ -47,10 +46,6 @@ function publicPath(args: LinkArgs): string | null {
 
 export function buildLinks(args: LinkArgs): DocLinks {
   const adminUrl = `${SERVER_URL}/admin/collections/${args.collection}/${args.id}`
-
-  if (args.collection === 'job-applications') {
-    return { adminUrl }
-  }
 
   const path = publicPath(args)
   const status = args.status ?? undefined

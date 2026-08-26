@@ -45,6 +45,12 @@ ARG PAYLOAD_SECRET=placeholder-build-secret
 ENV DATABASE_URL=$DATABASE_URL
 ENV PAYLOAD_SECRET=$PAYLOAD_SECRET
 
+# storagePlugin() throws when GCS_BUCKET is unset, and it loads during `next
+# build`. docker-compose already passes this as a build arg, but without the
+# ARG declared here Docker discards it and the build fails.
+ARG GCS_BUCKET
+ENV GCS_BUCKET=$GCS_BUCKET
+
 RUN pnpm run build
 
 # ============================================================
@@ -67,9 +73,23 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static  ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public        ./public
 
+# The image optimizer needs sharp at runtime. Next's file tracing pulls in the
+# sharp JS package but NOT its native @img/sharp-<platform> binding, which is a
+# separate optional dependency resolved at require() time — verified by
+# inspecting .next/standalone/node_modules after a build. Installing it here
+# fetches the musl build matching this base image.
+# Keep the version in step with package.json.
+RUN npm install --no-save --omit=dev sharp@0.34.2 \
+    && chown -R nextjs:nodejs /app/node_modules/sharp /app/node_modules/@img
+
 # Ensure the media directory exists before the volume is mounted
 RUN mkdir -p /app/public/media \
     && chown nextjs:nodejs /app/public/media
+
+# Same for the image optimizer's cache — it is a named volume in
+# docker-compose, and the server must be able to write to it as `nextjs`.
+RUN mkdir -p /app/.next/cache/images \
+    && chown -R nextjs:nodejs /app/.next/cache
 
 USER nextjs
 

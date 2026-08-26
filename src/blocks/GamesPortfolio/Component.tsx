@@ -1,28 +1,20 @@
+import { getLocale } from 'next-intl/server'
 import React from 'react'
-
-import configPromise from '@payload-config'
-import { getPayload } from 'payload'
 
 import type { Game, GamesPortfolioBlock as Props } from '@/payload-types'
 
 import { GamesCarousel } from './GamesCarousel'
 import { GamesPortfolioShell } from './GamesPortfolioShell'
+import { getCachedAllGames, getCachedGamesByIds } from './query'
 
 export const GamesPortfolioBlock: React.FC<Props & { id?: string }> = async (props) => {
   const { eyebrow, heading, populateBy, selectedGames } = props
 
   let games: Game[] = []
+  const locale = (await getLocale()) as 'en' | 'vi'
 
   if (populateBy === 'collection') {
-    const payload = await getPayload({ config: configPromise })
-    const fetched = await payload.find({
-      collection: 'games',
-      depth: 1,
-      // fetch all — no artificial limit
-      pagination: false,
-      sort: '-publishedAt',
-    })
-    games = fetched.docs
+    games = await getCachedAllGames(locale)()
   } else if (Array.isArray(selectedGames) && selectedGames.length > 0) {
     // Payload may return resolved objects or bare IDs depending on fetch depth.
     // Handle both cases: use objects directly, fetch any unresolved IDs.
@@ -30,15 +22,9 @@ export const GamesPortfolioBlock: React.FC<Props & { id?: string }> = async (pro
     const unresolvedIds = selectedGames.filter((g): g is string => typeof g === 'string')
 
     if (unresolvedIds.length > 0) {
-      const payload = await getPayload({ config: configPromise })
-      const fetched = await payload.find({
-        collection: 'games',
-        where: { id: { in: unresolvedIds } },
-        depth: 1,
-        pagination: false,
-      })
+      const fetchedDocs = await getCachedGamesByIds(unresolvedIds, locale)()
       // Merge while preserving the original selection order
-      const byId = new Map(fetched.docs.map((g) => [String(g.id), g]))
+      const byId = new Map(fetchedDocs.map((g) => [String(g.id), g]))
       const merged = new Map(resolvedGames.map((g) => [String(g.id), g]))
       unresolvedIds.forEach((id) => {
         const g = byId.get(id)

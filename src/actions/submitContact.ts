@@ -3,6 +3,8 @@
 import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 
+import { upsertSubscriber } from '@/utilities/email/upsertSubscriber'
+
 export type ContactResult = { ok: true } | { ok: false; error: string }
 
 export async function submitContact(formData: FormData): Promise<ContactResult> {
@@ -39,9 +41,19 @@ export async function submitContact(formData: FormData): Promise<ContactResult> 
       },
       overrideAccess: true,
     })
-    return { ok: true }
   } catch (err: unknown) {
     console.error('[submitContact]', err)
     return { ok: false, error: 'Something went wrong. Please try again.' }
   }
+
+  // Enrolling the sender in the newsletter is secondary. They have already
+  // written and sent their message, so a failure here must not come back as
+  // "sending failed" — log it and let the contact submission stand.
+  try {
+    await upsertSubscriber({ email, name, source: 'contact', payload })
+  } catch (err: unknown) {
+    console.error('[submitContact] subscriber upsert failed:', err)
+  }
+
+  return { ok: true }
 }

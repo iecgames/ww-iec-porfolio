@@ -2,7 +2,7 @@
 
 import { IconArrowRight } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React from 'react'
 
 import { cn } from '@/utilities/ui'

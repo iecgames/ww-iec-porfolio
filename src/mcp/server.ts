@@ -11,7 +11,6 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import type { Payload } from 'payload'
 import { z } from 'zod'
 
-import { registerApplicationTools } from './tools/applications'
 import { registerJobTools } from './tools/jobs'
 import { registerMediaTools } from './tools/media'
 import { registerPostTools } from './tools/posts'
@@ -119,17 +118,6 @@ MEDIA (IMAGES) — RULES
   • There is no media_delete via MCP — manage deletions in the admin.
 
 ═══════════════════════════════════════════════════════════════════════════
-APPLICATIONS (CVs) — HR WORKFLOWS
-═══════════════════════════════════════════════════════════════════════════
-
-  • Use applications_summary first when the user asks for an overview / report.
-  • Use applications_list to browse candidates with filters; the response
-    includes a direct CV download URL for each candidate.
-  • Use applications_update_status to move candidates through the pipeline.
-  • You CANNOT create or delete applications via MCP — that is a candidate-side
-    public form.
-
-═══════════════════════════════════════════════════════════════════════════
 TECHNICAL NOTES
 ═══════════════════════════════════════════════════════════════════════════
 
@@ -176,7 +164,7 @@ export function createMcpServer(payload: Payload): McpServer {
       const info = {
         name: SERVER_NAME,
         version: SERVER_VERSION,
-        domains: ['jobs', 'posts', 'media', 'applications'],
+        domains: ['jobs', 'posts', 'media'],
       }
       return {
         content: [{ type: 'text' as const, text: JSON.stringify(info, null, 2) }],
@@ -188,7 +176,6 @@ export function createMcpServer(payload: Payload): McpServer {
   registerJobTools(server, payload)
   registerPostTools(server, payload)
   registerMediaTools(server, payload)
-  registerApplicationTools(server, payload)
 
   return server
 }

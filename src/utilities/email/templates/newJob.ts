@@ -9,9 +9,18 @@ type NewJobTemplateArgs = {
   subscriber: { name?: string | null }
   unsubscribeUrl: string
   siteUrl: string
+  previewText?: string
+  logoUrl?: string
 }
 
-export function newJobTemplate({ job, subscriber, unsubscribeUrl, siteUrl }: NewJobTemplateArgs): {
+export function newJobTemplate({
+  job,
+  subscriber,
+  unsubscribeUrl,
+  siteUrl,
+  previewText,
+  logoUrl,
+}: NewJobTemplateArgs): {
   html: string
   subject: string
 } {
@@ -44,7 +53,7 @@ export function newJobTemplate({ job, subscriber, unsubscribeUrl, siteUrl }: New
     <p style="margin:24px 0 0;font-size:13px;color:#6b7280;">Nếu nút không hoạt động, vui lòng truy cập: <a href="${jobUrl}" style="color:#3b82f6;">${jobUrl}</a></p>
   `
 
-  const html = baseTemplate({ bodyHtml, unsubscribeUrl, siteUrl })
+  const html = baseTemplate({ bodyHtml, unsubscribeUrl, siteUrl, previewText, logoUrl })
 
   return { html, subject }
 }

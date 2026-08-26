@@ -69,6 +69,10 @@ export const link: LinkType = ({
                 label: 'External URL',
                 value: 'custom',
               },
+              {
+                label: 'Video popup',
+                value: 'video',
+              },
             ],
           },
           {
@@ -130,6 +134,18 @@ export const link: LinkType = ({
         placeholder: 'https://example.com',
       },
       label: 'External URL',
+      required: true,
+    },
+    {
+      name: 'video',
+      type: 'text',
+      admin: {
+        condition: (_, siblingData) => siblingData?.type === 'video',
+        description:
+          'YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.',
+        placeholder: 'https://www.youtube.com/watch?v=...',
+      },
+      label: 'Video URL',
       required: true,
     },
   ]

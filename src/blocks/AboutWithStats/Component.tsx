@@ -13,7 +13,7 @@ import {
   type MotionValue,
   type Variants,
 } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React, { useEffect, useRef } from 'react'
 
 import type { Media as MediaType, AboutWithStatsBlock as Props } from '@/payload-types'

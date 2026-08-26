@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
 
-import { PayloadRedirects } from '@/components/PayloadRedirects'
 import configPromise from '@payload-config'
+import { unstable_cache } from 'next/cache'
 import { draftMode } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
@@ -20,19 +21,11 @@ type Args = {
 export default async function HomePage({ params: paramsPromise }: Args) {
   const { isEnabled: draft } = await draftMode()
   const { locale } = await paramsPromise
-  const url = '/'
 
-  let home
-  try {
-    home = await queryHomeGlobal(locale, draft)
-  } catch (e) {
-    const fs = await import('fs')
-    fs.appendFileSync('debug-error.log', `\n===== queryHomeGlobal =====\n${(e as Error).stack}\n`)
-    throw e
-  }
+  const home = await queryHomeGlobal(locale, draft)
 
   if (!home) {
-    return <PayloadRedirects url={url} />
+    notFound()
   }
 
   const { hero, layout } = home
@@ -41,7 +34,6 @@ export default async function HomePage({ params: paramsPromise }: Args) {
     <article className="pt-16 pb-24">
       <PageClient />
       <LandingClient />
-      <PayloadRedirects disableNotFound url={url} />
       {draft && <LivePreviewListener />}
       {hero && <RenderHero {...hero} />}
       {Array.isArray(layout) && <RenderBlocks blocks={layout} />}
@@ -56,7 +48,7 @@ export async function generateMetadata({ params: paramsPromise }: Args): Promise
   return generateMeta({ doc: home as any, locale: locale as 'en' | 'vi' })
 }
 
-const queryHomeGlobal = cache(async (locale: string, draft: boolean) => {
+const queryHomeUncached = async (locale: string, draft: boolean) => {
   const payload = await getPayload({ config: configPromise })
 
   const home = await payload.findGlobal({
@@ -68,4 +60,19 @@ const queryHomeGlobal = cache(async (locale: string, draft: boolean) => {
   })
 
   return home || null
-})
+}
+
+/**
+ * Published content only. Tagged `global_home`, which revalidateHome already
+ * fires on save. Draft content must never reach this cache — an editor's
+ * unpublished draft is theirs alone, and a cached copy would leak it to
+ * everyone and go stale on the next edit.
+ */
+const queryHomeCached = (locale: string) =>
+  unstable_cache(async () => queryHomeUncached(locale, false), ['home-global', locale], {
+    tags: ['global_home'],
+  })
+
+const queryHomeGlobal = cache(async (locale: string, draft: boolean) =>
+  draft ? queryHomeUncached(locale, true) : queryHomeCached(locale)(),
+)

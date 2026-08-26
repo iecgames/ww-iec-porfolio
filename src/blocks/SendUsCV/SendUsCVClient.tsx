@@ -36,14 +36,11 @@ export type ApplyLabels = {
   additionalLinkHint: string
   cv: string
   cvHint: string
-  cvAttached: string
-  cvChange: string
-  submit: string
-  submitting: string
-  successTitle: string
-  successBody: string
   close: string
   required: string
+  disabledTitle: string
+  disabledBody: string
+  disabledMailButton: string
 }
 
 export type SendUsCVProps = {
@@ -53,6 +50,7 @@ export type SendUsCVProps = {
   innovatorLabel?: string
   socials?: SocialItem[]
   applyLabels: ApplyLabels
+  recruitmentEmail?: string | null
 }
 
 function SocialIcon({ platform }: { platform: SocialItem['platform'] }) {
@@ -83,6 +81,7 @@ export function SendUsCVClient({
   innovatorLabel,
   socials = [],
   applyLabels,
+  recruitmentEmail,
 }: SendUsCVProps) {
   return (
     <motion.div
@@ -213,6 +212,7 @@ export function SendUsCVClient({
         >
           <JobApplyModal
             labels={applyLabels}
+            recruitmentEmail={recruitmentEmail}
             trigger={
               <motion.span
                 whileHover={{ scale: 1.04 }}

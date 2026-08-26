@@ -1,6 +1,6 @@
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getMessages, setRequestLocale } from 'next-intl/server'
-import { draftMode } from 'next/headers'
+import { cookies, draftMode } from 'next/headers'
 import { notFound } from 'next/navigation'
 import React from 'react'
 
@@ -30,14 +30,23 @@ export default async function LocaleLayout({ children, params }: Props) {
   const { isEnabled } = await draftMode()
   const messages = await getMessages()
 
+  // AdminBar fetches /api/users/me as soon as it mounts. Rendering it for every
+  // visitor costs one API round-trip per page view just to conclude the bar
+  // should stay hidden, so gate it on the Payload auth cookie being present.
+  // This only decides whether to render — PayloadAdminBar still authenticates
+  // its own request, so a forged cookie reveals nothing.
+  const hasAuthCookie = Boolean((await cookies()).get('payload-token'))
+
   return (
     <NextIntlClientProvider locale={locale} messages={messages}>
       <Providers>
-        <AdminBar
-          adminBarProps={{
-            preview: isEnabled,
-          }}
-        />
+        {hasAuthCookie && (
+          <AdminBar
+            adminBarProps={{
+              preview: isEnabled,
+            }}
+          />
+        )}
 
         <Header />
         <PageTransition>{children}</PageTransition>

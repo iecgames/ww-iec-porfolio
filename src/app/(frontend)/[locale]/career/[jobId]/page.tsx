@@ -12,12 +12,13 @@ import {
   IconStack2,
 } from '@tabler/icons-react'
 import { getTranslations } from 'next-intl/server'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { notFound } from 'next/navigation'
 import { getPayload } from 'payload'
 import { cache } from 'react'
 
 import { buildSEO } from '@/utilities/getDefaultSEO'
+import { getCachedGlobal } from '@/utilities/getGlobals'
 import { SendUsCVBlock } from '@/blocks/SendUsCV/Component'
 import { JobApplyModal } from '@/components/JobApplyModal'
 import { JobCard, type JobCardData } from '@/components/JobCard'
@@ -84,6 +85,10 @@ export default async function JobDetailPage({ params: paramsPromise }: Args) {
   if (!job) notFound()
 
   const t = await getTranslations('JobDetail')
+
+  // Address candidates are told to email their CV to, editable in General Settings.
+  const general = await getCachedGlobal('general', 0, locale as 'en' | 'vi')()
+  const recruitmentEmail = general?.recruitmentEmail ?? null
 
   const employmentTypeLabel = job.employmentType ? t(`type.${job.employmentType}` as const) : null
 
@@ -233,15 +238,15 @@ export default async function JobDetailPage({ params: paramsPromise }: Args) {
                     additionalLinkHint: t('apply.additionalLinkHint'),
                     cv: t('apply.cv'),
                     cvHint: t('apply.cvHint'),
-                    cvAttached: t('apply.cvAttached'),
-                    cvChange: t('apply.cvChange'),
-                    submit: t('apply.submit'),
-                    submitting: t('apply.submitting'),
-                    successTitle: t('apply.successTitle'),
-                    successBody: t('apply.successBody'),
                     close: t('apply.close'),
                     required: t('apply.required'),
+                    disabledTitle: t('apply.disabledNotice.title'),
+                    disabledBody: t('apply.disabledNotice.body', {
+                      email: recruitmentEmail ?? 'hr@iecorp.vn',
+                    }),
+                    disabledMailButton: t('apply.disabledNotice.mailButton'),
                   }}
+                  recruitmentEmail={recruitmentEmail}
                 />
                 {job.linkedinUrl && (
                   <Button asChild className="w-full" size="lg" variant="outline">

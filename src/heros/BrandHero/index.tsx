@@ -1,8 +1,8 @@
 'use client'
 
 import React, { useEffect, useRef } from 'react'
-import Link from 'next/link'
-import { IconArrowRight } from '@tabler/icons-react'
+import { Link } from '@/i18n/navigation'
+import { IconArrowRight, IconPlayerPlayFilled } from '@tabler/icons-react'
 import {
   animate,
   motion,
@@ -22,6 +22,7 @@ import { ShareWidget, type SharePlatformKey } from '@/components/ShareWidget'
 import { VideoPopup } from '@/components/VideoPopup'
 import { useTransparentHeader } from '@/providers/TransparentHeader'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { resolveLinkHref } from '@/utilities/resolveLinkHref'
 
 type BrandHeroProps = NonNullable<Page['hero']> | NonNullable<Home['hero']>
 
@@ -44,20 +45,25 @@ const positionClass: Record<DecorPosition, string> = {
 
 type CtaLink = NonNullable<NonNullable<BrandHeroProps['cta']>[number]>['link']
 
-function resolveLinkHref(link: CtaLink) {
-  if (
-    link.type === 'reference' &&
-    typeof link.reference?.value === 'object' &&
-    link.reference.value &&
-    'slug' in link.reference.value
-  ) {
-    const slug = link.reference.value.slug
-    return link.reference.relationTo === 'pages'
-      ? `/${slug}`
-      : `/${link.reference.relationTo}/${slug}`
-  }
-  if (link.type === 'route') return link.route ?? '#'
-  return link.url ?? '#'
+/** Shared pill styling so a video CTA sits flush next to a navigation CTA. */
+const CTA_BUTTON_CLASS =
+  'inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-8px_rgba(0,111,238,0.55)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-8px_rgba(0,111,238,0.65)] md:text-base'
+
+function CtaLinkButton({ link }: { link: CtaLink }) {
+  const resolved = resolveLinkHref(link)
+  if (!resolved) return null
+
+  return (
+    <Link
+      href={resolved.href}
+      target={link.newTab ? '_blank' : undefined}
+      rel={link.newTab ? 'noreferrer' : undefined}
+      className={CTA_BUTTON_CLASS}
+    >
+      {link.label}
+      <IconArrowRight size={18} stroke={2.5} />
+    </Link>
+  )
 }
 
 /* ----------------------------- CountUp -------------------------------- */
@@ -160,10 +166,9 @@ export const BrandHero: React.FC<BrandHeroProps> = ({
   mascot,
   decorations,
   share,
-  introVideoUrl,
 }) => {
   const reduced = useReducedMotion()
-  const primaryLink = cta?.[0]?.link
+  const ctaLinks = (cta ?? []).map((entry) => entry.link).filter(Boolean)
   const { setTransparent } = useTransparentHeader()
 
   useEffect(() => {
@@ -373,18 +378,26 @@ export const BrandHero: React.FC<BrandHeroProps> = ({
             )}
 
             <motion.div variants={item} className="flex flex-wrap items-center gap-3">
-              {primaryLink && (
-                <Link
-                  href={resolveLinkHref(primaryLink)}
-                  target={primaryLink.newTab ? '_blank' : undefined}
-                  rel={primaryLink.newTab ? 'noreferrer' : undefined}
-                  className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-semibold text-primary-foreground shadow-[0_14px_32px_-8px_rgba(0,111,238,0.55)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-8px_rgba(0,111,238,0.65)] md:text-base"
-                >
-                  {primaryLink.label}
-                  <IconArrowRight size={18} stroke={2.5} />
-                </Link>
+              {ctaLinks.map((link, i) =>
+                link.type === 'video' ? (
+                  link.video ? (
+                    <VideoPopup
+                      key={i}
+                      url={link.video}
+                      ariaLabel={link.label ?? undefined}
+                      className={CTA_BUTTON_CLASS}
+                      trigger={
+                        <>
+                          <IconPlayerPlayFilled size={16} />
+                          {link.label}
+                        </>
+                      }
+                    />
+                  ) : null
+                ) : (
+                  <CtaLinkButton key={i} link={link} />
+                ),
               )}
-              {introVideoUrl && <VideoPopup url={introVideoUrl} />}
               <ShareWidget
                 shareText={brandHeading ?? ''}
                 enabledPlatforms={share?.enabledPlatforms as SharePlatformKey[] | undefined}

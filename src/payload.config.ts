@@ -11,7 +11,6 @@ import { Categories } from './collections/Categories'
 import { ContactSubmissions } from './collections/ContactSubmissions'
 import { EmailCampaigns } from './collections/EmailCampaigns'
 import { Games } from './collections/Games'
-import { JobApplications } from './collections/JobApplications'
 import { Jobs } from './collections/Jobs'
 import { Media } from './collections/Media'
 import { OAuthClients } from './collections/OAuthClients'
@@ -23,9 +22,9 @@ import { Social } from './collections/Social'
 import { Subscribers } from './collections/Subscribers'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
-import { sendCampaignEndpoint } from './endpoints/sendCampaign'
 import { unsubscribeEndpoint } from './endpoints/unsubscribe'
 import { Footer } from './Footer/config'
+import { EmailTemplates } from './EmailTemplates/config'
 import { General } from './General/config'
 import { Header } from './Header/config'
 import { Home } from './Home/config'
@@ -86,7 +85,6 @@ export default buildConfig({
     Tags,
     Users,
     Jobs,
-    JobApplications,
     Social,
     Games,
     Subscribers,
@@ -97,8 +95,8 @@ export default buildConfig({
     OAuthRefreshTokens,
   ],
   cors: [getServerSideURL()].filter(Boolean),
-  endpoints: [unsubscribeEndpoint, sendCampaignEndpoint],
-  globals: [Header, Footer, Home, Career, General],
+  endpoints: [unsubscribeEndpoint],
+  globals: [Header, Footer, Home, Career, General, EmailTemplates],
   localization: {
     locales: [
       { label: 'English', code: 'en' },

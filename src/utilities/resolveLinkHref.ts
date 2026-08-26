@@ -1,7 +1,7 @@
 import type { Page, Post } from '@/payload-types'
 
 type LinkLike = {
-  type?: 'reference' | 'route' | 'section' | 'custom' | null
+  type?: 'reference' | 'route' | 'section' | 'custom' | 'video' | null
   reference?: {
     relationTo: 'pages' | 'posts'
     value: string | number | Page | Post
@@ -13,11 +13,18 @@ type LinkLike = {
 
 /**
  * Resolve a shared `link` field group into an href + whether it points off-site.
- * Mirrors the branching in CMSLink, for places that render their own markup
- * (e.g. the Video Hero buttons) instead of using CMSLink.
+ *
+ * The single source of truth for that mapping: CMSLink calls this too, rather
+ * than keeping its own copy — the two used to diverge on what an unrecognised
+ * `type` should do.
  */
 export function resolveLinkHref(link?: LinkLike): { href: string; external: boolean } | null {
   if (!link) return null
+
+  // A video link opens a popup; it has no href. This must come before the url
+  // fallback below — switching a link from "External URL" to "Video" leaves the
+  // old url in the document, and it would otherwise be resolved as a real link.
+  if (link.type === 'video') return null
 
   if (link.type === 'section' && link.section) {
     return { href: link.section, external: false }
@@ -34,5 +41,13 @@ export function resolveLinkHref(link?: LinkLike): { href: string; external: bool
       return { href: `${relationTo === 'posts' ? '/posts' : ''}/${value.slug}`, external: false }
     }
   }
+
+  // Documents saved before `type` existed — or carrying an unrecognised value —
+  // still hold a plain url. CMSLink always fell back to it, so keep that or
+  // their links would vanish from the rendered page.
+  if (link.url) {
+    return { href: link.url, external: /^https?:\/\//i.test(link.url) }
+  }
+
   return null
 }

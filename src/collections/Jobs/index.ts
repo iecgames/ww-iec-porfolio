@@ -10,6 +10,7 @@ import {
 
 import { anyone } from '../../access/anyone'
 import { authenticated } from '../../access/authenticated'
+import { syncSearchText } from '../hooks/syncSearchText'
 import { notifyJobSubscribers } from './hooks/notifySubscribers'
 import { revalidateJob, revalidateJobDelete } from './hooks/revalidateJob'
 
@@ -34,6 +35,7 @@ export const Jobs: CollectionConfig = {
     maxPerDoc: 25,
   },
   hooks: {
+    beforeChange: [syncSearchText(['title', 'description'])],
     afterChange: [revalidateJob, notifyJobSubscribers],
     afterDelete: [revalidateJobDelete],
   },
@@ -222,6 +224,13 @@ export const Jobs: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'searchText',
+      type: 'text',
+      localized: true,
+      index: true,
+      admin: { hidden: true, readOnly: true },
     },
   ],
 }

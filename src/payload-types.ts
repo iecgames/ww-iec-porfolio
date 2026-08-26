@@ -74,7 +74,6 @@ export interface Config {
     tags: Tag;
     users: User;
     jobs: Job;
-    'job-applications': JobApplication;
     social: Social;
     games: Game;
     subscribers: Subscriber;
@@ -83,9 +82,6 @@ export interface Config {
     'oauth-clients': OauthClient;
     'oauth-codes': OauthCode;
     'oauth-refresh-tokens': OauthRefreshToken;
-    redirects: Redirect;
-    forms: Form;
-    'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-folders': FolderInterface;
@@ -106,7 +102,6 @@ export interface Config {
     tags: TagsSelect<false> | TagsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     jobs: JobsSelect<false> | JobsSelect<true>;
-    'job-applications': JobApplicationsSelect<false> | JobApplicationsSelect<true>;
     social: SocialSelect<false> | SocialSelect<true>;
     games: GamesSelect<false> | GamesSelect<true>;
     subscribers: SubscribersSelect<false> | SubscribersSelect<true>;
@@ -115,9 +110,6 @@ export interface Config {
     'oauth-clients': OauthClientsSelect<false> | OauthClientsSelect<true>;
     'oauth-codes': OauthCodesSelect<false> | OauthCodesSelect<true>;
     'oauth-refresh-tokens': OauthRefreshTokensSelect<false> | OauthRefreshTokensSelect<true>;
-    redirects: RedirectsSelect<false> | RedirectsSelect<true>;
-    forms: FormsSelect<false> | FormsSelect<true>;
-    'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
@@ -135,6 +127,7 @@ export interface Config {
     home: Home;
     career: Career;
     general: General;
+    'email-templates': EmailTemplate;
   };
   globalsSelect: {
     header: HeaderSelect<false> | HeaderSelect<true>;
@@ -142,6 +135,7 @@ export interface Config {
     home: HomeSelect<false> | HomeSelect<true>;
     career: CareerSelect<false> | CareerSelect<true>;
     general: GeneralSelect<false> | GeneralSelect<true>;
+    'email-templates': EmailTemplatesSelect<false> | EmailTemplatesSelect<true>;
   };
   locale: 'en' | 'vi';
   widgets: {
@@ -208,7 +202,7 @@ export interface Page {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -228,10 +222,14 @@ export interface Page {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -251,6 +249,10 @@ export interface Page {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     /**
      * Small label above the heading (e.g. "Gaming Studio").
@@ -283,12 +285,12 @@ export interface Page {
       | null;
     mascot?: (string | null) | Media;
     /**
-     * Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.
+     * Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.
      */
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'section' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -308,15 +310,15 @@ export interface Page {
              */
             section?: string | null;
             url?: string | null;
+            /**
+             * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+             */
+            video?: string | null;
             label: string;
           };
           id?: string | null;
         }[]
       | null;
-    /**
-     * Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.
-     */
-    introVideoUrl?: string | null;
     /**
      * QR / share popup next to the CTA. Pick which platforms to expose, an optional centre logo, and a colour preset for the QR code.
      */
@@ -347,7 +349,6 @@ export interface Page {
     | ContentBlock
     | MediaBlock
     | ArchiveBlock
-    | FormBlock
     | JobBoardBlock
     | SendUsCVBlock
     | NewsletterSignupBlock
@@ -519,7 +520,7 @@ export interface CallToActionBlock {
   links?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -539,6 +540,10 @@ export interface CallToActionBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -607,6 +612,7 @@ export interface Post {
    */
   generateSlug?: boolean | null;
   slug: string;
+  searchText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -623,6 +629,7 @@ export interface Category {
    */
   generateSlug?: boolean | null;
   slug: string;
+  searchText?: string | null;
   parent?: (string | null) | Category;
   breadcrumbs?:
     | {
@@ -701,7 +708,7 @@ export interface ContentBlock {
         } | null;
         enableLink?: boolean | null;
         link?: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -721,6 +728,10 @@ export interface ContentBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -846,210 +857,6 @@ export interface ArchiveBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock".
- */
-export interface FormBlock {
-  form: string | Form;
-  enableIntro?: boolean | null;
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  /**
-   * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
-   */
-  anchor?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'formBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms".
- */
-export interface Form {
-  id: string;
-  title: string;
-  fields?:
-    | (
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            defaultValue?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'checkbox';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'country';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'email';
-          }
-        | {
-            message?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'message';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            placeholder?: string | null;
-            options?:
-              | {
-                  label: string;
-                  value: string;
-                  id?: string | null;
-                }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'state';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textarea';
-          }
-      )[]
-    | null;
-  submitButtonLabel?: string | null;
-  /**
-   * Choose whether to display an on-page message or redirect to a different page after they submit the form.
-   */
-  confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  redirect?: {
-    url: string;
-  };
-  /**
-   * Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.
-   */
-  emails?:
-    | {
-        emailTo?: string | null;
-        cc?: string | null;
-        bcc?: string | null;
-        replyTo?: string | null;
-        emailFrom?: string | null;
-        subject: string;
-        /**
-         * Enter the message that should be sent in this email.
-         */
-        message?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
-        id?: string | null;
-      }[]
-    | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1207,7 +1014,7 @@ export interface AboutWithStatsBlock {
   cta?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1227,6 +1034,10 @@ export interface AboutWithStatsBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
         };
         id?: string | null;
@@ -1462,7 +1273,7 @@ export interface CoreValuesShowcaseBlock {
   cta?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1482,6 +1293,10 @@ export interface CoreValuesShowcaseBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -1524,7 +1339,7 @@ export interface CareersHighlightBlock {
   limit?: number | null;
   ctaLabel?: string | null;
   ctaLink?: {
-    type?: ('reference' | 'route' | 'section' | 'custom') | null;
+    type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
     newTab?: boolean | null;
     reference?:
       | ({
@@ -1544,6 +1359,10 @@ export interface CareersHighlightBlock {
      */
     section?: string | null;
     url?: string | null;
+    /**
+     * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+     */
+    video?: string | null;
   };
   /**
    * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
@@ -1732,41 +1551,10 @@ export interface Job {
     };
     [k: string]: unknown;
   } | null;
+  searchText?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "job-applications".
- */
-export interface JobApplication {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  /**
-   * The job this application was submitted for. Empty means a general/open application.
-   */
-  job?: (string | null) | Job;
-  /**
-   * Position the candidate is interested in. Auto-filled from the job title for job-specific applications.
-   */
-  position?: string | null;
-  experience?: string | null;
-  /**
-   * Portfolio, product showcase, GitHub, Behance, or other relevant link.
-   */
-  additionalLink?: string | null;
-  cv: string | Media;
-  status?: ('new' | 'reviewing' | 'contacted' | 'rejected' | 'hired') | null;
-  submittedAt?: string | null;
-  /**
-   * HR-only notes about this candidate.
-   */
-  internalNotes?: string | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1791,7 +1579,7 @@ export interface Subscriber {
   id: string;
   email: string;
   name?: string | null;
-  source?: ('job_application' | 'form_submission' | 'newsletter') | null;
+  source?: ('contact' | 'job_application' | 'form_submission' | 'newsletter') | null;
   subscribed?: boolean | null;
   unsubscribeToken?: string | null;
   subscribedAt?: string | null;
@@ -1800,6 +1588,8 @@ export interface Subscriber {
   createdAt: string;
 }
 /**
+ * Nhật ký các thư đã gửi. Nội dung thư cấu hình tại Newsletter → Email Templates.
+ *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "email-campaigns".
  */
@@ -1807,32 +1597,10 @@ export interface EmailCampaign {
   id: string;
   name: string;
   /**
-   * Supports tokens: {{job.title}}, {{post.title}}
+   * Tiêu đề đã gửi đi, sau khi thay token.
    */
-  subject: string;
-  /**
-   * Short preview text shown in email clients
-   */
-  previewText?: string | null;
-  type: 'manual' | 'new_job' | 'new_post';
-  /**
-   * Required for Manual campaigns. Optional for New Job / New Post — leave empty to use the default template. Available tokens: {{post.title}}, {{post.url}}, {{post.excerpt}}, {{job.title}}, {{job.url}}, {{subscriber.name}}
-   */
-  body?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  subject?: string | null;
+  type: 'new_job' | 'new_post';
   relatedJob?: (string | null) | Job;
   relatedPost?: (string | null) | Post;
   status?: ('draft' | 'sending' | 'sent') | null;
@@ -1915,49 +1683,6 @@ export interface OauthRefreshToken {
   resource?: string | null;
   expires_at: string;
   revoked?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects".
- */
-export interface Redirect {
-  id: string;
-  /**
-   * You will need to rebuild the website when changing this field.
-   */
-  from: string;
-  to?: {
-    type?: ('reference' | 'custom') | null;
-    reference?:
-      | ({
-          relationTo: 'pages';
-          value: string | Page;
-        } | null)
-      | ({
-          relationTo: 'posts';
-          value: string | Post;
-        } | null);
-    url?: string | null;
-  };
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-submissions".
- */
-export interface FormSubmission {
-  id: string;
-  form: string | Form;
-  submissionData?:
-    | {
-        field: string;
-        value: string;
-        id?: string | null;
-      }[]
-    | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2106,10 +1831,6 @@ export interface PayloadLockedDocument {
         value: string | Job;
       } | null)
     | ({
-        relationTo: 'job-applications';
-        value: string | JobApplication;
-      } | null)
-    | ({
         relationTo: 'social';
         value: string | Social;
       } | null)
@@ -2140,18 +1861,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'oauth-refresh-tokens';
         value: string | OauthRefreshToken;
-      } | null)
-    | ({
-        relationTo: 'redirects';
-        value: string | Redirect;
-      } | null)
-    | ({
-        relationTo: 'forms';
-        value: string | Form;
-      } | null)
-    | ({
-        relationTo: 'form-submissions';
-        value: string | FormSubmission;
       } | null)
     | ({
         relationTo: 'payload-folders';
@@ -2234,6 +1943,7 @@ export interface PagesSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         secondaryButtonLabel?: T;
         secondaryButton?:
@@ -2245,6 +1955,7 @@ export interface PagesSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         eyebrow?: T;
         brandHeading?: T;
@@ -2270,11 +1981,11 @@ export interface PagesSelect<T extends boolean = true> {
                     route?: T;
                     section?: T;
                     url?: T;
+                    video?: T;
                     label?: T;
                   };
               id?: T;
             };
-        introVideoUrl?: T;
         share?:
           | T
           | {
@@ -2297,7 +2008,6 @@ export interface PagesSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
         jobBoard?: T | JobBoardBlockSelect<T>;
         sendUsCV?: T | SendUsCVBlockSelect<T>;
         newsletterSignup?: T | NewsletterSignupBlockSelect<T>;
@@ -2341,6 +2051,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
               appearance?: T;
             };
@@ -2370,6 +2081,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
               appearance?: T;
             };
@@ -2441,18 +2153,6 @@ export interface ArchiveBlockSelect<T extends boolean = true> {
   categories?: T;
   limit?: T;
   selectedDocs?: T;
-  anchor?: T;
-  id?: T;
-  blockName?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "FormBlock_select".
- */
-export interface FormBlockSelect<T extends boolean = true> {
-  form?: T;
-  enableIntro?: T;
-  introContent?: T;
   anchor?: T;
   id?: T;
   blockName?: T;
@@ -2539,6 +2239,7 @@ export interface AboutWithStatsBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
             };
         id?: T;
@@ -2620,6 +2321,7 @@ export interface CoreValuesShowcaseBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
               appearance?: T;
             };
@@ -2650,6 +2352,7 @@ export interface CareersHighlightBlockSelect<T extends boolean = true> {
         route?: T;
         section?: T;
         url?: T;
+        video?: T;
       };
   anchor?: T;
   id?: T;
@@ -2728,6 +2431,7 @@ export interface PostsSelect<T extends boolean = true> {
       };
   generateSlug?: T;
   slug?: T;
+  searchText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -2834,6 +2538,7 @@ export interface CategoriesSelect<T extends boolean = true> {
   title?: T;
   generateSlug?: T;
   slug?: T;
+  searchText?: T;
   parent?: T;
   breadcrumbs?:
     | T
@@ -2899,28 +2604,10 @@ export interface JobsSelect<T extends boolean = true> {
   jobDescription?: T;
   qualifications?: T;
   benefits?: T;
+  searchText?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "job-applications_select".
- */
-export interface JobApplicationsSelect<T extends boolean = true> {
-  fullName?: T;
-  email?: T;
-  phone?: T;
-  job?: T;
-  position?: T;
-  experience?: T;
-  additionalLink?: T;
-  cv?: T;
-  status?: T;
-  submittedAt?: T;
-  internalNotes?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2980,9 +2667,7 @@ export interface SubscribersSelect<T extends boolean = true> {
 export interface EmailCampaignsSelect<T extends boolean = true> {
   name?: T;
   subject?: T;
-  previewText?: T;
   type?: T;
-  body?: T;
   relatedJob?: T;
   relatedPost?: T;
   status?: T;
@@ -3053,171 +2738,6 @@ export interface OauthRefreshTokensSelect<T extends boolean = true> {
   resource?: T;
   expires_at?: T;
   revoked?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "redirects_select".
- */
-export interface RedirectsSelect<T extends boolean = true> {
-  from?: T;
-  to?:
-    | T
-    | {
-        type?: T;
-        reference?: T;
-        url?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "forms_select".
- */
-export interface FormsSelect<T extends boolean = true> {
-  title?: T;
-  fields?:
-    | T
-    | {
-        checkbox?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              defaultValue?: T;
-              id?: T;
-              blockName?: T;
-            };
-        country?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        email?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        message?:
-          | T
-          | {
-              message?: T;
-              id?: T;
-              blockName?: T;
-            };
-        number?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        select?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              placeholder?: T;
-              options?:
-                | T
-                | {
-                    label?: T;
-                    value?: T;
-                    id?: T;
-                  };
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        state?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        text?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-        textarea?:
-          | T
-          | {
-              name?: T;
-              label?: T;
-              width?: T;
-              defaultValue?: T;
-              required?: T;
-              id?: T;
-              blockName?: T;
-            };
-      };
-  submitButtonLabel?: T;
-  confirmationType?: T;
-  confirmationMessage?: T;
-  redirect?:
-    | T
-    | {
-        url?: T;
-      };
-  emails?:
-    | T
-    | {
-        emailTo?: T;
-        cc?: T;
-        bcc?: T;
-        replyTo?: T;
-        emailFrom?: T;
-        subject?: T;
-        message?: T;
-        id?: T;
-      };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "form-submissions_select".
- */
-export interface FormSubmissionsSelect<T extends boolean = true> {
-  form?: T;
-  submissionData?:
-    | T
-    | {
-        field?: T;
-        value?: T;
-        id?: T;
-      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3313,7 +2833,7 @@ export interface Header {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -3333,6 +2853,10 @@ export interface Header {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
         };
         id?: string | null;
@@ -3356,7 +2880,7 @@ export interface Footer {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -3376,6 +2900,10 @@ export interface Footer {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
         };
         id?: string | null;
@@ -3414,7 +2942,7 @@ export interface Home {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3434,10 +2962,14 @@ export interface Home {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3457,6 +2989,10 @@ export interface Home {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     /**
      * Small label above the heading (e.g. "Gaming Studio").
@@ -3489,12 +3025,12 @@ export interface Home {
       | null;
     mascot?: (string | null) | Media;
     /**
-     * Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.
+     * Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.
      */
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'section' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -3514,15 +3050,15 @@ export interface Home {
              */
             section?: string | null;
             url?: string | null;
+            /**
+             * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+             */
+            video?: string | null;
             label: string;
           };
           id?: string | null;
         }[]
       | null;
-    /**
-     * Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.
-     */
-    introVideoUrl?: string | null;
     /**
      * QR / share popup next to the CTA. Pick which platforms to expose, an optional centre logo, and a colour preset for the QR code.
      */
@@ -3554,7 +3090,6 @@ export interface Home {
         | ContentBlock
         | MediaBlock
         | ArchiveBlock
-        | FormBlock
         | JobBoardBlock
         | SendUsCVBlock
         | NewsletterSignupBlock
@@ -3601,7 +3136,7 @@ export interface Career {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3621,10 +3156,14 @@ export interface Career {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3644,6 +3183,10 @@ export interface Career {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     /**
      * Small label above the heading (e.g. "Gaming Studio").
@@ -3676,12 +3219,12 @@ export interface Career {
       | null;
     mascot?: (string | null) | Media;
     /**
-     * Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.
+     * Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.
      */
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'section' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -3701,15 +3244,15 @@ export interface Career {
              */
             section?: string | null;
             url?: string | null;
+            /**
+             * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+             */
+            video?: string | null;
             label: string;
           };
           id?: string | null;
         }[]
       | null;
-    /**
-     * Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.
-     */
-    introVideoUrl?: string | null;
     /**
      * QR / share popup next to the CTA. Pick which platforms to expose, an optional centre logo, and a colour preset for the QR code.
      */
@@ -3741,7 +3284,6 @@ export interface Career {
         | ContentBlock
         | MediaBlock
         | ArchiveBlock
-        | FormBlock
         | JobBoardBlock
         | SendUsCVBlock
         | NewsletterSignupBlock
@@ -3781,6 +3323,10 @@ export interface General {
    */
   email?: string | null;
   /**
+   * Địa chỉ ứng viên gửi CV tới. Hiển thị trong thông báo ở form ứng tuyển.
+   */
+  recruitmentEmail?: string | null;
+  /**
    * Main logo displayed in the header and emails.
    */
   logo?: (string | null) | Media;
@@ -3801,6 +3347,71 @@ export interface General {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates".
+ */
+export interface EmailTemplate {
+  id: string;
+  newPost?: {
+    /**
+     * Token: {{post.title}}. Để trống để dùng tiêu đề mặc định.
+     */
+    subject?: string | null;
+    /**
+     * Đoạn ngắn hiển thị cạnh tiêu đề trong hộp thư.
+     */
+    previewText?: string | null;
+    /**
+     * Token: {{post.title}}, {{post.url}}, {{subscriber.name}}. Để trống để dùng mẫu mặc định.
+     */
+    body?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  newJob?: {
+    /**
+     * Token: {{job.title}}. Để trống để dùng tiêu đề mặc định.
+     */
+    subject?: string | null;
+    /**
+     * Đoạn ngắn hiển thị cạnh tiêu đề trong hộp thư.
+     */
+    previewText?: string | null;
+    /**
+     * Token: {{job.title}}, {{job.url}}, {{subscriber.name}}. Để trống để dùng mẫu mặc định.
+     */
+    body?: {
+      root: {
+        type: string;
+        children: {
+          type: any;
+          version: number;
+          [k: string]: unknown;
+        }[];
+        direction: ('ltr' | 'rtl') | null;
+        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+        indent: number;
+        version: number;
+      };
+      [k: string]: unknown;
+    } | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "header_select".
  */
 export interface HeaderSelect<T extends boolean = true> {
@@ -3816,6 +3427,7 @@ export interface HeaderSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
             };
         id?: T;
@@ -3844,6 +3456,7 @@ export interface FooterSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
             };
         id?: T;
@@ -3886,6 +3499,7 @@ export interface HomeSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         secondaryButtonLabel?: T;
         secondaryButton?:
@@ -3897,6 +3511,7 @@ export interface HomeSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         eyebrow?: T;
         brandHeading?: T;
@@ -3922,11 +3537,11 @@ export interface HomeSelect<T extends boolean = true> {
                     route?: T;
                     section?: T;
                     url?: T;
+                    video?: T;
                     label?: T;
                   };
               id?: T;
             };
-        introVideoUrl?: T;
         share?:
           | T
           | {
@@ -3949,7 +3564,6 @@ export interface HomeSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
         jobBoard?: T | JobBoardBlockSelect<T>;
         sendUsCV?: T | SendUsCVBlockSelect<T>;
         newsletterSignup?: T | NewsletterSignupBlockSelect<T>;
@@ -4000,6 +3614,7 @@ export interface CareerSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         secondaryButtonLabel?: T;
         secondaryButton?:
@@ -4011,6 +3626,7 @@ export interface CareerSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         eyebrow?: T;
         brandHeading?: T;
@@ -4036,11 +3652,11 @@ export interface CareerSelect<T extends boolean = true> {
                     route?: T;
                     section?: T;
                     url?: T;
+                    video?: T;
                     label?: T;
                   };
               id?: T;
             };
-        introVideoUrl?: T;
         share?:
           | T
           | {
@@ -4063,7 +3679,6 @@ export interface CareerSelect<T extends boolean = true> {
         content?: T | ContentBlockSelect<T>;
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
-        formBlock?: T | FormBlockSelect<T>;
         jobBoard?: T | JobBoardBlockSelect<T>;
         sendUsCV?: T | SendUsCVBlockSelect<T>;
         newsletterSignup?: T | NewsletterSignupBlockSelect<T>;
@@ -4089,10 +3704,34 @@ export interface GeneralSelect<T extends boolean = true> {
   address?: T;
   hotline?: T;
   email?: T;
+  recruitmentEmail?: T;
   logo?: T;
   logoMono?: T;
   tagline?: T;
   description?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-templates_select".
+ */
+export interface EmailTemplatesSelect<T extends boolean = true> {
+  newPost?:
+    | T
+    | {
+        subject?: T;
+        previewText?: T;
+        body?: T;
+      };
+  newJob?:
+    | T
+    | {
+        subject?: T;
+        previewText?: T;
+        body?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;

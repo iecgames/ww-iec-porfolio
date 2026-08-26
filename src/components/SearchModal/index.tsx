@@ -48,65 +48,32 @@ const GROUP_META: Record<GroupKey, { Icon: TablerIcon; bg: string; text: string;
   },
 }
 
-/** Build a Payload REST query string for a `like` search across the given fields. */
-function buildQuery(fields: string[], q: string, locale: string): string {
-  const params = new URLSearchParams()
-  if (fields.length === 1) {
-    params.set(`where[${fields[0]}][like]`, q)
-  } else {
-    fields.forEach((field, i) => params.set(`where[or][${i}][${field}][like]`, q))
-  }
-  params.set('limit', '5')
-  params.set('depth', '0')
-  params.set('locale', locale)
-  return params.toString()
-}
+type SearchResponse = Record<GroupKey, ApiDoc[]>
 
-const LOCALES = ['en', 'vi'] as const
+const EMPTY_RESULTS: SearchResponse = { posts: [], jobs: [], categories: [] }
 
-async function fetchDocs(
-  collection: string,
-  fields: string[],
+/**
+ * One request for everything. The route searches each collection across both
+ * locales and merges by id server-side — see app/(frontend)/api/site-search.
+ */
+async function searchSite(
   q: string,
   locale: string,
   signal: AbortSignal,
-): Promise<ApiDoc[]> {
+): Promise<SearchResponse> {
   try {
-    const res = await fetch(`/api/${collection}?${buildQuery(fields, q, locale)}`, { signal })
-    if (!res.ok) return []
-    const data = await res.json()
-    return (data?.docs ?? []) as ApiDoc[]
+    const params = new URLSearchParams({ q, locale })
+    const res = await fetch(`/api/site-search?${params}`, { signal })
+    if (!res.ok) return EMPTY_RESULTS
+    const data = (await res.json()) as Partial<SearchResponse>
+    return {
+      posts: data.posts ?? [],
+      jobs: data.jobs ?? [],
+      categories: data.categories ?? [],
+    }
   } catch {
-    return []
+    return EMPTY_RESULTS
   }
-}
-
-/**
- * Search a collection across BOTH locales so a keyword matches regardless of
- * the language it was typed in. Results are merged by id, preferring the
- * current locale's values for display.
- */
-async function searchCollection(
-  collection: string,
-  fields: string[],
-  q: string,
-  displayLocale: string,
-  signal: AbortSignal,
-): Promise<ApiDoc[]> {
-  const perLocale = await Promise.all(
-    LOCALES.map((loc) => fetchDocs(collection, fields, q, loc, signal)),
-  )
-
-  // Apply the current locale last so its values win on id collisions.
-  const ordered = LOCALES.map((loc, i) => ({ loc, docs: perLocale[i] })).sort((a) =>
-    a.loc === displayLocale ? 1 : -1,
-  )
-
-  const byId = new Map<string, ApiDoc>()
-  for (const { docs } of ordered) {
-    for (const doc of docs) byId.set(String(doc.id), doc)
-  }
-  return [...byId.values()]
 }
 
 export const SearchModal: React.FC = () => {
@@ -137,7 +104,7 @@ export const SearchModal: React.FC = () => {
     }
   }, [isOpen])
 
-  // Fetch results across posts, jobs and categories in parallel
+  // One request covers posts, jobs and categories across both locales
   useEffect(() => {
     const q = debouncedQuery.trim()
     if (!q) {
@@ -148,12 +115,8 @@ export const SearchModal: React.FC = () => {
     const controller = new AbortController()
     setLoading(true)
 
-    Promise.all([
-      searchCollection('posts', ['title', 'meta.description'], q, locale, controller.signal),
-      searchCollection('jobs', ['title', 'description'], q, locale, controller.signal),
-      searchCollection('categories', ['title'], q, locale, controller.signal),
-    ])
-      .then(([posts, jobs, categories]) => {
+    searchSite(q, locale, controller.signal)
+      .then(({ posts, jobs, categories }) => {
         if (controller.signal.aborted) return
 
         const next: ResultGroup[] = []

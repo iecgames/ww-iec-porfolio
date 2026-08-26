@@ -9,7 +9,7 @@ import {
   getTags,
 } from '@/blocks/CategoryShowcase/CategoryShowcaseView'
 import { motion, type Variants } from 'framer-motion'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import React from 'react'
 
 type Props = {

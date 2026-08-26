@@ -3,12 +3,13 @@ import { baseTemplate } from './base'
 type NewPostTemplateArgs = {
   post: {
     title: string
-    excerpt?: string | null
     slug: string
   }
   subscriber: { name?: string | null }
   unsubscribeUrl: string
   siteUrl: string
+  previewText?: string
+  logoUrl?: string
 }
 
 export function newPostTemplate({
@@ -16,14 +17,13 @@ export function newPostTemplate({
   subscriber,
   unsubscribeUrl,
   siteUrl,
+  previewText,
+  logoUrl,
 }: NewPostTemplateArgs): { html: string; subject: string } {
   const subject = `[IEC] Bài viết mới: ${post.title}`
   const greeting = subscriber.name ? `Xin chào <strong>${subscriber.name}</strong>,` : 'Xin chào,'
 
   const postUrl = `${siteUrl}/posts/${post.slug}`
-  const excerptHtml = post.excerpt
-    ? `<p style="margin:0 0 16px;color:#4b5563;">${post.excerpt}</p>`
-    : ''
 
   const bodyHtml = `
     <p style="margin:0 0 16px;">${greeting}</p>
@@ -32,7 +32,6 @@ export function newPostTemplate({
       <tr>
         <td style="padding:20px 24px;">
           <h2 style="margin:0 0 8px;font-size:18px;color:#1a1a1a;">${post.title}</h2>
-          ${excerptHtml}
         </td>
       </tr>
     </table>
@@ -46,7 +45,7 @@ export function newPostTemplate({
     <p style="margin:24px 0 0;font-size:13px;color:#6b7280;">Nếu nút không hoạt động, vui lòng truy cập: <a href="${postUrl}" style="color:#10b981;">${postUrl}</a></p>
   `
 
-  const html = baseTemplate({ bodyHtml, unsubscribeUrl, siteUrl })
+  const html = baseTemplate({ bodyHtml, unsubscribeUrl, siteUrl, previewText, logoUrl })
 
   return { html, subject }
 }
