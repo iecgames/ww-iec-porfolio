@@ -103,7 +103,10 @@
       "PowerShell(Remove-Item *)",
       "Bash(pnpm install *)",
       "PowerShell(Get-Process *)",
-      "PowerShell(Set-Location *)"
+      "PowerShell(Set-Location *)",
+      "Bash(curl -s \"http://localhost:3000/vi/career\")",
+      "Bash(curl -s -o /dev/null -w \"GET /vi/posts -> %{http_code} \\(redirect: %{num_redirects}\\)\\\\n\" \"http://localhost:3000/vi/posts\")",
+      "Bash(curl -s \"http://localhost:3000/en\")"
     ],
     "additionalDirectories": [
       "d:\\Service\\ww-iec\\iec-web-2\\src\\app\\(frontend)\\[locale]\\search"
