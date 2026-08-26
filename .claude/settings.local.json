@@ -88,7 +88,22 @@
       "Bash(echo \"\\(grep exit $?\\)\")",
       "Bash(sed -i \"/import { sendCampaignEndpoint } from '.\\\\/endpoints\\\\/sendCampaign'/d\" src/payload.config.ts)",
       "Bash(sed -i \"s/  endpoints: \\\\[unsubscribeEndpoint, sendCampaignEndpoint\\\\],/  endpoints: [unsubscribeEndpoint],/\" src/payload.config.ts)",
-      "Bash(echo \"exit=$?\")"
+      "Bash(echo \"exit=$?\")",
+      "Bash(node -e \"1\")",
+      "Bash(cp \"src/app/\\(frontend\\)/[locale]/[slug]/page.tsx\" /tmp/slug.bak)",
+      "Bash(cp \"src/app/\\(frontend\\)/[locale]/[slug]/page.tsx\" \"src/app/\\(frontend\\)/[locale]/[slug]/page.tsx.bak\")",
+      "Bash(sed -i 's/  const { isEnabled: draft } = await draftMode\\(\\)/  const draft = false \\\\/\\\\/ TEMP DIAGNOSTIC/' \"src/app/\\(frontend\\)/[locale]/[slug]/page.tsx\")",
+      "Bash(echo \"grep exit=$? \\(1 = sạch\\)\")",
+      "Bash(sed -i \"s|  const isEnabled = false // TEMP DIAGNOSTIC 2|  const { isEnabled } = await draftMode\\(\\)|\" \"src/app/\\(frontend\\)/[locale]/layout.tsx\")",
+      "Bash(sed -i \"s|  const hasAuthCookie = false // TEMP DIAGNOSTIC|  const hasAuthCookie = Boolean\\(\\(await cookies\\(\\)\\).get\\('payload-token'\\)\\)|\" \"src/app/\\(frontend\\)/[locale]/layout.tsx\")",
+      "Bash(pnpm dev *)",
+      "Bash(git worktree *)",
+      "Bash(cp .env ../iec-baseline/.env)",
+      "Bash(cmd //c mklink /J \"D:\\\\Service\\\\ww-iec\\\\iec-baseline\\\\node_modules\" \"D:\\\\Service\\\\ww-iec\\\\iec-web-2\\\\node_modules\")",
+      "PowerShell(Remove-Item *)",
+      "Bash(pnpm install *)",
+      "PowerShell(Get-Process *)",
+      "PowerShell(Set-Location *)"
     ],
     "additionalDirectories": [
       "d:\\Service\\ww-iec\\iec-web-2\\src\\app\\(frontend)\\[locale]\\search"
