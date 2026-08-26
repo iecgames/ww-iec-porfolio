@@ -225,26 +225,16 @@ export const hero: Field = {
       appearances: false,
       overrides: {
         name: 'cta',
-        label: 'Hero CTA Button',
-        maxRows: 1,
+        label: 'Hero CTA Buttons',
+        maxRows: 2,
         admin: {
           initCollapsed: false,
           description:
-            'Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.',
+            'Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.',
           condition: (_, { type } = {}) => type === 'brandHero',
         },
       },
     }),
-    {
-      name: 'introVideoUrl',
-      type: 'text',
-      label: 'Intro Video URL',
-      admin: {
-        description:
-          'Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.',
-        condition: (_, { type } = {}) => type === 'brandHero',
-      },
-    },
     {
       name: 'share',
       type: 'group',

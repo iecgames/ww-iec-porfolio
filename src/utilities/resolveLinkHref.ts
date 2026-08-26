@@ -1,7 +1,7 @@
 import type { Page, Post } from '@/payload-types'
 
 type LinkLike = {
-  type?: 'reference' | 'route' | 'section' | 'custom' | null
+  type?: 'reference' | 'route' | 'section' | 'custom' | 'video' | null
   reference?: {
     relationTo: 'pages' | 'posts'
     value: string | number | Page | Post
@@ -20,6 +20,11 @@ type LinkLike = {
  */
 export function resolveLinkHref(link?: LinkLike): { href: string; external: boolean } | null {
   if (!link) return null
+
+  // A video link opens a popup; it has no href. This must come before the url
+  // fallback below — switching a link from "External URL" to "Video" leaves the
+  // old url in the document, and it would otherwise be resolved as a real link.
+  if (link.type === 'video') return null
 
   if (link.type === 'section' && link.section) {
     return { href: link.section, external: false }

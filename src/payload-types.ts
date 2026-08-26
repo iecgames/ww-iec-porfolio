@@ -202,7 +202,7 @@ export interface Page {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -222,10 +222,14 @@ export interface Page {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -245,6 +249,10 @@ export interface Page {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     /**
      * Small label above the heading (e.g. "Gaming Studio").
@@ -277,12 +285,12 @@ export interface Page {
       | null;
     mascot?: (string | null) | Media;
     /**
-     * Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.
+     * Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.
      */
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'section' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -302,15 +310,15 @@ export interface Page {
              */
             section?: string | null;
             url?: string | null;
+            /**
+             * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+             */
+            video?: string | null;
             label: string;
           };
           id?: string | null;
         }[]
       | null;
-    /**
-     * Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.
-     */
-    introVideoUrl?: string | null;
     /**
      * QR / share popup next to the CTA. Pick which platforms to expose, an optional centre logo, and a colour preset for the QR code.
      */
@@ -512,7 +520,7 @@ export interface CallToActionBlock {
   links?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -532,6 +540,10 @@ export interface CallToActionBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -696,7 +708,7 @@ export interface ContentBlock {
         } | null;
         enableLink?: boolean | null;
         link?: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -716,6 +728,10 @@ export interface ContentBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -998,7 +1014,7 @@ export interface AboutWithStatsBlock {
   cta?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1018,6 +1034,10 @@ export interface AboutWithStatsBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
         };
         id?: string | null;
@@ -1253,7 +1273,7 @@ export interface CoreValuesShowcaseBlock {
   cta?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -1273,6 +1293,10 @@ export interface CoreValuesShowcaseBlock {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
           /**
            * Choose how the link should be rendered.
@@ -1315,7 +1339,7 @@ export interface CareersHighlightBlock {
   limit?: number | null;
   ctaLabel?: string | null;
   ctaLink?: {
-    type?: ('reference' | 'route' | 'section' | 'custom') | null;
+    type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
     newTab?: boolean | null;
     reference?:
       | ({
@@ -1335,6 +1359,10 @@ export interface CareersHighlightBlock {
      */
     section?: string | null;
     url?: string | null;
+    /**
+     * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+     */
+    video?: string | null;
   };
   /**
    * Optional. Link directly to this section with /path#your-id (e.g. "contact"). Use letters, numbers and hyphens only.
@@ -1915,6 +1943,7 @@ export interface PagesSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         secondaryButtonLabel?: T;
         secondaryButton?:
@@ -1926,6 +1955,7 @@ export interface PagesSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         eyebrow?: T;
         brandHeading?: T;
@@ -1951,11 +1981,11 @@ export interface PagesSelect<T extends boolean = true> {
                     route?: T;
                     section?: T;
                     url?: T;
+                    video?: T;
                     label?: T;
                   };
               id?: T;
             };
-        introVideoUrl?: T;
         share?:
           | T
           | {
@@ -2021,6 +2051,7 @@ export interface CallToActionBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
               appearance?: T;
             };
@@ -2050,6 +2081,7 @@ export interface ContentBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
               appearance?: T;
             };
@@ -2207,6 +2239,7 @@ export interface AboutWithStatsBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
             };
         id?: T;
@@ -2288,6 +2321,7 @@ export interface CoreValuesShowcaseBlockSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
               appearance?: T;
             };
@@ -2318,6 +2352,7 @@ export interface CareersHighlightBlockSelect<T extends boolean = true> {
         route?: T;
         section?: T;
         url?: T;
+        video?: T;
       };
   anchor?: T;
   id?: T;
@@ -2798,7 +2833,7 @@ export interface Header {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -2818,6 +2853,10 @@ export interface Header {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
         };
         id?: string | null;
@@ -2841,7 +2880,7 @@ export interface Footer {
   navItems?:
     | {
         link: {
-          type?: ('reference' | 'route' | 'section' | 'custom') | null;
+          type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
           newTab?: boolean | null;
           reference?:
             | ({
@@ -2861,6 +2900,10 @@ export interface Footer {
            */
           section?: string | null;
           url?: string | null;
+          /**
+           * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+           */
+          video?: string | null;
           label: string;
         };
         id?: string | null;
@@ -2899,7 +2942,7 @@ export interface Home {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -2919,10 +2962,14 @@ export interface Home {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -2942,6 +2989,10 @@ export interface Home {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     /**
      * Small label above the heading (e.g. "Gaming Studio").
@@ -2974,12 +3025,12 @@ export interface Home {
       | null;
     mascot?: (string | null) | Media;
     /**
-     * Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.
+     * Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.
      */
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'section' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -2999,15 +3050,15 @@ export interface Home {
              */
             section?: string | null;
             url?: string | null;
+            /**
+             * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+             */
+            video?: string | null;
             label: string;
           };
           id?: string | null;
         }[]
       | null;
-    /**
-     * Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.
-     */
-    introVideoUrl?: string | null;
     /**
      * QR / share popup next to the CTA. Pick which platforms to expose, an optional centre logo, and a colour preset for the QR code.
      */
@@ -3085,7 +3136,7 @@ export interface Career {
       | null;
     primaryButtonLabel?: string | null;
     primaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3105,10 +3156,14 @@ export interface Career {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     secondaryButtonLabel?: string | null;
     secondaryButton?: {
-      type?: ('reference' | 'route' | 'section' | 'custom') | null;
+      type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
       newTab?: boolean | null;
       reference?:
         | ({
@@ -3128,6 +3183,10 @@ export interface Career {
        */
       section?: string | null;
       url?: string | null;
+      /**
+       * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+       */
+      video?: string | null;
     };
     /**
      * Small label above the heading (e.g. "Gaming Studio").
@@ -3160,12 +3219,12 @@ export interface Career {
       | null;
     mascot?: (string | null) | Media;
     /**
-     * Primary call-to-action button (e.g. "Explore us") shown next to the share / video buttons.
+     * Buttons shown next to the share widget. Pick "Video popup" as the link type to open a video instead of navigating.
      */
     cta?:
       | {
           link: {
-            type?: ('reference' | 'route' | 'section' | 'custom') | null;
+            type?: ('reference' | 'route' | 'section' | 'custom' | 'video') | null;
             newTab?: boolean | null;
             reference?:
               | ({
@@ -3185,15 +3244,15 @@ export interface Career {
              */
             section?: string | null;
             url?: string | null;
+            /**
+             * YouTube / Vimeo URL hoặc link .mp4 trực tiếp. Bấm vào sẽ mở popup phát video, không chuyển trang.
+             */
+            video?: string | null;
             label: string;
           };
           id?: string | null;
         }[]
       | null;
-    /**
-     * Optional. YouTube / Vimeo URL or direct .mp4 link. When set, a play button appears next to the CTA and opens the video in a popup.
-     */
-    introVideoUrl?: string | null;
     /**
      * QR / share popup next to the CTA. Pick which platforms to expose, an optional centre logo, and a colour preset for the QR code.
      */
@@ -3368,6 +3427,7 @@ export interface HeaderSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
             };
         id?: T;
@@ -3396,6 +3456,7 @@ export interface FooterSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
               label?: T;
             };
         id?: T;
@@ -3438,6 +3499,7 @@ export interface HomeSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         secondaryButtonLabel?: T;
         secondaryButton?:
@@ -3449,6 +3511,7 @@ export interface HomeSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         eyebrow?: T;
         brandHeading?: T;
@@ -3474,11 +3537,11 @@ export interface HomeSelect<T extends boolean = true> {
                     route?: T;
                     section?: T;
                     url?: T;
+                    video?: T;
                     label?: T;
                   };
               id?: T;
             };
-        introVideoUrl?: T;
         share?:
           | T
           | {
@@ -3551,6 +3614,7 @@ export interface CareerSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         secondaryButtonLabel?: T;
         secondaryButton?:
@@ -3562,6 +3626,7 @@ export interface CareerSelect<T extends boolean = true> {
               route?: T;
               section?: T;
               url?: T;
+              video?: T;
             };
         eyebrow?: T;
         brandHeading?: T;
@@ -3587,11 +3652,11 @@ export interface CareerSelect<T extends boolean = true> {
                     route?: T;
                     section?: T;
                     url?: T;
+                    video?: T;
                     label?: T;
                   };
               id?: T;
             };
-        introVideoUrl?: T;
         share?:
           | T
           | {
