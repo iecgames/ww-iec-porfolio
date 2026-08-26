@@ -1,0 +1,129 @@
+# Deploy ww-iec (Next + Payload) trên VPS `be-hr-production`.
+#
+# VÌ SAO LÀ FILE RIÊNG, KHÔNG SỬA `docker-compose.yml`
+# File gốc viết cho máy dev. Ba giả định trong đó sai trên prod:
+#   1. nó `ports: "${PORT:-3000}:3000"` → bind 0.0.0.0, HỞ THẲNG RA INTERNET,
+#      đi vòng qua Traefik nên cũng không có TLS
+#   2. prod định tuyến bằng label Docker qua Traefik, và Traefik CHỈ thấy
+#      container cùng network `web` — thiếu là app chạy mà 404 câm
+#   3. thiếu GCS_PROJECT_ID / STORAGE_PROVIDER / VERBOSE_ERRORS mà bản Netlify
+#      đang có → hành vi lệch so với production hiện tại
+#
+# ⚠️ Máy còn có key SSH của nghiadt@ieccorp.vn. Không phải máy riêng.
+
+name: ww-iec-prod
+
+services:
+  app:
+    build:
+      context: .
+      args:
+        # NEXT_PUBLIC_* được NHÚNG vào client bundle lúc build, không phải đọc
+        # lúc chạy. Đổi domain = phải build lại, sửa .env rồi restart là vô ích.
+        NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?Set NEXT_PUBLIC_SERVER_URL trong .env}
+        # `next build` chạy generateStaticParams → query THẲNG Mongo lúc build.
+        # Thiếu là build fail, không phải chạy mới fail.
+        DATABASE_URL: ${DATABASE_URL:?Set DATABASE_URL trong .env}
+        PAYLOAD_SECRET: ${PAYLOAD_SECRET:?Set PAYLOAD_SECRET trong .env}
+        # storagePlugin() load lúc build và throw nếu thiếu bucket.
+        GCS_BUCKET: ${GCS_BUCKET:?Set GCS_BUCKET trong .env}
+    image: ww-iec-app-prod
+    container_name: ww-iec-prod-app
+    restart: unless-stopped
+
+    # `external: true` ở cuối file là BẮT BUỘC. Thiếu nó compose tự tạo network
+    # tên `ww-iec-prod_web`, Traefik không nằm trong đó, triệu chứng là 404 câm.
+    networks: [web]
+
+    ports:
+      # Traefik không cần dòng này, nhưng cron trên HOST gọi
+      # http://127.0.0.1:3002/api/payload-jobs/run để chạy scheduled publish.
+      # 127.0.0.1 nên không hở ra internet.
+      #
+      # HOST_PORT chứ KHÔNG phải PORT: `server.js` của Next cũng đọc biến tên
+      # `PORT` để chọn cổng nghe. Đặt PORT=3002 trong .env rồi lỡ tiêm vào
+      # container là app nghe 3002 trong khi traefik và mapping đều trỏ 3000
+      # — triệu chứng là 502 chứ không phải lỗi rõ ràng.
+      - '127.0.0.1:${HOST_PORT:-3002}:3000'
+
+    extra_hosts:
+      # Phòng khi Mongo/dịch vụ phụ chạy native trên chính host.
+      # GCP không hỗ trợ hairpin nên KHÔNG trỏ được vào IP public của chính VM.
+      - 'host.docker.internal:host-gateway'
+
+    environment:
+      # Ghim cứng, không lấy từ .env. Cổng nghe TRONG container phải luôn khớp
+      # với `loadbalancer.server.port` bên dưới và với mapping ở trên.
+      PORT: '3000'
+      HOSTNAME: '0.0.0.0'
+
+      DATABASE_URL: ${DATABASE_URL:?}
+      PAYLOAD_SECRET: ${PAYLOAD_SECRET:?}
+      NEXT_PUBLIC_SERVER_URL: ${NEXT_PUBLIC_SERVER_URL:?}
+      CRON_SECRET: ${CRON_SECRET:?}
+      PREVIEW_SECRET: ${PREVIEW_SECRET:?}
+
+      # PHẢI là https://… và KHÔNG có dấu / ở cuối. Netlify đang để
+      # "https://ww-iec.netlify.app/" — dấu / thừa làm lệch so khớp issuer.
+      OAUTH_ISSUER: ${OAUTH_ISSUER:-}
+      OAUTH_JWT_KID: ${OAUTH_JWT_KID:-iec-mcp-1}
+      OAUTH_JWT_PRIVATE_KEY: ${OAUTH_JWT_PRIVATE_KEY:-}
+      OAUTH_ACCESS_TOKEN_TTL: ${OAUTH_ACCESS_TOKEN_TTL:-3600}
+      OAUTH_REFRESH_TOKEN_TTL: ${OAUTH_REFRESH_TOKEN_TTL:-2592000}
+
+      # Ba biến dưới có trên Netlify nhưng docker-compose.yml gốc bỏ sót.
+      STORAGE_PROVIDER: ${STORAGE_PROVIDER:-gcs}
+      GCS_PROJECT_ID: ${GCS_PROJECT_ID:-}
+      VERBOSE_ERRORS: ${VERBOSE_ERRORS:-false}
+
+      GCS_BUCKET: ${GCS_BUCKET:?}
+      # Trong Docker ưu tiên GCS_CREDENTIALS (base64 JSON) — JSON thô bị các
+      # tầng env làm hỏng. GCS_KEY_FILE (đường dẫn) hoặc ADC cũng dùng được.
+      GCS_CREDENTIALS: ${GCS_CREDENTIALS:-}
+      GCS_KEY_FILE: ${GCS_KEY_FILE:-}
+
+      # Email: Netlify hiện KHÔNG cấu hình 2 biến này, nên các luồng gửi mail
+      # đang im lặng không hoạt động. Điền vào đây là bật lại.
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      EMAIL_FROM: ${EMAIL_FROM:-}
+      EMAIL_FROM_NAME: ${EMAIL_FROM_NAME:-IEC}
+      SITE_URL: ${SITE_URL:-}
+
+    labels:
+      traefik.enable: 'true'
+      traefik.docker.network: web
+      traefik.http.routers.wwiec.rule: Host(`${SITE_HOST:?Set SITE_HOST trong .env}`)
+      traefik.http.routers.wwiec.entrypoints: https
+      traefik.http.routers.wwiec.tls.certresolver: letsencrypt
+      traefik.http.services.wwiec.loadbalancer.server.port: '3000'
+
+    healthcheck:
+      # Repo KHÔNG có /api/health (khác ww-code-assess). `/api/access` là route
+      # Payload luôn phục vụ và có chạm DB — health chỉ kiểm process còn sống
+      # là health vô nghĩa.
+      test: ['CMD', 'wget', '-qO-', 'http://127.0.0.1:3000/api/access']
+      interval: 60s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+    volumes:
+      # Media upload cục bộ (khi không dùng GCS) phải sống qua mỗi lần deploy.
+      - media_data:/app/public/media
+      # Cache ảnh đã optimize. Thiếu volume này thì mỗi lần redeploy cache rỗng,
+      # khách đầu tiên phải chờ tải lại ảnh từ GCS + chạy sharp lại từ đầu.
+      - image_cache:/app/.next/cache/images
+
+volumes:
+  media_data:
+  image_cache:
+
+networks:
+  web:
+    external: true

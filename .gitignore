@@ -22,3 +22,8 @@ node_modules/
 /playwright/.cache/
 
 service-account.json
+# Local credentials (never commit)
+.credential/
+
+# Local Netlify folder
+.netlify

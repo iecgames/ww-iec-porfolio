@@ -1,0 +1,62 @@
+# Traefik cho `be-hr-production` — máy mới, chưa có reverse proxy nào.
+# Sao lại cấu hình đang chạy thật trên be-prod-1 (traefik v3.6, /srv/cds-playtest/app).
+#
+# Đặt tại: /opt/traefik/docker-compose.yml
+#
+# `exposedbydefault=false` nghĩa là container phải TỰ khai `traefik.enable=true`
+# mới được định tuyến. Bỏ dòng đó đi là mọi container trên máy tự nhiên lộ ra
+# internet, kể cả cái không định cho ai thấy.
+
+name: traefik
+
+services:
+  traefik:
+    image: traefik:v3.6
+    container_name: traefik
+    restart: unless-stopped
+
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.http.address=:80
+      - --entrypoints.https.address=:443
+      # Mọi request http bị đẩy sang https. Cần giữ entrypoint http mở vì
+      # ACME HTTP-01 challenge đi qua cổng 80 — đóng 80 là không xin được cert.
+      - --entrypoints.http.http.redirections.entrypoint.to=https
+      - --entrypoints.http.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=http
+      - --certificatesresolvers.letsencrypt.acme.storage=/acme/acme.json
+      # Cố ý KHÔNG đặt acme.email: Let's Encrypt không bắt buộc, và traefik trên
+      # be-prod-1 cũng chạy không có nó. Thêm email = đẩy địa chỉ cá nhân sang
+      # bên thứ ba chỉ để nhận thư nhắc hết hạn, trong khi traefik tự gia hạn.
+
+    ports:
+      - '80:80'
+      - '443:443'
+
+    volumes:
+      # Traefik khám phá container qua socket này. Read-only: traefik chỉ cần
+      # ĐỌC danh sách container, không cần quyền tạo/xoá. Mount rw là trao
+      # quyền tương đương root trên host cho bất cứ ai chiếm được container.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      # acme.json giữ private key của mọi cert. Mất volume này là phải xin lại
+      # toàn bộ cert — Let's Encrypt giới hạn 5 lần/tuần/domain.
+      - acme:/acme
+
+    networks: [web]
+
+    logging:
+      driver: json-file
+      options:
+        max-size: '10m'
+        max-file: '3'
+
+volumes:
+  acme:
+
+networks:
+  web:
+    # Tạo một lần bằng: docker network create web
+    # Mọi app muốn ra internet đều join network này và gắn label traefik.
+    external: true
