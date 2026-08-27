@@ -84,7 +84,13 @@ export async function Footer() {
   // do we fall back to the regular logo and force it white via a CSS filter.
   const resolveMedia = (value: unknown) =>
     value && typeof value === 'object'
-      ? (value as { url?: string; alt?: string; width?: number; height?: number })
+      ? (value as {
+          url?: string
+          alt?: string
+          width?: number
+          height?: number
+          updatedAt?: string
+        })
       : null
   const monoMedia = resolveMedia(generalData?.logoMono)
   const logoMedia = resolveMedia(generalData?.logo)
@@ -163,13 +169,17 @@ export async function Footer() {
             {/* Logo */}
             <div className="shrink-0 flex flex-col items-start md:items-end gap-3">
               <Link href="/" className="inline-block">
+                {/* No eager/high here: the footer logo is always below the fold,
+                    and preloading it at high priority made half a megabyte of PNG
+                    compete with the LCP image for bandwidth. */}
                 <Logo
-                  loading="eager"
-                  priority="high"
                   src={logoSrc}
                   alt={logoAlt}
                   size="large"
                   className={logoClassName}
+                  imgWidth={activeMedia?.width ?? null}
+                  imgHeight={activeMedia?.height ?? null}
+                  cacheTag={activeMedia?.updatedAt ?? null}
                 />
               </Link>
               {generalData.description && (

@@ -77,14 +77,22 @@ Ràng buộc khi làm:
 
 ## 6. Acceptance criteria
 
-- [ ] `pnpm exec tsc --noEmit` pass, `pnpm lint` không lỗi mới.
-- [ ] `pnpm build` sạch.
-- [ ] `curl -s http://localhost:3000/en | grep -o '<img[^>]*logo[^>]*>'` — attribute `width`/`height` khớp tỉ lệ 2316×954, không còn 193×34.
-- [ ] Request logo đi qua `/_next/image`, **không** còn URL `storage.googleapis.com` trực tiếp trong HTML.
-- [ ] Byte của logo giảm ít nhất 90% so với 508.694 (kỳ vọng vài chục KB ở dạng WebP đúng kích thước).
-- [ ] Header trông y hệt bản hiện tại ở 390px, 768px, 1440px. So sánh ảnh chụp cạnh nhau với production.
-- [ ] Footer vẫn hiển thị logo đúng, kể cả biến thể `monoMedia` (class `brightness-0 invert`).
-- [ ] **Đo CLS thật**: `pnpm start`, mở trang chủ ở chế độ ẩn danh với cache tắt, chạy trong console:
+- [x] `pnpm exec tsc --noEmit` pass — chỉ lỗi có sẵn. `pnpm lint` **không kiểm được** (ESLint hỏng sẵn, xem phase 01).
+- [x] `pnpm build` sạch.
+- [x] **Tỉ lệ ô dành sẵn giờ khớp ảnh thật** — đọc từ HTML server-render:
+
+  | | width×height | tỉ lệ | `sizes` | loading | fetchPriority |
+  |---|---|---|---|---|---|
+  | Header | 2316×954 | **2,428** | 150px | (priority) | high |
+  | Footer | 500×206 | **2,427** | 240px | **lazy** | **low** |
+
+  Hằng số cũ cho tỉ lệ 193/34 = **5,676**. Với `max-h-12.5` (50px) + `w-auto`, browser giờ dành sẵn 50 × 2,428 = **121px** — đúng bằng 121px đo được trên production. Ô dành sẵn bằng ô cuối cùng, nên không còn chỗ để shift.
+- [x] Cả hai logo đi qua `/_next/image`, không còn URL `storage.googleapis.com` trực tiếp trong HTML, và cả hai đều mang cache tag.
+- [x] **Byte logo giảm 97,1%**: 508.694 B PNG → **14.580 B** WebP ở bản 384px.
+- [x] Footer bỏ `eager`/`high`, chuyển `lazy`/`low`. Biến thể `monoMedia` vẫn dùng đúng ảnh mono (500×206) và giữ class.
+- [ ] **Chưa đo được CLS thực nghiệm.** Xem §9. Bằng chứng ở trên là cấu trúc (tỉ lệ ô dành sẵn), không phải số CLS đo bằng PerformanceObserver. Hoãn tới phase 06 sau khi deploy.
+- [ ] **Chưa so ảnh chụp header ở 390/768/1440px.** Cùng lý do.
+  Cách đo khi làm được (dùng ở phase 06, chạy server theo §9 chứ **không** phải `pnpm start`), mở trang chủ ở chế độ ẩn danh với cache tắt rồi chạy trong console:
       ```js
       let cls = 0
       new PerformanceObserver(l => l.getEntries().forEach(e => { if (!e.hadRecentInput) cls += e.value }))
@@ -118,3 +126,29 @@ optimizer: 508 KB PNG thô từ GCS (Cache-Control max-age=3600) trở thành We
 đúng kích thước, cache dài, phục vụ từ chính domain. Bỏ priority="high" ở logo
 footer vì nó luôn nằm ngoài viewport đầu tiên.
 ```
+
+---
+
+## 9. Ghi chú thi công (2026-08-27)
+
+### Vì sao chưa đo được CLS
+Ba trở ngại xếp chồng, ghi lại để phase sau không mất thời gian lại:
+
+1. **`pnpm start` không dùng được với `output: 'standalone'`.** Next in cảnh báo này ngay lúc khởi động và mình bỏ qua nó suốt phase 01–02. Server chạy nhưng **không render được nội dung**: trang chủ ra HTML rỗng block, header không có logo, nav trống. Mọi kiểm tra "trang chủ không có ảnh nào" ở phase 02 là do đây chứ không phải do DB rỗng.
+2. **Standalone server cần asset và env được copy thủ công.** `node .next/standalone/server.js` thiếu `.next/static`, `public/`, `.env` và `service-account.json`. Thiếu file cuối làm storage adapter của Payload ném lỗi lúc nạp module → toàn bộ global trả rỗng, biểu hiện y hệt lỗi (1). Copy đủ bốn thứ thì trang render đúng với 44 tham chiếu `/_next/image`.
+3. **Chrome không mở được `localhost:3100`** — trả error page trong khi `curl` cùng URL lấy được 48.185 byte. Nhiều khả năng extension chặn localhost. Chưa gỡ được.
+
+### Cách chạy server local cho đúng
+```bash
+pnpm build
+cp -r .next/static .next/standalone/.next/static
+cp -r public .next/standalone/public
+cp .env service-account.json .next/standalone/
+cd .next/standalone && PORT=3100 node server.js
+```
+Nhớ xoá `.env` và `service-account.json` khỏi `.next/standalone/` sau khi xong — đừng để bản sao credential nằm trong thư mục build.
+
+### Ảnh hưởng tới số liệu phase 01–02
+Đã kiểm lại trên server chạy đúng: **25 chunk / 528.625 B gzip**, so với 534.316 B ghi ở phase 01. Sát nhau, nên các phép đo JS cũ vẫn dùng được — danh sách chunk đến từ đồ thị import tĩnh của route chứ không phụ thuộc block nào thực sự render.
+
+Đồng thời tiêu chí bị hoãn của phase 02 giờ kiểm được: **0 chỗ `w=3840`** trong HTML trang chủ có nội dung đầy đủ.
