@@ -43,10 +43,12 @@ export const MediaBlock: React.FC<Props> = (props) => {
       )}
     >
       {(media || staticImage) && (
+        /* Sits in the article content column; measured 768px and 590px on production. */
         <Media
           imgClassName={cn('border border-border rounded-[0.8rem]', imgClassName)}
           resource={media}
           src={staticImage}
+          size="(max-width: 768px) 100vw, 800px"
         />
       )}
       {caption && (

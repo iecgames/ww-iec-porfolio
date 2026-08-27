@@ -103,7 +103,16 @@ Quét bằng script cho ra 20 chỗ gọi `<Media>`, 5 chỗ đã có `size` h�
 | `heros/BrandHero/index.tsx:460` | mascot, `priority` | **327×491** (đo trên DOM) |
 | `heros/PostHero/index.tsx:31` | `fill`, `priority`, hero tràn viền | đo tại chỗ |
 
-**Cách đo tại chỗ** (bắt buộc, không đoán): chạy `pnpm start`, mở trang chứa component, ở DevTools console:
+### Phương pháp thực tế đã dùng (2026-08-27) — khác với dự kiến
+
+Dự kiến ban đầu là đo cả 15 chỗ trên `pnpm start`. Không làm được: DB dev rỗng nội dung (global `home` không có block nào, `pages`/`games` 0 doc) nên local không render ảnh nào. Thay bằng hai nguồn, ghi rõ nguồn cho từng dòng ở bảng trên:
+
+- **8 chỗ có số đo thật** — đo trên production (cùng component, cùng CSS): `BrandHero:153/460`, `GamesCarousel:30`, `MediaBlock:46`, `Card:80`, `FeaturedPost:57`, `PostHero:31`, cộng ô `AboutWithStats:157` dùng chung wrapper với `BrandHero:153`.
+- **7 chỗ không render ở đâu trên production** — suy từ class Tailwind của chính wrapper, vốn là con số tuyệt đối chứ không phải phỏng đoán: `w-12 md:w-16 lg:w-20` = 48/64/80px, `w-32 md:w-48 lg:w-56` = 128/192/224px, `w-[34rem] xl:w-[42rem]` = 544/672px, `h-5 w-5` = 20px, `maxWidth: 180px`.
+
+Hai nguồn tự kiểm chứng lẫn nhau ở chỗ chúng giao nhau: `BrandHero:460` suy từ class ra 384px và đo được đúng 384px; `PostHero:31` suy từ `max-w-6xl` ra 1152px và đo được đúng 1152px.
+
+**Cách đo tại chỗ** (dùng khi trang có nội dung):
 
 ```js
 [...document.querySelectorAll('img')].map(i => ({
@@ -120,12 +129,21 @@ Quét bằng script cho ra 20 chỗ gọi `<Media>`, 5 chỗ đã có `size` h�
 
 ## 6. Acceptance criteria
 
-- [ ] `pnpm exec tsc --noEmit` pass, `pnpm lint` không lỗi mới.
-- [ ] `pnpm build` sạch.
-- [ ] `pnpm start` → `curl -s http://localhost:3000/en | grep -o 'w=[0-9]*' | sort | uniq -c` — **không còn `w=3840`**, và phân bố `w` hợp lý theo từng ô.
-- [ ] Kiểm tay ở 390px và 1440px: không ảnh nào mờ hoặc vỡ so với bản hiện tại. So sánh cạnh nhau với production.
-- [ ] Tổng byte ảnh của trang chủ giảm ít nhất 50% so với baseline (đo bằng tab Network, filter Img, disable cache).
-- [ ] Trang bài viết (`/en/posts/<slug>`) và trang danh mục vẫn hiển thị đúng — 5 call site cũ không bị ảnh hưởng.
+- [x] `pnpm exec tsc --noEmit` pass — chỉ còn lỗi có sẵn `tests/int/mcp-server.int.spec.ts:35`. `pnpm lint` **không kiểm được**: ESLint hỏng sẵn ở cấp config (xem phase 01).
+- [x] `pnpm build` sạch.
+- [x] **Cả 20/20 call site `<Media>` đều có `size`** (trước: 5/20).
+- [x] **Cả 15 chuỗi `sizes` mới hợp lệ theo parser của chính browser** — kiểm bằng `matchMedia()` cho media condition và `CSS.supports('width', …)` cho độ dài. Chuỗi cũ chạy qua cùng phép kiểm thì fail đúng ở `3840w`/`3072w`, xác nhận cả chẩn đoán lẫn cách sửa trong một phép thử.
+- [x] **Browser chọn ảnh nhỏ hơn hẳn** — dựng `<img>` mới với srcset thật của production (thêm cache-buster để Chrome không giữ bản lớn đã cache) rồi so hai chuỗi `sizes`, tại DPR 2 / viewport 1920:
+
+  | Element | Rộng thật | `sizes` cũ | `sizes` mới |
+  |---|---|---|---|
+  | BrandHero mascot | 338px | w=3840 | **w=828** |
+  | Games cover | 340px | w=3840 | **w=750** |
+  | BrandHero decor | 92px | w=3840 | **w=384** |
+
+- [x] **Không mờ**: bản được chọn rộng gấp 2,2–4,2 lần ô CSS, trên mức DPR 2 — nên không thiếu độ phân giải. Đây là lý lẽ định lượng thay cho việc so ảnh bằng mắt, vốn không làm được vì local không có nội dung.
+- [ ] **Hoãn tới sau khi deploy (phase 06)**: đếm `w=` trên trang chủ production, tổng byte ảnh giảm ≥50%, và nhìn tay ở 390px/1440px. Local không render được ảnh nào nên không có gì để đếm.
+- [ ] **Hoãn tới sau khi deploy**: xác nhận trang bài viết và trang danh mục vẫn đúng — 5 call site cũ không bị đụng vào nên rủi ro thấp, nhưng chưa chạy mắt qua được.
 
 ---
 

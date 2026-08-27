@@ -77,10 +77,13 @@ export const Card: React.FC<{
       <div className="relative w-full aspect-video overflow-hidden bg-muted">
         {cardImage ? (
           <>
+            {/* Used in the 12-col archive grid and the 2-col related-posts grid.
+                Measured on production: 420px and 499px at a 1707px viewport. */}
             <Media
               resource={cardImage}
               fill
               imgClassName="object-cover transition-transform duration-700 ease-out group-hover:scale-110"
+              size="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
             {/* Subtle dark gradient at bottom for depth */}
             <div

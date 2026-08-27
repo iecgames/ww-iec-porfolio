@@ -150,7 +150,12 @@ const DecorationItem: React.FC<DecorationProps> = ({ dec, index, smoothX, smooth
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.7, delay: 0.35 + index * 0.08, ease: 'easeOut' }}
     >
-      <Media resource={dec.image as MediaType} imgClassName="w-full h-auto opacity-90" />
+      {/* Wrapper caps at maxWidth 180px above; measured 135px on production. */}
+      <Media
+        resource={dec.image as MediaType}
+        imgClassName="w-full h-auto opacity-90"
+        size="180px"
+      />
     </motion.div>
   )
 }
@@ -457,10 +462,13 @@ export const BrandHero: React.FC<BrandHeroProps> = ({
                       : { duration: 4.5, repeat: Infinity, ease: 'easeInOut' }
                   }
                 >
+                  {/* Wrapper: w-full max-w-65 md:max-w-xs lg:max-w-sm = 260/320/384px.
+                      Measured 384px on production at a 1707px viewport. */}
                   <Media
                     resource={mascot}
                     imgClassName="w-full h-auto select-none drop-shadow-xl"
                     priority
+                    size="(max-width: 768px) 260px, (max-width: 1024px) 320px, 384px"
                   />
                 </motion.div>
               </motion.div>

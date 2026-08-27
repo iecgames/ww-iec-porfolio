@@ -154,7 +154,12 @@ const DecorationItem: React.FC<DecorationProps> = ({ dec, index, smoothX, smooth
       viewport={{ once: true, margin: '-10%' }}
       transition={{ duration: 0.7, delay: 0.25 + index * 0.08, ease: 'easeOut' }}
     >
-      <Media resource={dec.image as MediaType} imgClassName="w-full h-auto opacity-90" />
+      {/* Wrapper caps at maxWidth 180px above. */}
+      <Media
+        resource={dec.image as MediaType}
+        imgClassName="w-full h-auto opacity-90"
+        size="180px"
+      />
     </motion.div>
   )
 }
@@ -247,9 +252,11 @@ const SupportMedia: React.FC<{ media: MediaType; reduced: boolean | null }> = ({
             </div>
           </>
         ) : (
+          /* Portrait media card, roughly half the section width on desktop. */
           <Media
             resource={media}
             imgClassName="block aspect-[4/5] w-full h-full object-cover select-none"
+            size="(max-width: 768px) 100vw, 45vw"
           />
         )}
       </div>
@@ -336,7 +343,11 @@ const FeatureVideoCard: React.FC<{ media?: MediaType; youtubeUrl?: string | null
               playsInline
             />
           ) : media ? (
-            <Media resource={media} imgClassName="block aspect-video w-full object-cover" />
+            <Media
+              resource={media}
+              imgClassName="block aspect-video w-full object-cover"
+              size="(max-width: 1024px) 100vw, 50vw"
+            />
           ) : null}
         </div>
       </motion.div>
@@ -470,7 +481,12 @@ export const AboutWithStatsBlock: React.FC<Props> = ({
                 </span>
                 {marqueeBadgeMedia && (
                   <span className="block w-12 shrink-0 md:w-16 lg:w-20">
-                    <Media resource={marqueeBadgeMedia} imgClassName="w-full h-auto select-none" />
+                    {/* Wrapper span is w-12 md:w-16 lg:w-20 = 48/64/80px. */}
+                    <Media
+                      resource={marqueeBadgeMedia}
+                      imgClassName="w-full h-auto select-none"
+                      size="(max-width: 768px) 48px, (max-width: 1024px) 64px, 80px"
+                    />
                   </span>
                 )}
               </React.Fragment>
@@ -510,9 +526,11 @@ export const AboutWithStatsBlock: React.FC<Props> = ({
               reduced ? undefined : { duration: 2.2, repeat: Infinity, ease: 'easeInOut' }
             }
           >
+            {/* Wrapper is w-32 md:w-48 lg:w-56 = 128/192/224px. */}
             <Media
               resource={flyingMascot as MediaType}
               imgClassName="w-full h-auto drop-shadow-xl"
+              size="(max-width: 768px) 128px, (max-width: 1024px) 192px, 224px"
             />
           </motion.div>
         </motion.div>

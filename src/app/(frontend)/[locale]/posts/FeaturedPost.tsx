@@ -54,11 +54,13 @@ export const FeaturedPost: React.FC<{ post: FeaturedPostData }> = ({ post }) => 
         <div className="col-span-8 relative bg-muted overflow-hidden">
           {image ? (
             <>
+              {/* col-span-8 of a 12-col card; measured 874px at a 1707px viewport. */}
               <Media
                 fill
                 resource={image}
                 imgClassName="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                 priority
+                size="(max-width: 1024px) 100vw, 55vw"
               />
               {/* Gradient overlay on image (depth) */}
               <div
