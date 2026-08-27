@@ -1,9 +1,6 @@
-'use client'
+import React from 'react'
 
-import dynamic from 'next/dynamic'
-import React, { type ComponentType } from 'react'
-
-import { toIconComponentName } from '@/utilities/tablerIcon'
+import { getRegisteredIcon, type TablerIconComponent } from './iconRegistry'
 
 export type TablerIconProps = {
   size?: number | string
@@ -12,14 +9,21 @@ export type TablerIconProps = {
   className?: string
 }
 
-// Cache the lazy components per icon so we don't recreate them on every render.
-const iconCache = new Map<string, ComponentType<TablerIconProps>>()
+export type { TablerIconComponent }
 
 /**
- * Render a single Tabler icon by name (kebab-case "shield-check" or component name "IconShieldCheck").
+ * Render a single Tabler icon by its CMS name (kebab-case, e.g. "shield-check").
  *
- * Mỗi icon được nạp bằng dynamic import riêng → bundle ở frontend chỉ chứa icon thực sự được dùng,
- * không kéo theo toàn bộ ~5000 icon của @tabler/icons-react.
+ * Looks the icon up in the static registry. An unknown name renders nothing —
+ * same outcome as the previous implementation, whose dynamic import fell back to
+ * a null component on failure.
+ *
+ * This used to be a client component that lazy-loaded each icon via
+ * `import(...${name}.mjs)`. That path made the bundler emit a chunk per icon for
+ * all 6,090 of them plus an initial-load manifest mapping name to chunk; see
+ * `./iconRegistry` for the measurements. With a static registry there is no
+ * loading state left, so the component renders on the server and the icon markup
+ * ships inside the HTML instead of costing a round trip and hydration.
  */
 export const TablerIcon: React.FC<{ name?: string | null } & TablerIconProps> = ({
   name,
@@ -27,19 +31,8 @@ export const TablerIcon: React.FC<{ name?: string | null } & TablerIconProps> = 
 }) => {
   if (!name) return null
 
-  const componentName = toIconComponentName(name)
-
-  let Icon = iconCache.get(componentName)
-  if (!Icon) {
-    Icon = dynamic(
-      () =>
-        import(`@tabler/icons-react/dist/esm/icons/${componentName}.mjs`).catch(() => ({
-          default: () => null,
-        })),
-      { ssr: true },
-    ) as ComponentType<TablerIconProps>
-    iconCache.set(componentName, Icon)
-  }
+  const Icon = getRegisteredIcon(name)
+  if (!Icon) return null
 
   return <Icon {...props} />
 }

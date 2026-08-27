@@ -32,7 +32,12 @@ export const FeatureTabsBlock: React.FC<Props> = ({ tabs }) => {
           >
             {tab.icon && typeof tab.icon === 'object' && (
               <span className="inline-block h-5 w-5">
-                <Media resource={tab.icon} imgClassName="h-full w-full object-contain" />
+                {/* Wrapper span is h-5 w-5. */}
+                <Media
+                  resource={tab.icon}
+                  imgClassName="h-full w-full object-contain"
+                  size="20px"
+                />
               </span>
             )}
             {tab.label}

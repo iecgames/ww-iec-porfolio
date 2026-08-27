@@ -27,11 +27,13 @@ function GameCardInner({ game, isCenter }: { game: Game; isCenter: boolean }) {
       {/* Cover image */}
       {game.cover && typeof game.cover === 'object' && (
         <div className="aspect-video overflow-hidden">
+          {/* Carousel cards measured on production: 340px centre, 286/211px sides. */}
           <Media
             resource={game.cover}
             imgClassName={`h-full w-full object-cover transition-transform duration-500 ${
               isCenter ? 'group-hover/card:scale-105' : ''
             }`}
+            size="(max-width: 768px) 70vw, 360px"
           />
         </div>
       )}

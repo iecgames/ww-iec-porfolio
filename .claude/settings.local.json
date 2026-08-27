@@ -106,7 +106,10 @@
       "PowerShell(Set-Location *)",
       "Bash(curl -s \"http://localhost:3000/vi/career\")",
       "Bash(curl -s -o /dev/null -w \"GET /vi/posts -> %{http_code} \\(redirect: %{num_redirects}\\)\\\\n\" \"http://localhost:3000/vi/posts\")",
-      "Bash(curl -s \"http://localhost:3000/en\")"
+      "Bash(curl -s \"http://localhost:3000/en\")",
+      "Bash(awk '{s+=$1} END {printf \" tổng chunks JS: %.1f MB\\\\n\", s/1048576}')",
+      "Bash(awk '{s+=$1} END {printf \" tổng CSS : %.1f MB\\\\n\", s/1048576}')",
+      "Bash(awk '{printf \"  %6.2f MB  %s\\\\n\", $1/1048576, $2}')"
     ],
     "additionalDirectories": [
       "d:\\Service\\ww-iec\\iec-web-2\\src\\app\\(frontend)\\[locale]\\search"

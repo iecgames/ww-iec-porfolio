@@ -198,7 +198,12 @@ const ValueCard: React.FC<{
               className="overflow-hidden"
             >
               <div className="overflow-hidden rounded-xl ring-1 ring-black/5">
-                <Media resource={image} imgClassName="block h-auto w-full select-none" />
+                {/* Fills a value card, which sits about half the grid on desktop. */}
+                <Media
+                  resource={image}
+                  imgClassName="block h-auto w-full select-none"
+                  size="(max-width: 768px) 100vw, 45vw"
+                />
               </div>
               {value.imageCaption && (
                 <p className="mt-3 text-center text-base font-semibold leading-snug text-foreground/80">
@@ -447,9 +452,11 @@ export const CoreValuesShowcaseBlock: React.FC<Props> = ({
                         animate={{ y: [0, -14, 0] }}
                         transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
                       >
+                        {/* w-[34rem] xl:w-[42rem] 2xl:w-[48rem] = 544/672/768px. */}
                         <Media
                           resource={mascot}
                           imgClassName="h-auto w-[34rem] select-none xl:w-[42rem] 2xl:w-[48rem]"
+                          size="(max-width: 1280px) 544px, (max-width: 1536px) 672px, 768px"
                         />
                       </motion.div>
                     </motion.div>

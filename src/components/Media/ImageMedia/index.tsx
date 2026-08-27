@@ -8,10 +8,8 @@ import React from 'react'
 
 import type { Props as MediaProps } from '../types'
 
-import { cssVariables } from '@/cssVariables'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
 
-const { breakpoints } = cssVariables
 
 // A base64 encoded image to use as a placeholder while the image is loading
 const placeholderBlur =
@@ -77,12 +75,21 @@ export const ImageMedia: React.FC<MediaProps> = (props) => {
 
   const loading = loadingFromProps || (!priority ? 'lazy' : undefined)
 
-  // NOTE: this is used by the browser to determine which image to download at different screen sizes
-  const sizes = sizeFromProps
-    ? sizeFromProps
-    : Object.entries(breakpoints)
-        .map(([, value]) => `(max-width: ${value}px) ${value * 2}w`)
-        .join(', ')
+  // Tells the browser how wide this image will actually be, so it can pick the
+  // right candidate out of the srcset Next generates.
+  //
+  // The previous default emitted `(max-width: 1920px) 3840w, (max-width: 1536px)
+  // 3072w, …`. Two bugs: `w` is a srcset descriptor and is invalid in `sizes`
+  // (which takes a length — px/vw/em), and the breakpoints came out largest
+  // first while `sizes` matches the first condition that holds. Either alone
+  // makes the browser discard the list, fall back to 100vw and download the
+  // widest candidate. Measured on production: 14 of 16 images fetched at
+  // w=3840, including a game cover displayed 340px wide at 562 KB.
+  //
+  // This default is a conservative ceiling for an image spanning the content
+  // column. Any call site that knows its own box should pass `size` — see the
+  // ones updated alongside this change.
+  const sizes = sizeFromProps ?? '(max-width: 768px) 100vw, (max-width: 1280px) 90vw, 1280px'
 
   return (
     <picture className={cn(pictureClassName)}>

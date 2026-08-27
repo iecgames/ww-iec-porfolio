@@ -28,6 +28,14 @@ const nextConfig: NextConfig = {
     // `getMediaUrl` gắn `?<updatedAt>` vào URL nên ảnh đổi là URL đổi; nhờ đó
     // TTL dài không làm editor thấy ảnh cũ.
     minimumCacheTTL: 2592000, // 30 ngày
+    // Mặc định của Next kết thúc ở 3840. Không ô nào trên site rộng quá 1152 CSS
+    // px (hero bài viết, chỗ rộng nhất), nên bản 3840 chỉ tồn tại để đốt CPU của
+    // sharp và chỗ trên đĩa. Bỏ nó làm lưới an toàn: nếu về sau có call site
+    // quên truyền `size`, cái giá phải trả bị chặn ở 2048 thay vì 3840.
+    //
+    // Lưu ý khi deploy: đổi danh sách này làm đổi URL ảnh, nên cache trong volume
+    // `image_cache` thành vô dụng và lần deploy đầu VPS phải sinh lại. Một lần.
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     localPatterns: [
       {
         pathname: '/api/media/file/**',

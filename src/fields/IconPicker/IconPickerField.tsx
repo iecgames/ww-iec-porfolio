@@ -1,19 +1,20 @@
 'use client'
 
 import { FieldLabel, useField } from '@payloadcms/ui'
-import * as TablerIcons from '@tabler/icons-react'
-import iconNames from '@tabler/icons-react/dist/esm/icons-list.mjs'
-import React, { type ComponentType, useMemo, useRef, useState } from 'react'
+import React, { useMemo, useRef, useState } from 'react'
 
-import { toIconComponentName } from '@/utilities/tablerIcon'
+import { getRegisteredIcon, registeredIconNames } from '@/components/TablerIcon/iconRegistry'
 
-type IconComponent = ComponentType<{ size?: number; stroke?: number }>
-
-const iconMap = TablerIcons as unknown as Record<string, IconComponent | undefined>
-
-/** Render trực tiếp (đồng bộ) — chỉ dùng trong admin, nơi việc nạp full icon set chấp nhận được. */
+/**
+ * Chỉ chào những icon có trong registry, vì registry đúng bằng tập icon
+ * frontend render được — xem `src/components/TablerIcon/iconRegistry.ts`.
+ *
+ * Bản cũ liệt kê cả ~6.090 tên từ `icons-list.mjs` và render bằng
+ * `import * as TablerIcons`, nên editor chọn được icon mà frontend không có
+ * cách nào vẽ ra.
+ */
 function PreviewIcon({ name, size = 22 }: { name: string; size?: number }) {
-  const Icon = iconMap[toIconComponentName(name)]
+  const Icon = getRegisteredIcon(name)
   return Icon ? <Icon size={size} stroke={1.75} /> : null
 }
 
@@ -26,7 +27,9 @@ type IconPickerFieldProps = {
   readOnly?: boolean
 }
 
-const MAX_RESULTS = 80
+// Registry hiện có 155 icon nên mức trần này để nguyên cả danh sách khi không
+// tìm kiếm; nó chỉ còn là lưới an toàn nếu registry phình về sau.
+const MAX_RESULTS = 200
 
 export const IconPickerField: React.FC<IconPickerFieldProps> = ({ path, field, readOnly }) => {
   const { value, setValue } = useField<string>({ path })
@@ -36,7 +39,7 @@ export const IconPickerField: React.FC<IconPickerFieldProps> = ({ path, field, r
 
   const results = useMemo(() => {
     const q = search.trim().toLowerCase()
-    const list = q ? iconNames.filter((n) => n.includes(q)) : iconNames
+    const list = q ? registeredIconNames.filter((n) => n.includes(q)) : registeredIconNames
     return list.slice(0, MAX_RESULTS)
   }, [search])
 
