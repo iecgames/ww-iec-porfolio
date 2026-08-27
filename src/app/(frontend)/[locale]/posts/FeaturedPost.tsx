@@ -7,19 +7,13 @@ import { motion } from 'framer-motion'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import React from 'react'
+import { formatDateDot } from '@/utilities/formatDateTime'
 
 export type FeaturedPostData = Pick<
   Post,
   'slug' | 'categories' | 'meta' | 'title' | 'publishedAt' | 'heroImage'
 >
 
-function formatDateDDMMYYYY(timestamp: string): string {
-  const date = new Date(timestamp)
-  const DD = String(date.getDate()).padStart(2, '0')
-  const MM = String(date.getMonth() + 1).padStart(2, '0')
-  const YYYY = date.getFullYear()
-  return `${DD}.${MM}.${YYYY}`
-}
 
 export const FeaturedPost: React.FC<{ post: FeaturedPostData }> = ({ post }) => {
   const t = useTranslations('Posts')
@@ -152,7 +146,7 @@ export const FeaturedPost: React.FC<{ post: FeaturedPostData }> = ({ post }) => 
                   <line x1="8" y1="2" x2="8" y2="6" />
                   <line x1="3" y1="10" x2="21" y2="10" />
                 </svg>
-                {formatDateDDMMYYYY(post.publishedAt)}
+                {formatDateDot(post.publishedAt)}
               </span>
             )}
           </div>

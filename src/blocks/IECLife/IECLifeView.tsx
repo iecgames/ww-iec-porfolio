@@ -9,17 +9,10 @@ import type { Category, Post, Tag } from '@/payload-types'
 
 import { Media } from '@/components/Media'
 import { IconArrowUpRight } from '@tabler/icons-react'
+import { formatDateSlash as formatPostDate } from '@/utilities/formatDateTime'
 
 /* ──────────── helpers ──────────── */
 
-function formatPostDate(timestamp?: string | null): string {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const DD = String(date.getDate()).padStart(2, '0')
-  const MM = String(date.getMonth() + 1).padStart(2, '0')
-  const YYYY = date.getFullYear()
-  return `${DD}/${MM}/${YYYY}`
-}
 
 function getCategories(categories?: (string | Category)[] | null): Category[] {
   if (!Array.isArray(categories)) return []

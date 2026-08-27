@@ -8,19 +8,13 @@ import React from 'react'
 import type { Post } from '@/payload-types'
 
 import { Media } from '@/components/Media'
+import { formatDateDot } from '@/utilities/formatDateTime'
 
 export type CardPostData = Pick<
   Post,
   'slug' | 'categories' | 'tags' | 'meta' | 'title' | 'publishedAt' | 'heroImage'
 >
 
-function formatCardDate(timestamp: string): string {
-  const date = new Date(timestamp)
-  const DD = String(date.getDate()).padStart(2, '0')
-  const MM = String(date.getMonth() + 1).padStart(2, '0')
-  const YYYY = date.getFullYear()
-  return `${DD}.${MM}.${YYYY}`
-}
 
 export const Card: React.FC<{
   alignItems?: 'center'
@@ -124,7 +118,7 @@ export const Card: React.FC<{
           )}
           {publishedAt && (
             <span className="text-xs text-muted-foreground whitespace-nowrap ml-auto">
-              {formatCardDate(publishedAt)}
+              {formatDateDot(publishedAt)}
             </span>
           )}
         </div>

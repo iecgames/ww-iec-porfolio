@@ -44,13 +44,47 @@ Ghi lại kết luận vào phase file này trước khi sửa.
 
 ---
 
-## 3. Bước 2 — Sửa
+## 2b. Chẩn đoán — kết quả (2026-08-27)
 
-Cập nhật bảng "Files chạm vào" dưới đây sau khi chẩn đoán xong, rồi mới sửa.
+Không tái hiện được ở local vì DB dev thiếu nội dung của production, nên chẩn đoán chạy thẳng trên production bằng Playwright (Chrome hệ thống, không cần tải browser).
+
+**Khoanh vùng theo trang:**
+
+| Trang | #418 |
+|---|---|
+| `/en`, `/vi` | **có** |
+| `/en/posts` | **có** |
+| `/en/career`, `/vi/career` | không |
+| `/en/posts/<slug>` | không |
+
+**Xác định chính xác text lệch:** so mảng text node của HTML server-render (fetch thô, JS tắt) với DOM sau khi hydrate xong. Mọi ngày lệch **đúng một ngày**:
+
+| SSR | Sau hydrate |
+|---|---|
+| 06/04/2026 | 07/04/2026 |
+| 23/03/2026 | 24/03/2026 |
+| 05/03/2026 | 06/03/2026 |
+| 06.04.2026 | 07.04.2026 |
+
+**Nguyên nhân:** năm bản sao của cùng một đoạn `new Date(ts).getDate()/.getMonth()/.getFullYear()`. Các hàm này đọc timezone của **host**. Server chạy UTC, người xem ở UTC+7, nên mọi timestamp rơi vào 17:00–24:00 UTC render ra một ngày ở server và ngày kế tiếp ở browser.
+
+Vì sao `/career` và trang bài viết sạch: chúng chỉ có ít hoặc không có ngày, và ngày ở đó không rơi vào khung giờ vượt biên. Bug tồn tại ở mọi chỗ, chỉ là không phải lúc nào cũng lộ.
+
+---
+
+## 3. Bước 2 — Sửa
 
 | File | Action |
 |---|---|
-| *(điền sau bước 1)* | |
+| `src/utilities/formatDateTime.ts` | MODIFY — viết lại, ghim timezone |
+| `src/app/(frontend)/[locale]/posts/FeaturedPost.tsx` | MODIFY — bỏ `formatDateDDMMYYYY` cục bộ |
+| `src/components/Card/index.tsx` | MODIFY — bỏ `formatCardDate` cục bộ |
+| `src/blocks/CategoryShowcase/CategoryShowcaseView.tsx` | MODIFY — bỏ `formatPostDate` cục bộ, giữ re-export |
+| `src/blocks/IECLife/IECLifeView.tsx` | MODIFY — bỏ `formatPostDate` cục bộ |
+
+Một helper dùng `Intl.DateTimeFormat` với `timeZone: 'Asia/Ho_Chi_Minh'` cố định, ba hàm mỏng bọc ngoài để **giữ nguyên ba định dạng hiển thị đang có** (`DD.MM.YYYY`, `DD/MM/YYYY`, `MM/DD/YYYY`). Không đổi thứ gì người dùng nhìn thấy ngoài việc ngày giờ đúng.
+
+`CategoryShowcaseView` vẫn export `formatPostDate` vì `CategoryArchiveView` import từ đó — giữ nguyên để không phải sửa lan sang file thứ sáu.
 
 Hướng sửa theo từng nguyên nhân:
 - Format ngày/số → chốt `timeZone` và `locale` tường minh, dùng cùng một giá trị ở cả hai phía.
@@ -63,12 +97,18 @@ Hướng sửa theo từng nguyên nhân:
 
 ## 4. Acceptance criteria
 
-- [ ] `pnpm dev` → console trang chủ không còn cảnh báo hydration, ở cả `/en` và `/vi`.
-- [ ] `pnpm build && pnpm start` → console không còn `Minified React error #418`.
-- [ ] Kiểm cả các trang khác: `/en/career`, một `/en/posts/<slug>`, một `/en/[slug]`.
-- [ ] Kiểm ở hai timezone khác nhau (đổi timezone máy hoặc dùng `TZ=` khi chạy server) nếu nguyên nhân liên quan ngày giờ.
-- [ ] `pnpm exec tsc --noEmit` pass, `pnpm lint` không lỗi mới.
-- [ ] Đo lại TBT sau khi sửa và ghi lại — để biết phần này đóng góp bao nhiêu.
+- [x] `pnpm exec tsc --noEmit` pass — chỉ lỗi có sẵn. `pnpm lint` **không kiểm được** (ESLint hỏng sẵn, xem phase 01).
+- [x] **Unit: formatter độc lập timezone của host.** Chạy với `TZ=UTC` (mô phỏng server):
+      `2026-04-06T17:30:00Z → 07.04.2026`, `2026-04-06T16:59:59Z → 06.04.2026`, `2026-01-18T18:00:00Z → 19.01.2026`.
+      Đúng hai phía của biên ngày. Chuỗi rỗng và chuỗi hỏng trả `''` như bản cũ.
+- [x] **E2E: không còn lệch text ở timezone cực đoan.** Playwright ép `timezoneId` = `Pacific/Kiritimati` (UTC+14), `Pacific/Midway` (UTC−11), `Asia/Ho_Chi_Minh` (UTC+7), so text node SSR với DOM sau hydrate trên `/en` và `/en/posts`: **0 lệch, 0 hydration error** ở cả sáu tổ hợp.
+- [x] **Đối chứng: phép thử trên thật sự bắt được bug.** Revert tạm bản sửa rồi chạy lại cùng phép thử — `Pacific/Midway` cho `server: 03.06.2026` vs `client: 02.06.2026` kèm **1 hydration error**. Không có bước này thì kết quả "0 lệch" vô nghĩa.
+- [x] `pnpm build` sạch.
+- [ ] **Hoãn tới phase 06**: xác nhận `/en`, `/vi`, `/en/posts` trên production hết `#418`, và đo lại TBT. Nội dung production không có ở local nên chỉ kiểm được sau khi deploy.
+
+### Cách chạy lại phép thử
+
+Không giữ script trong repo. Dựng lại khi cần: Playwright với `chromium.launch({ channel: 'chrome' })` (dùng Chrome hệ thống, khỏi `playwright install`), lấy text node của HTML thô với `javaScriptEnabled: false` + `setContent`, so với text node của trang đã hydrate, lọc theo regex `^\d{2}[./]\d{2}[./]\d{4}$`. Lưu ý: `tsx` thêm helper `__name` vào hàm có tên nằm trong `page.evaluate` và làm vỡ nó — viết extractor không có hàm con lồng bên trong.
 
 ---
 

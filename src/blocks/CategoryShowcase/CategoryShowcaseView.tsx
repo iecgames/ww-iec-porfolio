@@ -10,17 +10,12 @@ import type { Category, Post, Tag } from '@/payload-types'
 import { Media } from '@/components/Media'
 import RichText from '@/components/RichText'
 import { RippleLink } from '@/components/RippleLink'
+import { formatDateSlash } from '@/utilities/formatDateTime'
 
 /* ──────────── helpers ──────────── */
 
-export function formatPostDate(timestamp?: string | null): string {
-  if (!timestamp) return ''
-  const date = new Date(timestamp)
-  const DD = String(date.getDate()).padStart(2, '0')
-  const MM = String(date.getMonth() + 1).padStart(2, '0')
-  const YYYY = date.getFullYear()
-  return `${DD}/${MM}/${YYYY}`
-}
+/** Re-exported so CategoryArchiveView keeps its existing import site. */
+export const formatPostDate = formatDateSlash
 
 export function getTags(tags?: (string | Tag)[] | null): Tag[] {
   if (!Array.isArray(tags)) return []
