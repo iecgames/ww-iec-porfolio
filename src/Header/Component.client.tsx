@@ -14,9 +14,19 @@ interface HeaderClientProps {
   data: Header
   logoSrc?: string | null
   logoAlt?: string | null
+  logoWidth?: number | null
+  logoHeight?: number | null
+  logoCacheTag?: string | null
 }
 
-export const HeaderClient: React.FC<HeaderClientProps> = ({ data, logoSrc, logoAlt }) => {
+export const HeaderClient: React.FC<HeaderClientProps> = ({
+  data,
+  logoSrc,
+  logoAlt,
+  logoWidth,
+  logoHeight,
+  logoCacheTag,
+}) => {
   const pathname = usePathname()
   const isPostsPage = /(^|\/)posts(\/|$)/.test(pathname)
   const { transparent } = useTransparentHeader()
@@ -64,7 +74,15 @@ export const HeaderClient: React.FC<HeaderClientProps> = ({ data, logoSrc, logoA
         >
           <div className="flex-1">
             <Link href="/">
-              <Logo loading="eager" priority="high" src={logoSrc} alt={logoAlt} />
+              <Logo
+                loading="eager"
+                priority="high"
+                src={logoSrc}
+                alt={logoAlt}
+                imgWidth={logoWidth}
+                imgHeight={logoHeight}
+                cacheTag={logoCacheTag}
+              />
             </Link>
           </div>
           <HeaderNav data={data} centered={centered} solid={solid} />

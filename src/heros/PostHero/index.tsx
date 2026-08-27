@@ -28,7 +28,14 @@ export const PostHero: React.FC<{
       <div className="relative w-full max-w-6xl mx-auto overflow-hidden rounded-2xl md:rounded-3xl ring-1 ring-black/5 shadow-sm isolate">
         <div className="relative aspect-16/10 md:aspect-21/9 w-full bg-muted">
           {displayImage && (
-            <Media fill priority imgClassName="object-cover" resource={displayImage} />
+            /* Wrapper is w-full max-w-6xl = 1152px; measured exactly that on production. */
+            <Media
+              fill
+              priority
+              imgClassName="object-cover"
+              resource={displayImage}
+              size="(max-width: 1152px) 100vw, 1152px"
+            />
           )}
 
           <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/40 to-black/10" />

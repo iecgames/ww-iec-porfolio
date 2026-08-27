@@ -1,29 +1,49 @@
 import clsx from 'clsx'
+import NextImage from 'next/image'
 
-const FALLBACK_SRC =
-  'https://raw.githubusercontent.com/payloadcms/payload/3.x/packages/ui/src/assets/payload-logo-light.svg'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
 const FALLBACK_ALT = 'IEC Logo'
 
-// Intrinsic ratio used to (a) reserve space before load and (b) derive the
-// missing side when only one of width/height is provided.
+/**
+ * Ratio used to reserve space before the image loads and to derive the missing
+ * side when only one of width/height is given.
+ *
+ * These are a last resort. When the caller passes the media's real dimensions
+ * the layout box matches the image exactly and nothing shifts; when it does
+ * not, the box is wrong by whatever the real ratio differs by. That was the
+ * bug: the header rendered a 2316x954 logo (2.43:1) inside a box reserved from
+ * a 193x34 constant (5.68:1), so the header grew from 34px to 50px tall the
+ * moment the image arrived and pushed the whole page down. Measured CLS on
+ * desktop was 0.254.
+ */
 const NATURAL_WIDTH = 193
 const NATURAL_HEIGHT = 34
 
+/**
+ * Rendered box per size. `maxWidthPx` mirrors the `max-w-*` class and is what
+ * `sizes` reports to the browser — without it Next would build a srcset around
+ * the media's intrinsic width (2316px for the current logo) and happily serve
+ * a multi-megapixel file for a 50px-tall mark.
+ */
 const LOGO_SIZE = {
-  small: 'max-h-12.5 w-auto max-w-37.5',
-  medium: 'max-h-15 w-auto max-w-45',
-  large: 'max-h-20 w-auto max-w-60',
-}
+  small: { className: 'max-h-12.5 w-auto max-w-37.5', maxWidthPx: 150 },
+  medium: { className: 'max-h-15 w-auto max-w-45', maxWidthPx: 180 },
+  large: { className: 'max-h-20 w-auto max-w-60', maxWidthPx: 240 },
+} as const
+
 interface Props {
   className?: string
   loading?: 'lazy' | 'eager'
   priority?: 'auto' | 'high' | 'low'
   size?: 'small' | 'medium' | 'large'
-  /** Logo image URL from General Settings. Falls back to default when absent. */
+  /** Logo image URL from General Settings. Nothing renders when absent. */
   src?: string | null
   alt?: string | null
   imgWidth?: number | null
   imgHeight?: number | null
+  /** Media `updatedAt`, appended to the URL so replacing the logo busts the optimizer cache. */
+  cacheTag?: string | null
 }
 
 export const Logo = (props: Props) => {
@@ -35,18 +55,24 @@ export const Logo = (props: Props) => {
     alt,
     imgWidth,
     imgHeight,
+    cacheTag,
   } = props
+
+  // No logo configured renders nothing. The previous fallback pointed at
+  // Payload's own logo on raw.githubusercontent.com, a host that is not in
+  // `images.remotePatterns` and so cannot be optimized — and shipping another
+  // product's branding on a missing-asset path is worse than showing nothing.
+  if (!src) return null
+
+  const { className: sizeClassName, maxWidthPx } = LOGO_SIZE[props.size || 'small']
 
   const loading = loadingFromProps || 'lazy'
   const priority = priorityFromProps || 'low'
-  const resolvedSrc = src || FALLBACK_SRC
   const resolvedAlt = alt || FALLBACK_ALT
 
   const hasWidth = typeof imgWidth === 'number' && imgWidth > 0
   const hasHeight = typeof imgHeight === 'number' && imgHeight > 0
 
-  // width/height attributes — keep aspect ratio when only one side is given,
-  // so the browser reserves the right amount of space (avoids layout shift).
   let attrWidth = NATURAL_WIDTH
   let attrHeight = NATURAL_HEIGHT
   if (hasWidth && hasHeight) {
@@ -61,16 +87,17 @@ export const Logo = (props: Props) => {
   }
 
   return (
-    /* eslint-disable @next/next/no-img-element */
-    <img
+    <NextImage
       alt={resolvedAlt}
       width={attrWidth}
       height={attrHeight}
-      loading={loading}
+      loading={priority === 'high' ? undefined : loading}
+      priority={priority === 'high'}
       fetchPriority={priority}
-      decoding="async"
-      className={clsx(LOGO_SIZE[props.size || 'small'], className)}
-      src={resolvedSrc}
+      quality={80}
+      sizes={`${maxWidthPx}px`}
+      className={clsx(sizeClassName, className)}
+      src={getMediaUrl(src, cacheTag)}
     />
   )
 }
