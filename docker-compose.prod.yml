@@ -98,7 +98,12 @@ services:
       #
       # Domain nào chưa trỏ DNS về máy này thì ACME fail rồi retry, KHÔNG làm
       # chết cert của domain còn lại. Nên khai host trước, đổi DNS sau là an toàn.
-      traefik.http.routers.wwiec.rule: Host(`${SITE_HOST:?Set SITE_HOST trong .env}`,`ieccorp.vn`,`www.ieccorp.vn`)
+      #
+      # ⚠️ Nhiều host phải nối bằng `||`, KHÔNG phải Host(`a`,`b`,`c`) — cú pháp
+      # nhiều tham số là của Traefik v2, v3 vứt bỏ. Viết sai thì traefik bỏ luôn
+      # cả router, tức là 404 CÂM cho MỌI domain kể cả domain đang chạy tốt, và
+      # lỗi chỉ hiện trong `docker logs traefik` chứ deploy vẫn báo healthy.
+      traefik.http.routers.wwiec.rule: Host(`${SITE_HOST:?Set SITE_HOST trong .env}`) || Host(`ieccorp.vn`) || Host(`www.ieccorp.vn`)
       traefik.http.routers.wwiec.entrypoints: https
       traefik.http.routers.wwiec.tls.certresolver: letsencrypt
 
