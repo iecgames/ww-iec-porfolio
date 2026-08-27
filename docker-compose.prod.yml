@@ -92,9 +92,27 @@ services:
     labels:
       traefik.enable: 'true'
       traefik.docker.network: web
-      traefik.http.routers.wwiec.rule: Host(`${SITE_HOST:?Set SITE_HOST trong .env}`)
+      # Cả 3 host chung MỘT router nên Traefik xin MỘT cert 3 SAN, không phải 3
+      # cert. Đổi danh sách này = đổi SAN = Let's Encrypt tính là cert mới, mà
+      # giới hạn là 5 cert trùng bộ SAN / tuần — đừng sửa đi sửa lại để thử.
+      #
+      # Domain nào chưa trỏ DNS về máy này thì ACME fail rồi retry, KHÔNG làm
+      # chết cert của domain còn lại. Nên khai host trước, đổi DNS sau là an toàn.
+      traefik.http.routers.wwiec.rule: Host(`${SITE_HOST:?Set SITE_HOST trong .env}`,`ieccorp.vn`,`www.ieccorp.vn`)
       traefik.http.routers.wwiec.entrypoints: https
       traefik.http.routers.wwiec.tls.certresolver: letsencrypt
+
+      # www.ieccorp.vn → ieccorp.vn (canonical là apex). www vẫn phải nằm trong
+      # rule ở trên, nếu không Traefik 404 trước khi kịp redirect, và cert cũng
+      # không có SAN cho nó nên trình duyệt cảnh báo TLS trước cả khi thấy 301.
+      #
+      # ⚠️ `$${1}` HAI dấu $ là cố ý: docker compose nội suy `${1}` thành chuỗi
+      # rỗng trước khi Traefik nhìn thấy, hậu quả là mọi URL con bị nuốt path và
+      # đổ hết về trang chủ. `$$` là cách escape của compose.
+      traefik.http.middlewares.wwiec-www.redirectregex.regex: ^https://www\.ieccorp\.vn/(.*)
+      traefik.http.middlewares.wwiec-www.redirectregex.replacement: https://ieccorp.vn/$${1}
+      traefik.http.middlewares.wwiec-www.redirectregex.permanent: 'true'
+      traefik.http.routers.wwiec.middlewares: wwiec-www
       traefik.http.services.wwiec.loadbalancer.server.port: '3000'
 
     healthcheck:
