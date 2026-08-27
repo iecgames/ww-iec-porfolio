@@ -235,3 +235,7 @@ DAG: 01 chặn 04 (phải cắt icon trước thì mới đo được `dynamic()
 - **`dynamic()` cho block gây nháy nội dung.** Block dưới màn hình đầu nạp trễ có thể thấy khoảng trống khi cuộn nhanh. Giảm thiểu: giữ `ssr: true` để HTML vẫn có nội dung, chỉ hoãn phần JS hydrate.
 - **Hydration #418 có thể phình phase 06.** Chưa biết component nào. Nếu truy ra nguyên nhân nằm ngoài phạm vi (ví dụ trong `@heroui` hay `next-intl`), phase 06 dừng lại, ghi lại phát hiện và chuyển thành task riêng thay vì cố sửa.
 - **Cây làm việc bẩn làm commit lẫn lộn.** Xem §6. Giảm thiểu: xử lý trước khi bắt đầu phase 01.
+
+---
+
+**Kết quả cuối:** [results.md](results.md)

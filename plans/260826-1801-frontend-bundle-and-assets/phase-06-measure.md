@@ -96,3 +96,11 @@ docs(plans): record before/after measurements for the bundle task
 Đo lại trên production cùng phương pháp với baseline ngày 2026-08-26 và ghi
 bảng đối chiếu vào results.md, kèm danh sách những gì còn lại và thuộc task nào.
 ```
+
+---
+
+## 7. Trạng thái (2026-08-27)
+
+Đã tạo `results.md` với toàn bộ số đo local, danh sách tiêu chí còn treo, các vấn đề có sẵn phát hiện dọc đường, và đề xuất task tiếp theo.
+
+**Bảng đối chiếu PageSpeed vẫn trống — chờ deploy.** Đây là phần duy nhất của task chưa xong, và nó chặn nốt 4 tiêu chí đang treo ở phase 02/03/05: CLS thực nghiệm, tổng byte ảnh, nhìn tay ở 390/1440px, và xác nhận #418 đã hết trên production.
