@@ -54,19 +54,23 @@ Mọi con số dưới đây đo trực tiếp trên `https://ww-iec.haleinterac
 
 → **250 KB / 721 KB gzip (35%) là icon**, cho 68 icon thật sự được import trong `src/`.
 
-### 2.5 Tiến độ đo được theo phase (local, `pnpm start`)
+### 2.5 Tiến độ đo được theo phase (local)
 
 Đo cùng một cách với bảng §3.1 nên so với nhau được; **không** so thẳng với bảng PSI §2.1 vì đây là máy dev với DB khác.
 
-| Mốc | Tổng JS gzip trang chủ | Số chunk trong `.next/static/chunks/` |
-|---|---|---|
-| Trước phase 01 | 720.691 B | ~6.000 |
-| Probe (bỏ hẳn `TablerIcon`) | 525.053 B | 95 |
-| **Sau phase 01 (registry 155 icon)** | **534.316 B** | **97** |
+| Mốc | Tổng JS gzip trang chủ | Số chunk `.next/static/chunks/` | Server |
+|---|---|---|---|
+| Trước phase 01 | 720.691 B | ~6.000 | `pnpm start` ⚠ |
+| Probe (bỏ hẳn `TablerIcon`) | 525.053 B | 95 | `pnpm start` ⚠ |
+| Sau phase 01 (registry 155 icon) | 534.316 B | 97 | `pnpm start` ⚠ |
+| **Sau phase 01–03** | **528.625 B** | **95** | standalone ✓ |
+| Thử phase 04 (`dynamic()`) | 532.549 B | 97 | standalone ✓ — **tệ hơn, đã revert** |
 
-Phase 01 cắt được **−186.375 B (−25,9%)**.
+Phase 01 cắt được **−186 KB (−26%)**, và đó là gần như toàn bộ phần cắt được của cả task.
 
-Chênh 9,3 KB so với probe chính là 155 icon của registry. Chúng còn nằm trên trang chủ vì `RenderHero` import tĩnh mọi biến thể hero, kéo theo `VideoHero → PolicyTabsBlock → TablerIcon → iconRegistry`, dù trang chủ dùng `BrandHero`. **Phase 04 sẽ đẩy phần này ra khỏi trang chủ** — lúc đó registry chỉ còn nằm trên trang `/career`, nơi PolicyTabs thật sự render.
+⚠ **Các dòng `pnpm start` đo trên server không render được nội dung** — Next cảnh báo `"next start" does not work with "output: standalone"` và mình bỏ qua. Đã kiểm lại: con số sau phase 01–03 trên server chạy đúng là 528.625 B, sát với 534.316 B đo bằng cách sai, nên các dòng cũ vẫn dùng để so tương đối được. Cách chạy server đúng: `phase-03-logo-cls.md` §9.
+
+Chênh ~9 KB so với probe là 155 icon của registry. Lúc lập plan mình viết *"Phase 04 sẽ đẩy phần này ra khỏi trang chủ"* — **sai**. Phase 04 đã thi công, đo, và bị bỏ: `dynamic()` không gỡ được registry khỏi chunk tải ngay mà còn làm nặng thêm 3,9 KB. Nguyên nhân thật nằm ở tầng chia chunk của Turbopack, không ở tầng import. Xem `phase-04-lazy-blocks.md` §4.
 
 ### 2.4 Ảnh
 
@@ -170,7 +174,7 @@ Bảng này đã đánh số lại ngày 2026-08-27 sau khi phase `modularizeImp
 | 01 | `phase-01-tabler-icon-registry.md` | Thay glob dynamic import bằng registry tĩnh → xoá chunk icon 795 KB + manifest 6.090 chunk | — |
 | 02 | `phase-02-image-sizes.md` | Sửa `sizes` hỏng trong `ImageMedia`, truyền `size` cho 15 call site, giới hạn `deviceSizes` | — |
 | 03 | `phase-03-logo-cls.md` | Truyền kích thước thật cho `<Logo>`, cho logo đi qua `next/image`, bỏ `priority="high"` ở Footer | — |
-| 04 | `phase-04-lazy-blocks.md` | `dynamic()` cho biến thể hero và các block dưới màn hình đầu | 01 |
+| ~~04~~ | `phase-04-lazy-blocks.md` | **BỎ sau khi đo (2026-08-27).** `dynamic()` làm trang chủ nặng thêm 3,9 KB gzip và không gỡ được gì — Server Component vốn đã chỉ ship Client Component được render. Không giữ thay đổi source nào | 01 |
 | 05 | `phase-05-hydration-418.md` | Truy và sửa hydration mismatch trên trang chủ | — |
 | 06 | `phase-06-measure.md` | Build lại, đo lại, ghi bảng so sánh trước/sau vào plan folder | 01–05 |
 
