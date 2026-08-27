@@ -54,6 +54,20 @@ Mọi con số dưới đây đo trực tiếp trên `https://ww-iec.haleinterac
 
 → **250 KB / 721 KB gzip (35%) là icon**, cho 68 icon thật sự được import trong `src/`.
 
+### 2.5 Tiến độ đo được theo phase (local, `pnpm start`)
+
+Đo cùng một cách với bảng §3.1 nên so với nhau được; **không** so thẳng với bảng PSI §2.1 vì đây là máy dev với DB khác.
+
+| Mốc | Tổng JS gzip trang chủ | Số chunk trong `.next/static/chunks/` |
+|---|---|---|
+| Trước phase 01 | 720.691 B | ~6.000 |
+| Probe (bỏ hẳn `TablerIcon`) | 525.053 B | 95 |
+| **Sau phase 01 (registry 155 icon)** | **534.316 B** | **97** |
+
+Phase 01 cắt được **−186.375 B (−25,9%)**.
+
+Chênh 9,3 KB so với probe chính là 155 icon của registry. Chúng còn nằm trên trang chủ vì `RenderHero` import tĩnh mọi biến thể hero, kéo theo `VideoHero → PolicyTabsBlock → TablerIcon → iconRegistry`, dù trang chủ dùng `BrandHero`. **Phase 04 sẽ đẩy phần này ra khỏi trang chủ** — lúc đó registry chỉ còn nằm trên trang `/career`, nơi PolicyTabs thật sự render.
+
 ### 2.4 Ảnh
 
 | | |
@@ -67,20 +81,33 @@ Mọi con số dưới đây đo trực tiếp trên `https://ww-iec.haleinterac
 
 ## 3. Nguyên nhân gốc đã kiểm chứng
 
-### 3.1 Vì sao toàn bộ 6.148 icon vào bundle
+### 3.1 Vì sao toàn bộ 6.148 icon vào bundle — ĐÃ ĐO LẠI, GIẢ THUYẾT BAN ĐẦU SAI
 
-`node_modules/@tabler/icons-react/dist/esm/tabler-icons-react.mjs` mở đầu bằng:
+**Giả thuyết ban đầu (sai):** barrel của package mở đầu bằng namespace re-export —
 
 ```js
 import * as index from './icons/index.mjs';
 export { index as icons };
-import * as iconsList from './icons-list.mjs';
-export { iconsList };
 ```
 
-`@tabler/icons-react` **có** nằm trong danh sách `optimizePackageImports` mặc định của Next (xác nhận tại `node_modules/next/dist/server/config.js:985`), nhưng barrel optimizer bail out khi gặp namespace re-export (`export { index as icons }`) vì không chứng minh được namespace đó không được dùng. Hệ quả: **mọi** `import { IconX } from '@tabler/icons-react'` kéo nguyên barrel. `src/blocks/CoreValuesShowcase/Component.tsx` là một block của trang chủ và import kiểu này → chunk 795 KB nằm trên critical path.
+— nên `optimizePackageImports` bail out và mọi named import kéo nguyên barrel. Từ đó suy ra cách sửa là thêm `modularizeImports` vào `next.config.ts`.
 
-### 3.2 Vì sao có 6.090 lazy chunk
+**Thực đo ngày 2026-08-27** cho thấy suy luận đó không đúng. Bốn lần build, đo tổng JS gzip của trang chủ trên `pnpm start`:
+
+| `modularizeImports` | glob import trong `TablerIcon` | Tổng JS gzip trang chủ |
+|---|---|---|
+| tắt (baseline production) | bật | 721.313 B |
+| **bật** | bật | 720.691 B |
+| bật | tắt | 525.053 B |
+| tắt | tắt | 525.789 B |
+
+`modularizeImports` đóng góp **736 byte**. Toàn bộ 195 KB tiết kiệm đến từ việc bỏ glob dynamic import ở §3.2.
+
+Transform **có chạy** — kiểm chứng bằng cách trỏ `transform` vào đường dẫn bịa (`ZZZ_BOGUS_{{member}}.mjs`), build vỡ đúng tại `CoreValuesShowcase/Component.tsx:8`, `LanguageSwitcher/index.tsx:4`, `Header/MobileMenu/index.tsx:13`. Nó chỉ không giải quyết được gì, vì glob import đã kéo sẵn toàn bộ icon vào graph; barrel có bị tree-shake hay không cũng không còn ý nghĩa.
+
+**Hệ quả:** bỏ hẳn phương án `modularizeImports`. Sau khi §3.2 được sửa, `optimizePackageImports` mặc định của Next xử lý named import đủ tốt — đo được chunk icon **không** xuất hiện trên trang chủ ở cả hai cấu hình cuối bảng. Chunk 6.195 icon còn lại chỉ nằm trong bundle admin, đến từ `import * as TablerIcons` của `IconPickerField`, đúng như thiết kế.
+
+### 3.2 Vì sao có 6.090 lazy chunk — đây mới là nguyên nhân thật
 
 `src/components/TablerIcon/index.tsx:36`:
 
@@ -124,8 +151,8 @@ Console trang chủ có `Minified React error #418` — hydration mismatch dạn
 
 | Câu hỏi | Lựa chọn |
 |---|---|
-| Cách sửa 250 KB icon Tabler | **`modularizeImports` trong `next.config.ts`**, map `IconX` → `@tabler/icons-react/dist/esm/icons/IconX.mjs`. Không đụng 30 file import trong `src/` |
-| `preventFullImport` | **Không bật.** `src/fields/IconPicker/IconPickerField.tsx:4` dùng `import * as TablerIcons` và sẽ lỗi build nếu bật. Đánh đổi: mất lá chắn chống full-import vô ý về sau |
+| ~~Cách sửa 250 KB icon Tabler: `modularizeImports`~~ | **HUỶ sau khi đo (2026-08-27).** Đo được nó chỉ tiết kiệm 736 B — xem §3.1. Nguyên nhân thật là glob dynamic import ở §3.2. Không thêm `modularizeImports` vào `next.config.ts` |
+| ~~`preventFullImport`~~ | Không còn liên quan sau khi huỷ quyết định trên |
 | HTML `Cache-Control: private, no-cache, no-store` | **Giữ nguyên route dynamic.** Đúng theo quyết định của plan `260825-1411` (cache ở tầng query bằng tag). Chuyển ISR đụng luồng draft/live-preview, lợi ~0,3 s TTFB — để task riêng |
 | framer-motion (21 file, ~52 KB gzip) | **Chỉ `dynamic()` các block dưới màn hình đầu.** Không viết lại animation, không gỡ thư viện |
 | Lỗi hydration React #418 | **Có, thành phase riêng** (phase 06) |
@@ -136,26 +163,29 @@ Console trang chủ có `Minified React error #418` — hydration mismatch dạn
 
 ## 5. Phase breakdown
 
+Bảng này đã đánh số lại ngày 2026-08-27 sau khi phase `modularizeImports` bị huỷ (§3.1). File phase cũ đã xoá, không còn file nào trùng số.
+
 | Phase | File | Mục tiêu | Phụ thuộc |
 |---|---|---|---|
-| 01 | `phase-01-modularize-icons.md` | Thêm `modularizeImports` cho `@tabler/icons-react` → xoá chunk barrel 795 KB | — |
-| 02 | `phase-02-tabler-icon-registry.md` | Thay glob dynamic import bằng registry tĩnh → xoá manifest 6.090 chunk | 01 |
-| 03 | `phase-03-image-sizes.md` | Sửa `sizes` hỏng trong `ImageMedia`, truyền `size` cho 15 call site, giới hạn `deviceSizes` | — |
-| 04 | `phase-04-logo-cls.md` | Truyền kích thước thật cho `<Logo>`, cho logo đi qua `next/image`, bỏ `priority="high"` ở Footer | — |
-| 05 | `phase-05-lazy-blocks.md` | `dynamic()` cho biến thể hero và các block dưới màn hình đầu | 01, 02 |
-| 06 | `phase-06-hydration-418.md` | Truy và sửa hydration mismatch trên trang chủ | — |
-| 07 | `phase-07-measure.md` | Build lại, đo lại, ghi bảng so sánh trước/sau vào plan folder | 01–06 |
+| 01 | `phase-01-tabler-icon-registry.md` | Thay glob dynamic import bằng registry tĩnh → xoá chunk icon 795 KB + manifest 6.090 chunk | — |
+| 02 | `phase-02-image-sizes.md` | Sửa `sizes` hỏng trong `ImageMedia`, truyền `size` cho 15 call site, giới hạn `deviceSizes` | — |
+| 03 | `phase-03-logo-cls.md` | Truyền kích thước thật cho `<Logo>`, cho logo đi qua `next/image`, bỏ `priority="high"` ở Footer | — |
+| 04 | `phase-04-lazy-blocks.md` | `dynamic()` cho biến thể hero và các block dưới màn hình đầu | 01 |
+| 05 | `phase-05-hydration-418.md` | Truy và sửa hydration mismatch trên trang chủ | — |
+| 06 | `phase-06-measure.md` | Build lại, đo lại, ghi bảng so sánh trước/sau vào plan folder | 01–05 |
 
-DAG: 01 chặn 02 (registry dựa trên deep import mà 01 thiết lập) và 05 (đo lại chunk sau khi icon đã gọn). 03, 04, 06 độc lập hoàn toàn. 07 chạy cuối.
+DAG: 01 chặn 04 (phải cắt icon trước thì mới đo được `dynamic()` có tác dụng thật hay không). 02, 03, 05 độc lập hoàn toàn. 06 chạy cuối.
+
+**Mục tiêu số của phase 01 đã có bằng chứng thực nghiệm**, không còn là dự đoán: 720.691 B → 525.053 B gzip trên trang chủ, tức **−195 KB (−27%)**, và số chunk trong `.next/static/chunks/` từ ~6.000 xuống 95. Đo bằng build probe ngày 2026-08-27 với `TablerIcon` bị vô hiệu hoá tạm; phase 01 phải đạt lại đúng con số này bằng registry thật.
 
 ---
 
 ## 6. Ràng buộc kỹ thuật cần nhớ khi thi công
 
-- **Cây làm việc đang bẩn.** `next.config.ts`, `package.json`, `Dockerfile`, `docker-compose.yml`, `.env.example` có thay đổi chưa commit từ một phiên làm việc khác (`NEXT_BUILD_CPUS` / Docker build memory). Phase 01 và 03 đều sửa `next.config.ts` → phải commit hoặc stash phần đó trước, không trộn vào commit của task này.
-- **`experimental` trong `next.config.ts` đang là spread có điều kiện** (`...(buildCpus ? { experimental: {...} } : {})`). `modularizeImports` là key top-level, không nằm trong `experimental` → không xung đột. Đừng thêm gì vào `experimental` mà không xử lý cái spread này.
-- **File icon của Tabler chỉ export `default` và `__iconNode`**, không export tên. `modularizeImports` mặc định chuyển named import → default import, đúng nhu cầu. Không đặt `skipDefaultConversion`.
-- **`import { type IconProps }` trong `src/blocks/CoreValuesShowcase/Component.tsx:22`** là type-only nằm chung khối import giá trị. `modularizeImports` sẽ cố map nó thành file không tồn tại → phải tách thành `import type { IconProps } from '@tabler/icons-react'` riêng. Đã kiểm: 67/68 icon còn lại đều có file `.mjs` khớp tên, chỉ mình `IconProps` là type.
+- ~~**Cây làm việc đang bẩn.**~~ Đã xử lý: các thay đổi `NEXT_BUILD_CPUS` / Docker được commit ở `3f57eb9` trước khi task này bắt đầu. Nhánh làm việc: `opt/resource`.
+- **`experimental` trong `next.config.ts` là spread có điều kiện** (`...(buildCpus ? { experimental: {...} } : {})`). Đừng thêm gì vào `experimental` mà không xử lý cái spread này. Phase 02 chỉ thêm `images.deviceSizes` — key top-level, không đụng tới.
+- **Kiểm tra chunk phải lọc theo trang chủ, không quét cả `.next/static/chunks/`.** Chunk chứa cả icon set vẫn tồn tại hợp lệ trong bundle admin (`IconPickerField` dùng `import * as TablerIcons`). Tiêu chí đúng là: lấy danh sách chunk từ HTML trang chủ rồi mới đối chiếu. Lần chạy đầu ngày 2026-08-27 suýt báo động nhầm vì quét cả thư mục.
+- **Dừng `pnpm start` chạy nền không giết được server** — process vẫn giữ cổng và khoá `.next`, làm build sau đó vỡ với `EBUSY: rmdir '.next/static/chunks'`. Phải kill theo PID của listener trên cổng đó trước khi build lại.
 - **Block component không tự gọi `getPayload()`** — ranh giới do plan `260825-1411` thiết lập, task này không được phá.
 - **Nhánh `draft === true` luôn bypass cache** — ràng buộc từ plan cũ, task này không đụng tới query nên chỉ cần không làm hỏng.
 
@@ -164,7 +194,7 @@ DAG: 01 chặn 02 (registry dựa trên deep import mà 01 thiết lập) và 05
 ## 7. Phạm vi
 
 **In scope**
-- `next.config.ts` — thêm `modularizeImports`, chỉnh `images.deviceSizes`
+- `next.config.ts` — chỉ chỉnh `images.deviceSizes` (phase 02)
 - `src/components/Media/ImageMedia/index.tsx` — sửa hàm sinh `sizes`
 - 15 chỗ gọi `<Media>` chưa truyền `size` (liệt kê đủ trong phase 03)
 - `src/components/Logo/Logo.tsx`, `src/Header/Component.tsx`, `src/Footer/Component.tsx`
@@ -184,7 +214,7 @@ DAG: 01 chặn 02 (registry dựa trên deep import mà 01 thiết lập) và 05
 
 ---
 
-## 8. Điểm cần bạn xác nhận trước phase 02
+## 8. Điểm cần bạn xác nhận trước phase 01
 
 `TablerIcon` render icon theo tên do editor chọn từ IconPicker, mà picker hiện cho chọn cả 6.090 icon. Muốn bỏ glob dynamic import thì tập icon phải hữu hạn và biết trước lúc build. Đề xuất: quét DB lấy các giá trị `icon` đang thực sự được lưu, gộp với một bộ mặc định, sinh ra registry tĩnh; picker chỉ hiển thị các icon trong registry.
 
@@ -194,8 +224,8 @@ DAG: 01 chặn 02 (registry dựa trên deep import mà 01 thiết lập) và 05
 
 ## 9. Rủi ro
 
-- **`modularizeImports` không tương thích Turbopack như kỳ vọng.** Đây là transform ở tầng SWC nên về lý thuyết chạy được, nhưng repo build bằng Turbopack (mặc định của Next 16) và chưa có bằng chứng thực nghiệm trên chính repo này. Giảm thiểu: acceptance criteria của phase 01 là **đo lại kích thước chunk sau build**, không phải "build chạy được". Nếu không ăn, fallback sang barrel nội bộ `src/components/icons.ts` (phương án 2 đã cân nhắc ở Q&A) — khi đó phase 01 phải viết lại và sửa 30 file import.
-- **Icon alias bị map sai file.** Tabler có icon export dưới nhiều tên (`Icon123` và `IconNumber123` cùng trỏ `IconNumber123.mjs`). Đã kiểm 68 icon đang dùng đều có file khớp tên, nhưng nếu về sau ai import một alias thì build sẽ vỡ ở đúng dòng đó. Chấp nhận được — lỗi hiện ra lúc build, không phải lúc chạy.
+- ~~**`modularizeImports` không tương thích Turbopack như kỳ vọng.**~~ **Rủi ro này đã xảy ra và đã xử lý (2026-08-27).** Transform chạy đúng nhưng vô dụng; phương án bị huỷ, phase viết lại. Xem §3.1. Bài học giữ lại: acceptance criterion phải là **con số đo được sau build**, không phải "build chạy được" — chính tiêu chí đó bắt được vấn đề ngay lần build đầu.
+- **Đo trên local không so thẳng được với baseline production.** Bảng §3.1 đo trên `pnpm start` ở máy dev với DB khác, HTML 41 KB thay vì 72 KB. Các con số JS *so với nhau* thì hợp lệ (cùng máy, cùng cách đo), nhưng không được ghép trực tiếp vào bảng PSI. Giảm thiểu: phase 06 đo lại trên production sau khi deploy.
 - **Registry icon làm mất icon đang hiển thị trên site.** Nếu quét DB sót một giá trị, icon đó biến mất im lặng (`TablerIcon` trả `null`). Giảm thiểu: acceptance criteria phase 02 bắt buộc so khớp danh sách quét được với registry và log ra tên nào không khớp.
 - **Truyền `size` sai làm ảnh mờ trên màn hình lớn.** Đặt `sizes` quá nhỏ thì browser tải bản thiếu độ phân giải. Giảm thiểu: mỗi call site trong phase 03 ghi rõ chiều rộng thật đo được trên DOM; kiểm tra tay ở 1440px và 390px trước khi commit.
 - **`dynamic()` cho block gây nháy nội dung.** Block dưới màn hình đầu nạp trễ có thể thấy khoảng trống khi cuộn nhanh. Giảm thiểu: giữ `ssr: true` để HTML vẫn có nội dung, chỉ hoãn phần JS hydrate.

@@ -1,8 +1,8 @@
-# Phase 05 — Hoãn nạp JS của hero không dùng và block dưới màn hình đầu
+# Phase 04 — Hoãn nạp JS của hero không dùng và block dưới màn hình đầu
 
 **Goal:** Sau phase này, trang chủ không còn tải JS của những biến thể hero mà nó không render, và JS của các block nằm dưới màn hình đầu được hoãn lại. Mục tiêu: giảm TBT (baseline 370 ms mobile / 180 ms desktop).
 
-**Chặn bởi:** phase 01 và 02 — phải cắt 250 KB icon trước, nếu không con số đo được ở phase này bị icon che lấp và không biết `dynamic()` có tác dụng thật hay không.
+**Chặn bởi:** phase 01 — phải cắt icon trước, nếu không con số đo được ở phase này bị icon che lấp và không biết `dynamic()` có tác dụng thật hay không.
 
 ---
 
@@ -10,7 +10,7 @@
 
 `src/blocks/RenderBlocks.tsx:7-21` import tĩnh **14 block**. `src/heros/RenderHero.tsx` import tĩnh mọi biến thể hero. Một trang chỉ render vài block, nhưng bundle mang đủ cả 14 — cộng framer-motion, HeroUI, và mọi thứ chúng kéo theo.
 
-Đường dẫn cụ thể đã truy được: trang chủ dùng `BrandHero`, nhưng vì `RenderHero` import tĩnh `VideoHero` → `RenderVideoHeroBlocks` → `PolicyTabsBlock` → `TablerIcon`, nên `TablerIcon` vào graph trang chủ dù không bao giờ render. Phase 02 sửa gốc của `TablerIcon`; phase này sửa đường dẫn.
+Đường dẫn cụ thể đã truy được: trang chủ dùng `BrandHero`, nhưng vì `RenderHero` import tĩnh `VideoHero` → `RenderVideoHeroBlocks` → `PolicyTabsBlock` → `TablerIcon`, nên `TablerIcon` vào graph trang chủ dù không bao giờ render. Phase 01 sửa gốc của `TablerIcon`; phase này sửa đường dẫn.
 
 ---
 
@@ -49,10 +49,10 @@ Xác định block nào above-the-fold bằng cách mở trang chủ ở 1440×9
 
 - [ ] `pnpm exec tsc --noEmit` pass, `pnpm lint` không lỗi mới.
 - [ ] `pnpm build` sạch.
-- [ ] Tổng byte JS initial của trang chủ giảm so với sau phase 02 (ghi lại cả hai con số vào `plan.md` §2).
+- [ ] Tổng byte JS initial của trang chủ giảm so với sau phase 01 (ghi lại cả hai con số vào `plan.md` §2).
 - [ ] `curl -s http://localhost:3000/en | grep -c '<section\|<article'` — HTML server-render vẫn chứa đủ nội dung mọi block, không rỗng chỗ nào. Đối chiếu với bản trước phase.
 - [ ] Cuộn hết trang chủ ở tốc độ bình thường: không thấy khoảng trắng nhấp nháy hay nội dung nhảy vào muộn.
-- [ ] Đo lại CLS như cách ở phase 04 → không tăng so với sau phase 04.
+- [ ] Đo lại CLS như cách ở phase 03 → không tăng so với sau phase 03.
 - [ ] Trang `/en/[slug]` bất kỳ, `/en/career`, `/en/posts/[slug]` vẫn render đúng (các trang này dùng chung `RenderBlocks`).
 - [ ] Live preview trong admin vẫn cập nhật được — `dynamic()` không làm hỏng luồng này.
 

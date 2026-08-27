@@ -1,4 +1,4 @@
-# Phase 03 — Sửa `sizes` để browser tải ảnh đúng kích thước
+# Phase 02 — Sửa `sizes` để browser tải ảnh đúng kích thước
 
 **Goal:** Sau phase này, không còn request `/_next/image?...&w=3840` nào trên trang chủ. Mỗi `<img>` tải bản gần nhất với chiều rộng thật nó chiếm trên màn hình.
 
@@ -131,7 +131,7 @@ Quét bằng script cho ra 20 chỗ gọi `<Media>`, 5 chỗ đã có `size` h�
 
 ## 7. Out of scope (phase này)
 
-- Không đụng logo (phase 04).
+- Không đụng logo (phase 03).
 - Không đổi `quality` (đang là 80, hợp lý).
 - Không thêm `formats: ['image/avif']` — đổi format làm đổi tải CPU của sharp trên VPS, cần đo riêng.
 - Không nén lại file gốc trên GCS.

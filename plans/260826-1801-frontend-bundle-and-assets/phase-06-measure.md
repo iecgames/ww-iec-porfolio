@@ -1,8 +1,8 @@
-# Phase 07 — Đo lại và ghi bảng so sánh
+# Phase 06 — Đo lại và ghi bảng so sánh
 
 **Goal:** Có bằng chứng số cho toàn bộ task, không phải cảm nhận. Kết thúc phase này, `plan.md` có một bảng trước/sau đầy đủ và một kết luận rõ ràng về việc mục tiêu nào đạt, mục tiêu nào không.
 
-**Chặn bởi:** 01–06.
+**Chặn bởi:** 01–05.
 
 ---
 

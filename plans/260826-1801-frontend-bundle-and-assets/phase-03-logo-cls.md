@@ -1,4 +1,4 @@
-# Phase 04 — Sửa layout shift và 508 KB của logo
+# Phase 03 — Sửa layout shift và 508 KB của logo
 
 **Goal:** Sau phase này, header không còn nhảy khi logo load, và logo không còn là file PNG 508 KB tải thẳng từ GCS. CLS desktop từ **0,254** phải về dưới 0,1.
 

@@ -1,4 +1,4 @@
-# Phase 06 — Truy và sửa hydration mismatch (React #418)
+# Phase 05 — Truy và sửa hydration mismatch (React #418)
 
 **Goal:** Console trang chủ sạch lỗi. React không phải render lại cây ở client vì HTML server và client lệch nhau.
 
